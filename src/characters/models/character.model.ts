@@ -9,7 +9,7 @@ import {
   Unique,
 } from 'sequelize-typescript';
 
-@Table({ tableName: 'characters', timestamps: true, paranoid: true })
+@Table({ tableName: 'Characters', timestamps: true, paranoid: true })
 export class Character extends Model {
   @PrimaryKey @AutoIncrement @Column(DataType.INTEGER) id!: number;
 

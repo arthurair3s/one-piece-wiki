@@ -23,7 +23,9 @@ export class DeleteIslandHandler
       throw new NotFoundException('Island não encontrada');
     }
 
-    // REGRA 2 — soft delete técnico
-    await island.destroy();
+    // REGRA 2 — soft delete
+    await island.update({
+      is_active: false,
+    });
   }
 }

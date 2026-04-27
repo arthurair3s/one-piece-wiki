@@ -3,8 +3,8 @@ import { CqrsModule } from '@nestjs/cqrs';
 import { SequelizeModule } from '@nestjs/sequelize';
 
 import { Arc } from './models/arc.model';
-import { Saga } from '../sagas/models/saga.model';
-import { Island } from '../islands/models/island.model';
+import { Saga } from 'src/sagas/models/saga.model';
+import { Island } from 'src/islands/models/island.model';
 
 import { ArcsService } from './arcs.service';
 import { ArcsController } from './arcs.controller';

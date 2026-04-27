@@ -3,6 +3,7 @@ import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { AddCharacterToIslandCommand } from './commands/impl/add-character-to-island.command';
 import { RemoveCharacterFromIslandCommand } from './commands/impl/remove-character-from-island.command';
 import { GetCharactersByIslandQuery } from './queries/impl/get-characters-by-island.query';
+import { GetIslandCharacterByIdQuery } from './queries/impl/get-island-character-by-id.query';
 import { AddCharacterToIslandDto } from './dtos/add-character-to-island.dto';
 import { IslandCharacterFilterDto } from './dtos/island-character-filter.dto';
 

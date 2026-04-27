@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsInt, IsNotEmpty, IsOptional } from 'class-validator';
+import { IsInt, IsNotEmpty } from 'class-validator';
 
 export class AddCharacterToIslandDto {
   @ApiProperty({ example: 1, description: 'ID da versão do personagem' })
@@ -11,9 +11,4 @@ export class AddCharacterToIslandDto {
   @IsInt()
   @IsNotEmpty()
   island_id!: number;
-
-  @ApiProperty({ example: 0, description: 'ordem de exibição na ilha', required: false })
-  @IsInt()
-  @IsOptional()
-  order?: number;
 }

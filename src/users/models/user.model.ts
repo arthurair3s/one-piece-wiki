@@ -12,14 +12,7 @@ import {
 } from 'sequelize-typescript';
 import { Profile } from '../../profiles/models/profile.model';
 
-@Table({
-  tableName: 'users',
-  timestamps: true,
-  paranoid: true,
-  defaultScope: {
-    attributes: { exclude: ['password_hash'] }
-  }
-})
+@Table({ tableName: 'Users', timestamps: true, paranoid: true })
 export class User extends Model {
   @PrimaryKey @AutoIncrement @Column(DataType.INTEGER) id!: number;
 
@@ -32,4 +25,6 @@ export class User extends Model {
   @ForeignKey(() => Profile) @AllowNull(false) @Column(DataType.INTEGER) profile_id!: number;
 
   @BelongsTo(() => Profile) profile!: Profile;
+
+  @AllowNull(true) @Column(DataType.INTEGER) current_arc_id!: number;
 }

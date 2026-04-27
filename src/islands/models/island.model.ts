@@ -9,11 +9,11 @@ import {
 } from 'sequelize-typescript';
 
 import { Optional } from 'sequelize';
-import { Arc } from '../../arcs/models/arc.model';
-import { CharacterVersion } from '../../character-versions/models/character-version.model';
-import { IslandCharacterVersion } from '../../island-character-versions/models/island-character-version.model';
+import { Arc } from 'src/arcs/models/arc.model';
+import { CharacterVersion } from 'src/character-versions/models/character-version.model';
+import { IslandCharacterVersion } from 'src/island-character-versions/models/island-character-version.model';
 import { HasMany } from 'sequelize-typescript';
-import { Event } from '../../events/models/event.model';
+import { Event } from 'src/events/models/event.model';
 
 interface IslandAttributes {
   id: number;
@@ -33,8 +33,7 @@ interface IslandCreationAttributes
 
 @Table({
   tableName: 'islands',
-  timestamps: true,
-  paranoid: true,
+  timestamps: false,
 })
 export class Island extends Model<
   IslandAttributes,

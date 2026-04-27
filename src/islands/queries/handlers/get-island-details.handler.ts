@@ -5,10 +5,10 @@ import { NotFoundException } from '@nestjs/common';
 import { GetIslandDetailsQuery } from '../impl/get-island-details.query';
 
 import { Island } from '../../models/island.model';
-import { Arc } from '../../../arcs/models/arc.model';
-import { CharacterVersion } from '../../../character-versions/models/character-version.model';
-import { Character } from '../../../characters/models/character.model';
-import { Event } from '../../../events/models/event.model';
+import { Arc } from 'src/arcs/models/arc.model';
+import { CharacterVersion } from 'src/character-versions/models/character-version.model';
+import { Character } from 'src/characters/models/character.model';
+import { Event } from 'src/events/models/event.model';
 
 @QueryHandler(GetIslandDetailsQuery)
 export class GetIslandDetailsHandler
@@ -30,11 +30,11 @@ export class GetIslandDetailsHandler
             },
             {
             model: CharacterVersion,
-            attributes: ['id', 'alias', 'epithet', 'image_url', 'bounty', 'status'],
+            attributes: ['id', 'image_url', 'bounty', 'status'],
             include: [
                 {
                 model: Character,
-                attributes: ['id', 'name'],
+                attributes: ['id', 'name', 'epithet'],
                 },
             ],
             },
@@ -67,7 +67,7 @@ export class GetIslandDetailsHandler
       characters:
         island.character_versions?.map((cv) => ({
           id: cv.character.id,
-          name: cv.alias || cv.character.name,
+          name: cv.character.name,
           epithet: cv.epithet,
           image: cv.image_url,
           bounty: cv.bounty,

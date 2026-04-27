@@ -7,7 +7,7 @@ import {
 
 import { UpdateIslandCommand } from '../impl/update-island.command';
 import { Island } from '../../models/island.model';
-import { Arc } from '../../../arcs/models/arc.model';
+import { Arc } from 'src/arcs/models/arc.model';
 
 @CommandHandler(UpdateIslandCommand)
 export class UpdateIslandHandler

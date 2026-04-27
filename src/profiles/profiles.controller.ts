@@ -13,9 +13,9 @@ import { UpdateProfilePermissionsDto } from './dtos/update-profile-permissions.d
 @ApiTags('Profiles')
 @Controller('profiles')
 @UseGuards(JwtAuthGuard, PermissionsGuard)
-@ApiResponse({ status: 400, description: 'Requisição inválida (Erro de validação ou parâmetros).' })
+@ApiResponse({ status: 400, description: 'Requisição inválida.' })
 @ApiResponse({ status: 401, description: 'Não autorizado (Token ausente ou inválido).' })
-@ApiResponse({ status: 403, description: 'Proibido (Falta de permissão para gerir perfis).' })
+@ApiResponse({ status: 403, description: 'Proibido (Falta de permissão).' })
 export class ProfilesController {
   constructor(private readonly profilesService: ProfilesService) { }
 

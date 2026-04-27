@@ -8,9 +8,7 @@ import {
 } from 'sequelize-typescript';
 
 import { Optional } from 'sequelize';
-import { Saga } from '../../sagas/models/saga.model';
-import { Island } from '../../islands/models/island.model';
-import { HasMany } from 'sequelize-typescript';
+import { Saga } from 'src/sagas/models/saga.model';
 
 interface ArcAttributes {
   id: number;
@@ -25,8 +23,7 @@ interface ArcCreationAttributes
 
 @Table({
   tableName: 'arcs',
-  timestamps: true,
-  paranoid: true,
+  timestamps: false,
 })
 export class Arc extends Model<ArcAttributes, ArcCreationAttributes> {
   @Column({
@@ -63,7 +60,4 @@ export class Arc extends Model<ArcAttributes, ArcCreationAttributes> {
     allowNull: false,
   })
   order!: number;
-
-  @HasMany(() => Island)
-  islands!: Island[];
 }

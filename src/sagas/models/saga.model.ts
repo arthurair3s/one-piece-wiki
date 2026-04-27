@@ -7,7 +7,7 @@ import {
 } from 'sequelize-typescript';
 
 import { Optional } from 'sequelize';
-import { Arc } from '../../arcs/models/arc.model';
+import { Arc } from 'src/arcs/models/arc.model';
 
 interface SagaAttributes {
   id: number;
@@ -20,8 +20,7 @@ interface SagaCreationAttributes
 
 @Table({
   tableName: 'sagas',
-  timestamps: true,
-  paranoid: true,
+  timestamps: false,
 })
 export class Saga extends Model<SagaAttributes, SagaCreationAttributes> {
   @Column({

@@ -3,7 +3,7 @@ import { InjectModel } from '@nestjs/sequelize';
 import { Op } from 'sequelize';
 
 import { GetSagasQuery } from '../impl/get-sagas.query';
-import { Saga } from '../../models/saga.model';
+import { Saga } from 'src/sagas/models/saga.model';
 
 @QueryHandler(GetSagasQuery)
 export class GetSagasHandler implements IQueryHandler<GetSagasQuery> {
@@ -20,7 +20,7 @@ export class GetSagasHandler implements IQueryHandler<GetSagasQuery> {
     const where: any = {};
 
     if (name) {
-      where.name = { [Op.iLike]: `%${name}%` };
+      where.name = { [Op.like]: `%${name}%` };
     }
 
     if (order !== undefined) {

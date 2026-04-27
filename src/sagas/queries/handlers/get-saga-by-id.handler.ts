@@ -3,8 +3,7 @@ import { InjectModel } from '@nestjs/sequelize';
 import { NotFoundException } from '@nestjs/common';
 
 import { GetSagaByIdQuery } from '../impl/get-saga-by-id.query';
-import { Saga } from '../../models/saga.model';
-import { Arc } from '../../../arcs/models/arc.model';
+import { Saga } from 'src/sagas/models/saga.model';
 
 @QueryHandler(GetSagaByIdQuery)
 export class GetSagaByIdHandler implements IQueryHandler<GetSagaByIdQuery> {
@@ -16,17 +15,9 @@ export class GetSagaByIdHandler implements IQueryHandler<GetSagaByIdQuery> {
   async execute(query: GetSagaByIdQuery): Promise<Saga> {
     const { id } = query;
 
-    const saga = await this.sagaModel.findByPk(id, {
-      include: [
-        {
-          model: Arc,
-          attributes: ['id', 'name', 'order', 'description'],
-        },
-      ],
-      order: [[{ model: Arc, as: 'arcs' }, 'order', 'ASC']],
-    });
+    const saga = await this.sagaModel.findByPk(id);
 
-    // validação: precisa existir
+    // REGRA — precisa existir
     if (!saga) {
       throw new NotFoundException('Saga não encontrada');
     }

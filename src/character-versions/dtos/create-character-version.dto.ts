@@ -1,6 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsInt, IsNotEmpty, IsOptional, IsString, IsNumber, IsUrl, IsEnum } from 'class-validator';
-import { CharacterStatus } from '../../common/enums/character-status.enum';
+import { IsInt, IsNotEmpty, IsOptional, IsString, IsNumber, IsUrl } from 'class-validator';
 
 export class CreateCharacterVersionDto {
   @ApiProperty({ example: 1, description: 'ID do personagem base' })
@@ -28,14 +27,10 @@ export class CreateCharacterVersionDto {
   @IsNumber()
   bounty?: number;
 
-  @ApiPropertyOptional({ 
-    description: 'Status de vida do personagem no contexto do arco',
-    enum: CharacterStatus,
-    default: CharacterStatus.ALIVE,
-  })
+  @ApiPropertyOptional({ example: 'Pirata novato', description: 'Status na época do arco' })
   @IsOptional()
-  @IsEnum(CharacterStatus)
-  status?: CharacterStatus;
+  @IsString()
+  status?: string;
 
   @ApiPropertyOptional({ example: 'http://image.url/luffy.png', description: 'URL da imagem' })
   @IsOptional()

@@ -12,9 +12,9 @@ import { UpdateUserDto } from './dtos/update-user.dto';
 @ApiTags('Users')
 @Controller('users')
 @UseGuards(JwtAuthGuard, PermissionsGuard)
-@ApiResponse({ status: 400, description: 'Requisição inválida (Erro de validação ou parâmetros).' })
+@ApiResponse({ status: 400, description: 'Requisição inválida.' })
 @ApiResponse({ status: 401, description: 'Não autorizado (Token ausente ou inválido).' })
-@ApiResponse({ status: 403, description: 'Proibido (Falta de permissão para gerir usuários).' })
+@ApiResponse({ status: 403, description: 'Proibido (Falta de permissão).' })
 export class UsersController {
   constructor(private readonly usersService: UsersService) { }
 

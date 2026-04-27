@@ -38,76 +38,20 @@ Para manter a consistência em +60 endpoints, adotamos o seguinte padrão rigoro
 ---
 
 ## 📋 Requisitos Obrigatórios (Trabalho Acadêmico)
-- [/] **Endpoints**: Meta de 60. Atualmente ~52 implementados.
-- [x] **Documentação**: Swagger completo, padronizado em PT-BR com exemplos reais de One Piece.
-- [x] **Listagem**: Todos os endpoints de listagem possuem paginação e pelo menos 2 filtros.
-- [x] **Segurança**: Autenticação JWT + RBAC granular aplicado em todos os endpoints.
-- [x] **Regras de Negócio**: 10 necessárias. 8 implementadas (ver seção abaixo).
-- [x] **Persistência**: Migrations implementadas. Seeds básicos de Profiles/Permissions existentes.
+- [ ] **Endpoints**: Mínimo de 60 endpoints implementados.
+- [ ] **Documentação**: Swagger completo e obrigatório.
+- [ ] **Listagem**: Todos os endpoints de listagem devem ter **Paginação** e pelo menos **2 Filtros**.
+- [ ] **Segurança**: Autenticação e controle de acesso via **Perfil e Permissão**.
+- [ ] **Regras de Negócio**: Mínimo de 10 regras complexas (não apenas validações de campo).
+- [ ] **Persistência**: Uso obrigatório de **Migrations** e **Seeds**.
 
 ---
 
-## 🧠 Regras de Negócio Complexas (Contrato de Domínio)
-
-Essas regras vão além de simples validações de campo — envolvem lógica de domínio entre entidades e garantem a consistência do universo One Piece na API.
-
-### 1. Integridade de Localização
-
-- **RN01 — Exclusão Protegida** ✅ Implementada
-  - Não é permitido excluir uma `Saga` com `Arcos`, nem um `Arco` com `Ilhas`, nem uma `Ilha` com `Eventos` ou `Personagens`.
-  - Implementada em: `delete-saga.handler.ts`, `delete-arc.handler.ts`, `delete-island.handler.ts`
-
-- **RN02 — Ordem Única de Arcos** ✅ Implementada
-  - Dentro de uma mesma Saga, não podem existir dois Arcos com o mesmo valor de `order`.
-  - Implementada em: `create-arc.handler.ts`
-
-- **RN03 — Ordem Única de Eventos** ✅ Implementada
-  - Dentro de uma mesma Ilha, não podem existir dois Eventos com o mesmo valor de `order`.
-  - Implementada em: `create-event.handler.ts`
-
-### 2. Consistência de Personagens
-
-- **RN04 — Unicidade de Versão por Arco** ✅ Implementada
-  - Um personagem pode ter várias versões, mas apenas **uma versão pode estar vinculada a ilhas de um mesmo Arco**.
-  - Implementada em: `add-character-to-island.handler.ts`
-
-- **RN05 — Cronologia de Versões** ✅ Implementada
-  - Uma versão de personagem de um Arco futuro (`arc.order` maior) não pode ser vinculada a uma Ilha de um Arco passado (`arc.order` menor).
-  - Exemplo: "Luffy Pós-Timeskip" não pode aparecer numa ilha do East Blue.
-  - Implementada em: `add-character-to-island.handler.ts`
-
-- **RN06 — Bulk Create Atômico** ✅ Implementada
-  - Criações em lote de personagens validam a unicidade de `slug` antes de qualquer inserção. Se um falhar, nenhum é criado.
-  - Implementada em: `create-characters-bulk.handler.ts`
-
-### 3. Segurança e Acesso
-
-- **RN07 — Bypass de Desenvolvimento** ✅ Implementada
-  - `IGNORE_PERMISSIONS=true` no `.env` desativa a checagem de RBAC para facilitar testes locais.
-  - Implementada em: `permissions.guard.ts`
-
-- **RN08 — Proteção de Admin** 🔲 Pendente
-  - O sistema deve impedir a remoção de permissões vitais do perfil `ADMIN`, evitando lockout.
-  - A implementar em: handler de gerenciamento de permissões de perfil.
-
----
-
-## 🔐 Sistema de Permissões (RBAC)
-
-| Módulo | `.view` | `.create` | `.update` | `.delete` |
-|---|---|---|---|---|
-| `sagas` | USER | ADMIN | ADMIN | ADMIN |
-| `arcs` | USER | ADMIN | ADMIN | ADMIN |
-| `islands` | USER | ADMIN | ADMIN | ADMIN |
-| `events` | USER | ADMIN | ADMIN | ADMIN |
-| `characters` | USER | ADMIN | ADMIN | ADMIN |
-| `versions` | USER | ADMIN | ADMIN | ADMIN |
-| `island_char` | USER | ADMIN | ADMIN | ADMIN |
-| `users` | ADMIN | ADMIN | ADMIN | ADMIN |
-| `profiles` | ADMIN | ADMIN | ADMIN | ADMIN |
-| `permissions` | ADMIN | ADMIN | ADMIN | ADMIN |
-
-> **Bypass de teste:** Defina `IGNORE_PERMISSIONS=true` no `.env` e reinicie o servidor.
+## 🏗️ Arquitetura: Foco em CQRS
+Para garantir escalabilidade e aprendizado técnico, o projeto adotará **CQRS** logo no primeiro commit:
+- **Commands**: Responsáveis por mutações de estado (Create, Update, Delete).
+- **Queries**: Responsáveis por consultas otimizadas e leitura de dados.
+- **Vertical Slice**: A estrutura de pastas será organizada por funcionalidade (entidade), mantendo comandos, queries, modelos e controllers próximos.
 
 ---
 
@@ -168,14 +112,12 @@ erDiagram
     characters {
         int id PK
         varchar name
-        varchar slug
+        varchar epithet
     }
     character_versions {
         int id PK
         int character_id FK
         int arc_id FK
-        varchar alias
-        varchar epithet
         bigint bounty
         varchar status
         varchar image_url
@@ -222,17 +164,19 @@ erDiagram
     - [x] Implementação de **Guards** baseados em Roles e Permissions.
     - [x] Integração com JWT (ESM compatible).
 
-### Fase 2: Núcleo Geográfico & Conteúdo ✅ Concluída (CRUD)
-- [x] **CRUD de Sagas, Arcos, Ilhas, Eventos, Personagens e Versões**.
-- [x] **Filtros e Paginação** em todas as listagens.
-- [x] **Soft Delete** (`paranoid: true`) nos modelos principais.
-- [x] **Regras de Negócio** (7 de 8 implementadas): bloqueios de exclusão, unicidade de ordem, cronologia de versões, bulk atômico.
+### Fase 2: Núcleo Geográfico & Conteúdo
+- [ ] **CRUD de Regiões e Ilhas**: Listagem com filtros de clima e região.
+- [ ] **Enciclopédia**: Implementação de Sagas, Arcos e Personagens.
+- [ ] **Sistema de Akuma no Mi**: Regra de negócio: apenas um usuário por fruto.
 
-### Fase 3: Polimento & Entrega 🚀 Em Andamento
-- [ ] **Finalizar Regras de Negócio**: Implementar RN08 (Proteção de Admin).
-- [ ] **Meta de Endpoints**: Fechar os ~8 endpoints restantes para atingir 60.
-- [ ] **Seeds Reais**: Povoar o banco com dados temáticos de One Piece.
-- [ ] **Entrega**: PDF com catálogo das regras de negócio.
+### Fase 3: Interatividade & Gamificação
+- [ ] **Sistema de Exploração**: Desbloqueio de ilhas baseado em quizzes.
+- [ ] **Quizzes & Respostas**: Implementação de lógica de pontuação.
+
+### Fase 4: Polimento & Entrega
+- [ ] **Swagger**: Documentação exaustiva de todos os endpoints.
+- [ ] **Performance**: Implementação de Cache em endpoints de listagem de ilhas/personagens.
+- [ ] **Business Rules**: Refinamento das 10 regras de negócio complexas em PDF.
 
 ---
 

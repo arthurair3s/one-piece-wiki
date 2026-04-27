@@ -3,7 +3,6 @@ import { CqrsModule } from '@nestjs/cqrs';
 import { SequelizeModule } from '@nestjs/sequelize';
 import { IslandCharacterVersion } from './models/island-character-version.model';
 import { CharacterVersion } from '../character-versions/models/character-version.model';
-import { Island } from '../islands/models/island.model';
 import { IslandCharacterVersionsService } from './island-character-versions.service';
 import { IslandCharacterVersionsController } from './island-character-versions.controller';
 
@@ -12,7 +11,7 @@ import { RemoveCharacterFromIslandHandler } from './commands/handlers/remove-cha
 import { GetCharactersByIslandHandler } from './queries/handlers/get-characters-by-island.handler';
 
 @Module({
-  imports: [CqrsModule, SequelizeModule.forFeature([IslandCharacterVersion, CharacterVersion, Island])],
+  imports: [CqrsModule, SequelizeModule.forFeature([IslandCharacterVersion, CharacterVersion])],
   controllers: [IslandCharacterVersionsController],
   providers: [
     IslandCharacterVersionsService,

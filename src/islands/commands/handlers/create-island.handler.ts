@@ -7,7 +7,7 @@ import {
 
 import { CreateIslandCommand } from '../impl/create-island.command';
 import { Island } from '../../models/island.model';
-import { Arc } from '../../../arcs/models/arc.model';
+import { Arc } from 'src/arcs/models/arc.model';
 
 @CommandHandler(CreateIslandCommand)
 export class CreateIslandHandler

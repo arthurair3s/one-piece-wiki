@@ -3,7 +3,7 @@ import { InjectModel } from '@nestjs/sequelize';
 import { Op } from 'sequelize';
 
 import { GetIslandsQuery } from '../impl/get-islands.query';
-import { Island } from '../../models/island.model';
+import { Island } from 'src/islands/models/island.model';
 
 @QueryHandler(GetIslandsQuery)
 export class GetIslandsHandler

@@ -11,7 +11,7 @@ import {
 } from 'sequelize-typescript';
 import { Island } from '../../islands/models/island.model';
 
-@Table({ tableName: 'events', timestamps: true, paranoid: true })
+@Table({ tableName: 'Events', timestamps: true })
 export class Event extends Model {
   @PrimaryKey @AutoIncrement @Column(DataType.INTEGER) id!: number;
 

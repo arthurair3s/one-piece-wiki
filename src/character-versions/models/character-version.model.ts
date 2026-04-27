@@ -12,7 +12,7 @@ import {
 import { Character } from '../../characters/models/character.model';
 import { Arc } from '../../arcs/models/arc.model';
 
-@Table({ tableName: 'character_versions', timestamps: true, paranoid: true })
+@Table({ tableName: 'CharacterVersions', timestamps: true, paranoid: true })
 export class CharacterVersion extends Model {
   @PrimaryKey @AutoIncrement @Column(DataType.INTEGER) id!: number;
 
@@ -38,12 +38,7 @@ export class CharacterVersion extends Model {
 
   @AllowNull(true) @Column(DataType.BIGINT) bounty!: number;
 
-  @AllowNull(false)
-  @Column({
-    type: DataType.ENUM('ALIVE', 'DECEASED', 'UNKNOWN', 'IMPRISONED'),
-    defaultValue: 'ALIVE',
-  })
-  status!: string;
+  @AllowNull(true) @Column(DataType.STRING) status!: string;
 
   @AllowNull(true) @Column(DataType.STRING) image_url!: string;
 

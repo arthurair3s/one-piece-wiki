@@ -20,7 +20,7 @@ export class CharacterVersionsController {
 
   @ApiOperation({ summary: 'Criar uma nova versão de personagem' })
   @ApiResponse({ status: 201, description: 'Versão de personagem criada com sucesso.' })
-  @RequirePermissions('character_versions.create')
+  @RequirePermissions('versions.create')
   @Post()
   create(@Body() body: CreateCharacterVersionDto) {
     return this.characterVersionsService.create(body);
@@ -29,7 +29,7 @@ export class CharacterVersionsController {
   @ApiOperation({ summary: 'Criar múltiplas versões de personagens em lote (Bulk)' })
   @ApiBody({ type: [CreateCharacterVersionDto] })
   @ApiResponse({ status: 201, description: 'Versões de personagens criadas em lote com sucesso.' })
-  @RequirePermissions('character_versions.create')
+  @RequirePermissions('versions.create')
   @Post('bulk')
   createBulk(@Body(new ParseArrayPipe({ items: CreateCharacterVersionDto })) bodies: CreateCharacterVersionDto[]) {
     return this.characterVersionsService.createBulk(bodies);
@@ -37,7 +37,7 @@ export class CharacterVersionsController {
 
   @ApiOperation({ summary: 'Listar versões de personagens com filtros' })
   @ApiResponse({ status: 200, description: 'Lista de versões retornada com sucesso.' })
-  @RequirePermissions('character_versions.view')
+  @RequirePermissions('versions.view')
   @Get()
   findAll(@Query() params: CharacterVersionFilterDto) {
     return this.characterVersionsService.findAll(params);
@@ -46,7 +46,7 @@ export class CharacterVersionsController {
   @ApiOperation({ summary: 'Buscar versão de personagem pelo ID' })
   @ApiResponse({ status: 200, description: 'Versão de personagem encontrada.' })
   @ApiResponse({ status: 404, description: 'Versão de personagem não encontrada.' })
-  @RequirePermissions('character_versions.view')
+  @RequirePermissions('versions.view')
   @Get(':id')
   findOne(@Param('id', ParseIntPipe) id: number) {
     return this.characterVersionsService.findOne(id);
@@ -55,7 +55,7 @@ export class CharacterVersionsController {
   @ApiOperation({ summary: 'Atualizar uma versão de personagem' })
   @ApiResponse({ status: 200, description: 'Versão de personagem atualizada com sucesso.' })
   @ApiResponse({ status: 404, description: 'Versão de personagem não encontrada.' })
-  @RequirePermissions('character_versions.update')
+  @RequirePermissions('versions.update')
   @Patch(':id')
   update(@Param('id', ParseIntPipe) id: number, @Body() body: UpdateCharacterVersionDto) {
     return this.characterVersionsService.update(id, body);
@@ -64,7 +64,7 @@ export class CharacterVersionsController {
   @ApiOperation({ summary: 'Remover uma versão de personagem (Soft Delete)' })
   @ApiResponse({ status: 200, description: 'Versão de personagem removida com sucesso.' })
   @ApiResponse({ status: 404, description: 'Versão de personagem não encontrada.' })
-  @RequirePermissions('character_versions.delete')
+  @RequirePermissions('versions.delete')
   @Delete(':id')
   remove(@Param('id', ParseIntPipe) id: number) {
     return this.characterVersionsService.remove(id);

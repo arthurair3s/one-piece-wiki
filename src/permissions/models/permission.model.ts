@@ -12,7 +12,7 @@ import {
 import { Profile } from '../../profiles/models/profile.model';
 import { ProfilePermission } from './profile-permission.model';
 
-@Table({ tableName: 'permissions', timestamps: true, paranoid: true })
+@Table({ tableName: 'Permissions', timestamps: true, paranoid: true })
 export class Permission extends Model {
   @PrimaryKey @AutoIncrement @Column(DataType.INTEGER) id!: number;
 
