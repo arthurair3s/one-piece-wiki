@@ -1,17 +1,57 @@
 services:
-  # Banco de Dados Principal
   postgres_db:
     image: postgres:15
-    container_name: one_piece_postgres
     restart: always
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: grand_line_db
+      POSTGRES_USER: ${DB_USERNAME:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
+      POSTGRES_DB: ${DB_DATABASE:-grand_line_db}
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    networks:
+      - project-network
+
+  api:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    restart: always
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./api:/usr/src/api
+      - /usr/src/api/node_modules
+    env_file:
+      - ./api/.env
+    environment:
+      - DB_HOST=postgres_db
+    depends_on:
+      - postgres_db
+    networks:
+      - project-network
+
+  web:
+    build:
+      context: ./app
+      dockerfile: Dockerfile
+    restart: always
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./app:/usr/src/app
+      - /usr/src/app/node_modules
+    environment:
+      - VITE_API_URL=http://localhost:3000
+    depends_on:
+      - api
+    networks:
+      - project-network
 
 volumes:
   postgres_data:
+
+networks:
+  project-network:
+    driver: bridge
