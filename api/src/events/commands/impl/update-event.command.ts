@@ -5,6 +5,7 @@ export class UpdateEventCommand {
     public readonly title?: string,
     public readonly type?: string,
     public readonly description?: string,
+    public readonly arc_id?: number,
     public readonly order?: number,
   ) {}
 }

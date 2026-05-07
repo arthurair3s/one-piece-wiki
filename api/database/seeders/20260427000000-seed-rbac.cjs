@@ -14,9 +14,16 @@ module.exports = {
       { id: 1, name: 'Listar Usuários', slug: 'users.view' },
       { id: 2, name: 'Criar Usuários', slug: 'users.create' },
       { id: 3, name: 'Deletar Usuários', slug: 'users.delete' },
+      { id: 7, name: 'Editar Usuários', slug: 'users.update' },
       { id: 4, name: 'Ver Perfis', slug: 'profiles.view' },
       { id: 5, name: 'Criar Perfis', slug: 'profiles.create' },
-      { id: 6, name: 'Gerenciar Permissões', slug: 'permissions.view' },
+      { id: 8, name: 'Editar Perfis', slug: 'profiles.update' },
+      { id: 9, name: 'Deletar Perfis', slug: 'profiles.delete' },
+      { id: 14, name: 'Vincular Permissões', slug: 'profiles.assign' },
+      { id: 6, name: 'Listar Permissões', slug: 'permissions.view' },
+      { id: 15, name: 'Criar Permissões', slug: 'permissions.create' },
+      { id: 16, name: 'Editar Permissões', slug: 'permissions.update' },
+      { id: 17, name: 'Deletar Permissões', slug: 'permissions.delete' },
       // Sagas
       { id: 10, name: 'Ver Sagas', slug: 'sagas.view' },
       { id: 11, name: 'Criar Sagas', slug: 'sagas.create' },
@@ -47,6 +54,10 @@ module.exports = {
       { id: 61, name: 'Criar Versões', slug: 'character_versions.create' },
       { id: 62, name: 'Editar Versões', slug: 'character_versions.update' },
       { id: 63, name: 'Deletar Versões', slug: 'character_versions.delete' },
+      // Vínculos Ilha-Personagem
+      { id: 70, name: 'Ver Vínculos Ilha-Personagem', slug: 'island_char.view' },
+      { id: 71, name: 'Criar Vínculo Ilha-Personagem', slug: 'island_char.create' },
+      { id: 72, name: 'Deletar Vínculo Ilha-Personagem', slug: 'island_char.delete' },
     ].map(p => ({ ...p, createdAt: new Date(), updatedAt: new Date() }));
 
     await queryInterface.bulkInsert('permissions', permissions);
@@ -60,7 +71,12 @@ module.exports = {
     }));
 
     const playerPermissions = permissions
-      .filter(p => p.slug.endsWith('.view'))
+      .filter(p => 
+        p.slug.endsWith('.view') && 
+        !p.slug.startsWith('users.') && 
+        !p.slug.startsWith('profiles.') && 
+        !p.slug.startsWith('permissions.')
+      )
       .map(p => ({
         profile_id: 2,
         permission_id: p.id,
@@ -85,7 +101,7 @@ module.exports = {
         id: 2,
         username: 'luffy',
         email: 'luffy@onepiece.com',
-        password_hash: '$2b$10$iRO0TR/BS.K0X4S3aw9NhO3GZXcFmec9gdkMRtOngE.YdHpD7IpUG', // admin123
+        password_hash: '$2b$10$PYfEsoyI5kJiabhd5SS1be8Kj3Nf1HsFdeiqQhxnRY4sBhUx34A/.', // luffy123
         profile_id: 2,
         createdAt: new Date(),
         updatedAt: new Date(),

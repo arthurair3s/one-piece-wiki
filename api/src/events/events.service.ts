@@ -19,11 +19,11 @@ export class EventsService {
   constructor(
     private readonly commandBus: CommandBus,
     private readonly queryBus: QueryBus,
-  ) {}
+  ) { }
 
   create(dto: CreateEventDto) {
     return this.commandBus.execute(
-      new CreateEventCommand(dto.island_id, dto.title, dto.type, dto.description, dto.order)
+      new CreateEventCommand(dto.island_id, dto.arc_id, dto.title, dto.type, dto.description, dto.order)
     );
   }
 
@@ -45,7 +45,7 @@ export class EventsService {
 
   update(id: number, dto: UpdateEventDto) {
     return this.commandBus.execute(
-      new UpdateEventCommand(id, dto.island_id, dto.title, dto.type, dto.description, dto.order)
+      new UpdateEventCommand(id, dto.island_id, dto.title, dto.type, dto.description, dto.arc_id, dto.order)
     );
   }
 

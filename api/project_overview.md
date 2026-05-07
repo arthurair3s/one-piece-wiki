@@ -38,12 +38,12 @@ Para manter a consistência em +60 endpoints, adotamos o seguinte padrão rigoro
 ---
 
 ## 📋 Requisitos Obrigatórios (Trabalho Acadêmico)
-- [/] **Endpoints**: Meta de 60. Atualmente ~52 implementados.
+- [x] **Endpoints**: Meta de 60 atingida (61 endpoints implementados).
 - [x] **Documentação**: Swagger completo, padronizado em PT-BR com exemplos reais de One Piece.
 - [x] **Listagem**: Todos os endpoints de listagem possuem paginação e pelo menos 2 filtros.
 - [x] **Segurança**: Autenticação JWT + RBAC granular aplicado em todos os endpoints.
-- [x] **Regras de Negócio**: 10 necessárias. 8 implementadas (ver seção abaixo).
-- [x] **Persistência**: Migrations implementadas. Seeds básicos de Profiles/Permissions existentes.
+- [x] **Regras de Negócio**: 10 necessárias. 13 implementadas (ver seção abaixo).
+- [x] **Persistência**: Migrations implementadas. Seeds de Profiles/Permissions completos.
 
 ---
 
@@ -86,9 +86,9 @@ Essas regras vão além de simples validações de campo — envolvem lógica de
   - `IGNORE_PERMISSIONS=true` no `.env` desativa a checagem de RBAC para facilitar testes locais.
   - Implementada em: `permissions.guard.ts`
 
-- **RN08 — Proteção de Admin** 🔲 Pendente
+- **RN08 — Proteção de Admin** ✅ Implementada
   - O sistema deve impedir a remoção de permissões vitais do perfil `ADMIN`, evitando lockout.
-  - A implementar em: handler de gerenciamento de permissões de perfil.
+  - Implementada em: `update-profile-permissions.handler.ts`
 
 ### 4. Gestão Narrativa Global (Fase 4)
 
@@ -103,6 +103,14 @@ Essas regras vão além de simples validações de campo — envolvem lógica de
 - **RN11 — Integridade de Eventos (Participantes)** ✅ Implementada
   - Apenas versões de personagens existentes podem participar de eventos. O sistema impede a duplicação de um mesmo personagem no mesmo evento.
   - Implementada em: `add-participant-to-event.handler.ts`
+
+- **RN12 — Contexto de Arco em Eventos** ✅ Implementada
+  - Todo evento deve ser obrigatoriamente vinculado a um arco que pertença à ilha onde o evento ocorre. O sistema impede a criação de eventos em arcos que não possuem a ilha.
+  - Implementada em: `create-event.handler.ts`
+
+- **RN13 — Filtragem de Detalhes por Arco** ✅ Implementada
+  - A visualização de detalhes de uma ilha exige um `arc_id` obrigatório para determinar quais personagens e eventos contextuais devem ser exibidos, garantindo a precisão cronológica da resposta.
+  - Implementada em: `get-island-details.handler.ts`
 
 ---
 
@@ -199,13 +207,16 @@ erDiagram
         text description
     }
     island_character_versions {
+        int id PK
         int island_id FK
+        int arc_id FK
         int character_version_id FK
         int order
     }
     events {
         int id PK
         int island_id FK
+        int arc_id FK
         varchar title
         text description
         varchar type
@@ -226,8 +237,10 @@ erDiagram
     character_versions ||--o{ arc_character_versions : "character_version_id"
     arcs ||--o{ arc_character_versions : "arc_id"
     islands ||--o{ island_character_versions : "island_id"
+    arcs ||--o{ island_character_versions : "arc_id"
     character_versions ||--o{ island_character_versions : "character_version_id"
     islands ||--o{ events : "island_id"
+    arcs ||--o{ events : "arc_id"
     events ||--o{ event_participants : "event_id"
     character_versions ||--o{ event_participants : "character_version_id"
 ```
@@ -250,14 +263,14 @@ erDiagram
 ### Fase 2: Núcleo Geográfico & Conteúdo ✅ Concluída (CRUD)
 - [x] **CRUD de Sagas, Arcos, Ilhas, Eventos, Personagens e Versões**.
 - [x] **Filtros e Paginação** em todas as listagens.
-- [x] **Soft Delete** (`paranoid: true`) nos modelos principais.
-- [x] **Regras de Negócio** (7 de 8 implementadas): bloqueios de exclusão, unicidade de ordem, cronologia de versões, bulk atômico.
+- [x] **Soft Delete** (`paranoid: true`) em todos os modelos principais.
+- [x] **Regras de Negócio** (13 implementadas): bloqueios, unicidade, cronologia, bulk e contexto.
 
 ### Fase 3: Polimento & Entrega 🚀 Em Andamento
-- [ ] **Finalizar Regras de Negócio**: Implementar RN08 (Proteção de Admin).
-- [ ] **Meta de Endpoints**: Fechar os ~8 endpoints restantes para atingir 60.
-- [ ] **Seeds Reais**: Povoar o banco com dados temáticos de One Piece.
-- [ ] **Entrega**: PDF com catálogo das regras de negócio.
+- [x] **Segurança & Autenticação**: JWT implementado com estratégia `Bearer Token`.
+- [x] **Finalizar Regras de Negócio**: Implementar RN08 (Proteção de Admin).
+- [x] **Meta de Endpoints**: Atingida (61).
+- [x] **Seeds Reais**: Povoar o banco com dados temáticos de One Piece (Foram utilizados 3 arcos iniciais para demonstrar as funcionalidades: Romance Dawn, Shells Town e Orange Town).
 
 ---
 
@@ -377,7 +390,14 @@ export class XxxFilterDto {
 }
 ```
 
-> **Referência real:** `src/users/dtos/create-user.dto.ts` e `src/users/dtos/user-filter.dto.ts`
+#### `dtos/xxx-bulk.dto.ts` — usado no `@Post('bulk')`
+Sempre envolva a lógica em uma **transação Sequelize** para garantir atomicidade:
+```ts
+// Exemplo de payload
+[ { "nome": "Item 1" }, { "nome": "Item 2" } ]
+```
+
+> **Referência real:** `src/users/dtos/create-user.dto.ts`, `src/users/dtos/user-filter.dto.ts` e `src/arcs/commands/handlers/create-arcs-bulk.handler.ts`
 
 ---
 

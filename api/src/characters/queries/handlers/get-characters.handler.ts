@@ -32,7 +32,7 @@ export class GetCharactersHandler implements IQueryHandler<GetCharactersQuery> {
           model: CharacterVersion,
           include: [{ 
             model: Arc, 
-            attributes: ['order'],
+            attributes: ['id', 'name', 'description', 'saga_id', 'order'],
             through: { attributes: [] }
           }],
         },
