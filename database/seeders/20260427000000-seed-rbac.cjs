@@ -71,10 +71,10 @@ module.exports = {
     }));
 
     const playerPermissions = permissions
-      .filter(p => 
-        p.slug.endsWith('.view') && 
-        !p.slug.startsWith('users.') && 
-        !p.slug.startsWith('profiles.') && 
+      .filter(p =>
+        p.slug.endsWith('.view') &&
+        !p.slug.startsWith('users.') &&
+        !p.slug.startsWith('profiles.') &&
         !p.slug.startsWith('permissions.')
       )
       .map(p => ({
