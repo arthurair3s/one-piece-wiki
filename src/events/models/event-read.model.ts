@@ -6,6 +6,9 @@ import { EventParticipantRead } from './event-participant-read.model';
   tableName: 'event_reads',
   timestamps: true,
   paranoid: true,
+  indexes: [
+    { unique: true, fields: ['island_id', 'arc_id', 'order'], where: { deletedAt: null }, name: 'unique_event_order_context_read' }
+  ]
 })
 export class EventRead extends Model {
   @Column({

@@ -12,6 +12,9 @@ import { Island } from '../../islands/models/island.model';
   tableName: 'arc_islands',
   timestamps: true,
   paranoid: true,
+  indexes: [
+    { unique: true, fields: ['arc_id', 'order'], where: { deletedAt: null }, name: 'unique_arc_island_order' }
+  ]
 })
 export class ArcIsland extends Model {
   @ForeignKey(() => Arc)

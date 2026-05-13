@@ -124,6 +124,16 @@ module.exports = {
       { event_id: 12, character_version_id: 1, createdAt: now, updatedAt: now },
       { event_id: 12, character_version_id: 4, createdAt: now, updatedAt: now }
     ]);
+
+    // Sincronizar sequências (PostgreSQL) para evitar erro de ID duplicado após seed com IDs explícitos
+    if (queryInterface.sequelize.options.dialect === 'postgres') {
+      await queryInterface.sequelize.query(`SELECT setval('"sagas_id_seq"', (SELECT COALESCE(MAX(id), 1) FROM "sagas"));`);
+      await queryInterface.sequelize.query(`SELECT setval('"arcs_id_seq"', (SELECT COALESCE(MAX(id), 1) FROM "arcs"));`);
+      await queryInterface.sequelize.query(`SELECT setval('"islands_id_seq"', (SELECT COALESCE(MAX(id), 1) FROM "islands"));`);
+      await queryInterface.sequelize.query(`SELECT setval('"characters_id_seq"', (SELECT COALESCE(MAX(id), 1) FROM "characters"));`);
+      await queryInterface.sequelize.query(`SELECT setval('"character_versions_id_seq"', (SELECT COALESCE(MAX(id), 1) FROM "character_versions"));`);
+      await queryInterface.sequelize.query(`SELECT setval('"events_id_seq"', (SELECT COALESCE(MAX(id), 1) FROM "events"));`);
+    }
   },
 
   down: async (queryInterface, Sequelize) => {

@@ -12,6 +12,9 @@ import { CharacterVersionRead } from '../../character-versions/models/character-
   tableName: 'event_participants',
   timestamps: true,
   paranoid: true,
+  indexes: [
+    { unique: true, fields: ['event_id', 'character_version_id'], where: { deletedAt: null }, name: 'unique_event_participant_read' }
+  ]
 })
 export class EventParticipantRead extends Model {
   @Column({

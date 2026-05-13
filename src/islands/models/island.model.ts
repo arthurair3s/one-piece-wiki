@@ -33,6 +33,9 @@ interface IslandCreationAttributes
   tableName: 'islands',
   timestamps: true,
   paranoid: true,
+  indexes: [
+    { unique: true, fields: ['name'], where: { deletedAt: null }, name: 'islands_name_unique' }
+  ]
 })
 export class Island extends Model<
   IslandAttributes,
@@ -41,7 +44,7 @@ export class Island extends Model<
   @Column({ primaryKey: true, autoIncrement: true, type: DataType.INTEGER })
   id!: number;
 
-  @Column({ allowNull: false, unique: true })
+  @Column({ allowNull: false })
   name!: string;
 
   @Column({ allowNull: false, type: DataType.TEXT })

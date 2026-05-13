@@ -5,25 +5,27 @@ module.exports = {
     // 1. profiles
     await queryInterface.createTable('profiles', {
       id: { type: Sequelize.INTEGER, primaryKey: true, autoIncrement: true },
-      name: { type: Sequelize.STRING, allowNull: false, unique: true },
+      name: { type: Sequelize.STRING, allowNull: false },
       description: { type: Sequelize.STRING, allowNull: true },
       createdAt: { type: Sequelize.DATE, allowNull: false },
       updatedAt: { type: Sequelize.DATE, allowNull: false },
       deletedAt: { type: Sequelize.DATE, allowNull: true },
     });
     await queryInterface.addIndex('profiles', ['deletedAt']);
+    await queryInterface.addIndex('profiles', ['name'], { unique: true, where: { deletedAt: null }, name: 'profiles_name_unique' });
 
     // 2. permissions
     await queryInterface.createTable('permissions', {
       id: { type: Sequelize.INTEGER, primaryKey: true, autoIncrement: true },
       name: { type: Sequelize.STRING, allowNull: false },
-      slug: { type: Sequelize.STRING, allowNull: false, unique: true },
+      slug: { type: Sequelize.STRING, allowNull: false },
       description: { type: Sequelize.STRING, allowNull: true },
       createdAt: { type: Sequelize.DATE, allowNull: false },
       updatedAt: { type: Sequelize.DATE, allowNull: false },
       deletedAt: { type: Sequelize.DATE, allowNull: true },
     });
     await queryInterface.addIndex('permissions', ['deletedAt']);
+    await queryInterface.addIndex('permissions', ['slug'], { unique: true, where: { deletedAt: null }, name: 'permissions_slug_unique' });
 
     // 3. profile_permissions (pivot)
     await queryInterface.createTable('profile_permissions', {
@@ -50,8 +52,8 @@ module.exports = {
     // 4. users
     await queryInterface.createTable('users', {
       id: { type: Sequelize.INTEGER, primaryKey: true, autoIncrement: true },
-      username: { type: Sequelize.STRING, allowNull: false, unique: true },
-      email: { type: Sequelize.STRING, allowNull: false, unique: true },
+      username: { type: Sequelize.STRING, allowNull: false },
+      email: { type: Sequelize.STRING, allowNull: false },
       password_hash: { type: Sequelize.STRING, allowNull: false },
       profile_id: {
         type: Sequelize.INTEGER,
@@ -65,18 +67,22 @@ module.exports = {
       deletedAt: { type: Sequelize.DATE, allowNull: true },
     });
     await queryInterface.addIndex('users', ['deletedAt', 'profile_id']);
+    await queryInterface.addIndex('users', ['username'], { unique: true, where: { deletedAt: null }, name: 'users_username_unique' });
+    await queryInterface.addIndex('users', ['email'], { unique: true, where: { deletedAt: null }, name: 'users_email_unique' });
 
     // 5. sagas
     await queryInterface.createTable('sagas', {
       id: { type: Sequelize.INTEGER, primaryKey: true, autoIncrement: true },
-      name: { type: Sequelize.STRING(100), allowNull: false, unique: true },
+      name: { type: Sequelize.STRING(100), allowNull: false },
       description: { type: Sequelize.TEXT, allowNull: true },
-      order: { type: Sequelize.INTEGER, allowNull: false, unique: true }, // RN02: ordem única por saga
+      order: { type: Sequelize.INTEGER, allowNull: false }, // RN02: ordem única por saga
       createdAt: { type: Sequelize.DATE, allowNull: false },
       updatedAt: { type: Sequelize.DATE, allowNull: false },
       deletedAt: { type: Sequelize.DATE, allowNull: true },
     });
     await queryInterface.addIndex('sagas', ['deletedAt']);
+    await queryInterface.addIndex('sagas', ['name'], { unique: true, where: { deletedAt: null }, name: 'sagas_name_unique' });
+    await queryInterface.addIndex('sagas', ['order'], { unique: true, where: { deletedAt: null }, name: 'sagas_order_unique' });
 
     // 6. arcs
     await queryInterface.createTable('arcs', {
@@ -95,9 +101,9 @@ module.exports = {
       updatedAt: { type: Sequelize.DATE, allowNull: false },
       deletedAt: { type: Sequelize.DATE, allowNull: true },
     });
-    await queryInterface.addConstraint('arcs', {
-      fields: ['order', 'saga_id'],
-      type: 'unique',
+    await queryInterface.addIndex('arcs', ['order', 'saga_id'], {
+      unique: true,
+      where: { deletedAt: null },
       name: 'unique_arc_order_per_saga'
     });
     await queryInterface.addIndex('arcs', ['deletedAt', 'saga_id']);
@@ -105,7 +111,7 @@ module.exports = {
     // 7. islands
     await queryInterface.createTable('islands', {
       id: { type: Sequelize.INTEGER, primaryKey: true, autoIncrement: true },
-      name: { type: Sequelize.STRING, allowNull: false, unique: true },
+      name: { type: Sequelize.STRING, allowNull: false },
       description: { type: Sequelize.TEXT, allowNull: false },
       coordinate_x: { type: Sequelize.FLOAT, allowNull: false },
       coordinate_y: { type: Sequelize.FLOAT, allowNull: false },
@@ -118,6 +124,7 @@ module.exports = {
       deletedAt: { type: Sequelize.DATE, allowNull: true },
     });
     await queryInterface.addIndex('islands', ['deletedAt']);
+    await queryInterface.addIndex('islands', ['name'], { unique: true, where: { deletedAt: null }, name: 'islands_name_unique' });
 
     // 8. arc_islands
     await queryInterface.createTable('arc_islands', {
@@ -141,10 +148,10 @@ module.exports = {
       updatedAt: { type: Sequelize.DATE, allowNull: false },
       deletedAt: { type: Sequelize.DATE, allowNull: true },
     });
-    await queryInterface.addConstraint('arc_islands', {
-      fields: ['arc_id', 'order'],
-      type: 'unique',
-      name: 'unique_arc_island_order' // RN09
+    await queryInterface.addIndex('arc_islands', ['arc_id', 'order'], {
+      unique: true,
+      where: { deletedAt: null },
+      name: 'unique_arc_island_order'
     });
     await queryInterface.addIndex('arc_islands', ['deletedAt', 'arc_id', 'island_id']);
 
@@ -173,10 +180,10 @@ module.exports = {
       updatedAt: { type: Sequelize.DATE, allowNull: false },
       deletedAt: { type: Sequelize.DATE, allowNull: true },
     });
-    await queryInterface.addConstraint('events', {
-      fields: ['island_id', 'arc_id', 'order'],
-      type: 'unique',
-      name: 'unique_event_order_context' // RN03: ordem única por evento numa ilha num arco
+    await queryInterface.addIndex('events', ['island_id', 'arc_id', 'order'], {
+      unique: true,
+      where: { deletedAt: null },
+      name: 'unique_event_order_context'
     });
     await queryInterface.addIndex('events', ['deletedAt', 'island_id', 'arc_id']);
 
@@ -184,12 +191,13 @@ module.exports = {
     await queryInterface.createTable('characters', {
       id: { type: Sequelize.INTEGER, primaryKey: true, autoIncrement: true },
       name: { type: Sequelize.STRING, allowNull: false },
-      slug: { type: Sequelize.STRING, allowNull: false, unique: true },
+      slug: { type: Sequelize.STRING, allowNull: false },
       createdAt: { type: Sequelize.DATE, allowNull: false },
       updatedAt: { type: Sequelize.DATE, allowNull: false },
       deletedAt: { type: Sequelize.DATE, allowNull: true },
     });
     await queryInterface.addIndex('characters', ['deletedAt']);
+    await queryInterface.addIndex('characters', ['slug'], { unique: true, where: { deletedAt: null }, name: 'characters_slug_unique' });
 
     // 11. character_versions
     await queryInterface.createTable('character_versions', {
@@ -246,10 +254,10 @@ module.exports = {
       updatedAt: { type: Sequelize.DATE, allowNull: false },
       deletedAt: { type: Sequelize.DATE, allowNull: true },
     });
-    await queryInterface.addConstraint('arc_character_versions', {
-      fields: ['arc_id', 'character_id'],
-      type: 'unique',
-      name: 'unique_one_version_per_character_in_arc' // RN04 blindada
+    await queryInterface.addIndex('arc_character_versions', ['arc_id', 'character_id'], {
+      unique: true,
+      where: { deletedAt: null },
+      name: 'unique_one_version_per_character_in_arc'
     });
     await queryInterface.addIndex('arc_character_versions', ['deletedAt', 'arc_id']);
 
@@ -282,9 +290,9 @@ module.exports = {
       updatedAt: { type: Sequelize.DATE, allowNull: false },
       deletedAt: { type: Sequelize.DATE, allowNull: true },
     });
-    await queryInterface.addConstraint('island_character_versions', {
-      fields: ['island_id', 'arc_id', 'order'],
-      type: 'unique',
+    await queryInterface.addIndex('island_character_versions', ['island_id', 'arc_id', 'order'], {
+      unique: true,
+      where: { deletedAt: null },
       name: 'unique_island_arc_order_version'
     });
     await queryInterface.addIndex('island_character_versions', ['deletedAt']);
@@ -310,10 +318,10 @@ module.exports = {
       updatedAt: { type: Sequelize.DATE, allowNull: false },
       deletedAt: { type: Sequelize.DATE, allowNull: true },
     });
-    await queryInterface.addConstraint('event_participants', {
-      fields: ['event_id', 'character_version_id'],
-      type: 'unique',
-      name: 'unique_event_participant' // RN11
+    await queryInterface.addIndex('event_participants', ['event_id', 'character_version_id'], {
+      unique: true,
+      where: { deletedAt: null },
+      name: 'unique_event_participant'
     });
     await queryInterface.addIndex('event_participants', ['deletedAt']);
   },

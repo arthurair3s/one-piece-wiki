@@ -7,7 +7,6 @@ import {
   BelongsTo,
   PrimaryKey,
   AutoIncrement,
-  Unique,
   AllowNull,
 } from 'sequelize-typescript';
 import { Profile } from '../../profiles/models/profile.model';
@@ -18,14 +17,18 @@ import { Profile } from '../../profiles/models/profile.model';
   paranoid: true,
   defaultScope: {
     attributes: { exclude: ['password_hash'] }
-  }
+  },
+  indexes: [
+    { unique: true, fields: ['username'], where: { deletedAt: null }, name: 'users_username_unique' },
+    { unique: true, fields: ['email'], where: { deletedAt: null }, name: 'users_email_unique' }
+  ]
 })
 export class User extends Model {
   @PrimaryKey @AutoIncrement @Column(DataType.INTEGER) id!: number;
 
-  @Unique @AllowNull(false) @Column(DataType.STRING) username!: string;
+  @AllowNull(false) @Column(DataType.STRING) username!: string;
 
-  @Unique @AllowNull(false) @Column(DataType.STRING) email!: string;
+  @AllowNull(false) @Column(DataType.STRING) email!: string;
 
   @AllowNull(false) @Column(DataType.STRING) password_hash!: string;
 

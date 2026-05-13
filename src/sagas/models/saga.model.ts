@@ -24,6 +24,10 @@ interface SagaCreationAttributes
   tableName: 'sagas',
   timestamps: true,
   paranoid: true,
+  indexes: [
+    { unique: true, fields: ['name'], where: { deletedAt: null }, name: 'sagas_name_unique' },
+    { unique: true, fields: ['order'], where: { deletedAt: null }, name: 'sagas_order_unique' }
+  ]
 })
 export class Saga extends Model<SagaAttributes, SagaCreationAttributes> {
   @Column({
@@ -36,7 +40,6 @@ export class Saga extends Model<SagaAttributes, SagaCreationAttributes> {
   @Column({
     type: DataType.STRING(100),
     allowNull: false,
-    unique: true,
   })
   name!: string;
 
@@ -49,7 +52,6 @@ export class Saga extends Model<SagaAttributes, SagaCreationAttributes> {
   @Column({
     type: DataType.INTEGER,
     allowNull: false,
-    unique: true,
   })
   order!: number;
 

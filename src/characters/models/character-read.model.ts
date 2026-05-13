@@ -7,7 +7,14 @@ import {
 } from 'sequelize-typescript';
 import { CharacterVersionRead } from '../../character-versions/models/character-version-read.model';
 
-@Table({ tableName: 'characters', timestamps: true, paranoid: true })
+@Table({
+  tableName: 'character_reads',
+  timestamps: true,
+  paranoid: true,
+  indexes: [
+    { unique: true, fields: ['slug'], where: { deletedAt: null }, name: 'characters_slug_unique_read' }
+  ]
+})
 export class CharacterRead extends Model {
   @Column({
     type: DataType.INTEGER,
@@ -18,7 +25,7 @@ export class CharacterRead extends Model {
   @Column({ type: DataType.STRING, allowNull: false })
   name!: string;
 
-  @Column({ type: DataType.STRING, allowNull: false, unique: true })
+  @Column({ type: DataType.STRING, allowNull: false })
   slug!: string;
 
   @HasMany(() => CharacterVersionRead)
