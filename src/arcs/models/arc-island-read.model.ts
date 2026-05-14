@@ -6,6 +6,7 @@ import {
   ForeignKey,
   PrimaryKey,
   AutoIncrement,
+  BelongsTo,
 } from 'sequelize-typescript';
 import { ArcRead } from './arc-read.model';
 import { IslandRead } from '../../islands/models/island-read.model';
@@ -25,9 +26,15 @@ export class ArcIslandRead extends Model {
   @Column({ type: DataType.INTEGER, allowNull: false })
   arc_id!: number;
 
+  @BelongsTo(() => ArcRead, { constraints: false })
+  arc!: ArcRead;
+
   @ForeignKey(() => IslandRead)
   @Column({ type: DataType.INTEGER, allowNull: false })
   island_id!: number;
+
+  @BelongsTo(() => IslandRead, { constraints: false })
+  island!: IslandRead;
 
   @Column({ type: DataType.INTEGER, allowNull: false, defaultValue: 0 })
   order!: number;

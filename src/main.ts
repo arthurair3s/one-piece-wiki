@@ -42,7 +42,7 @@ async function bootstrap() {
         brokers: ['localhost:9092'], // Porta exposta no compose.yml
       },
       consumer: {
-        groupId: 'nestjs-cdc-consumer',
+        groupId: 'nestjs-cdc-consumer-v3',
       },
       subscribe: {
         fromBeginning: true,

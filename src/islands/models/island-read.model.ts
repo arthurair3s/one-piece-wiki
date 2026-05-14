@@ -49,15 +49,15 @@ export class IslandRead extends Model {
   @Column({ defaultValue: true })
   is_active!: boolean;
 
-  @BelongsToMany(() => ArcRead, () => ArcIslandRead)
+  @BelongsToMany(() => ArcRead, { through: () => ArcIslandRead, constraints: false })
   arcs!: ArcRead[];
 
-  @BelongsToMany(() => CharacterVersionRead, () => IslandCharacterVersionRead)
+  @BelongsToMany(() => CharacterVersionRead, { through: () => IslandCharacterVersionRead, constraints: false })
   character_versions!: CharacterVersionRead[];
 
-  @HasMany(() => EventRead)
+  @HasMany(() => EventRead, { constraints: false })
   events!: EventRead[];
 
-  @HasMany(() => IslandCharacterVersionRead)
+  @HasMany(() => IslandCharacterVersionRead, { constraints: false })
   island_character_versions!: IslandCharacterVersionRead[];
 }

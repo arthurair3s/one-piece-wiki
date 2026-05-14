@@ -28,6 +28,6 @@ export class CharacterRead extends Model {
   @Column({ type: DataType.STRING, allowNull: false })
   slug!: string;
 
-  @HasMany(() => CharacterVersionRead)
+  @HasMany(() => CharacterVersionRead, { constraints: false })
   versions!: CharacterVersionRead[];
 }

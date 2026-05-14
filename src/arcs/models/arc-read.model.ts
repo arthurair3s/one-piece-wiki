@@ -48,6 +48,6 @@ export class ArcRead extends Model {
   })
   order!: number;
 
-  @BelongsToMany(() => IslandRead, () => ArcIslandRead)
+  @BelongsToMany(() => IslandRead, { through: () => ArcIslandRead, constraints: false })
   islands!: IslandRead[];
 }

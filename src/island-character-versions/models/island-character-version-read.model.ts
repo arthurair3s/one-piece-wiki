@@ -28,7 +28,7 @@ export class IslandCharacterVersionRead extends Model {
   @Column(DataType.INTEGER)
   island_id!: number;
 
-  @BelongsTo(() => IslandRead)
+  @BelongsTo(() => IslandRead, { constraints: false })
   island!: IslandRead;
 
   @ForeignKey(() => ArcRead)
@@ -36,7 +36,7 @@ export class IslandCharacterVersionRead extends Model {
   @Column(DataType.INTEGER)
   arc_id!: number;
 
-  @BelongsTo(() => ArcRead)
+  @BelongsTo(() => ArcRead, { constraints: false })
   arc!: ArcRead;
 
   @ForeignKey(() => CharacterVersionRead)
@@ -44,7 +44,7 @@ export class IslandCharacterVersionRead extends Model {
   @Column(DataType.INTEGER)
   character_version_id!: number;
 
-  @BelongsTo(() => CharacterVersionRead)
+  @BelongsTo(() => CharacterVersionRead, { constraints: false })
   characterVersion!: CharacterVersionRead;
 
   @AllowNull(false)

@@ -4,6 +4,7 @@ import {
   Model,
   DataType,
   ForeignKey,
+  BelongsTo,
 } from 'sequelize-typescript';
 import { EventRead } from './event-read.model';
 import { CharacterVersionRead } from '../../character-versions/models/character-version-read.model';
@@ -27,7 +28,13 @@ export class EventParticipantRead extends Model {
   @Column({ type: DataType.INTEGER, allowNull: false })
   event_id!: number;
 
+  @BelongsTo(() => EventRead, { constraints: false })
+  event!: EventRead;
+
   @ForeignKey(() => CharacterVersionRead)
   @Column({ type: DataType.INTEGER, allowNull: false })
   character_version_id!: number;
+
+  @BelongsTo(() => CharacterVersionRead, { constraints: false })
+  characterVersion!: CharacterVersionRead;
 }

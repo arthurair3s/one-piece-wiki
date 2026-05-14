@@ -1,4 +1,4 @@
-import { Column, DataType, Model, Table, BelongsToMany, ForeignKey } from 'sequelize-typescript';
+import { Column, DataType, Model, Table, BelongsToMany, ForeignKey, BelongsTo } from 'sequelize-typescript';
 import { CharacterVersionRead } from '../../character-versions/models/character-version-read.model';
 import { EventParticipantRead } from './event-participant-read.model';
 
@@ -25,6 +25,9 @@ export class EventRead extends Model {
     allowNull: false,
   })
   island_id!: number;
+
+  @BelongsTo(() => IslandRead, { constraints: false })
+  island!: IslandRead;
 
   @Column({
     type: DataType.INTEGER,
@@ -61,7 +64,8 @@ export class EventRead extends Model {
   @BelongsToMany(() => CharacterVersionRead, {
     through: () => EventParticipantRead,
     foreignKey: 'event_id',
-    otherKey: 'character_version_id'
+    otherKey: 'character_version_id',
+    constraints: false
   })
   participants!: CharacterVersionRead[];
 }

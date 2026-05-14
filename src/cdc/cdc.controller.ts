@@ -62,9 +62,10 @@ export class CdcController {
       payload = message.payload;
     }
     if (!payload || !payload.op) {
-      this.logger.warn('Mensagem recebida sem estrutura válida do Debezium, ignorando...');
+      this.logger.warn(`Mensagem recebida sem estrutura válida: ${JSON.stringify(message)}`);
       return null;
     }
+    this.logger.log(`Recebido CDC: ${payload.source.table} [op=${payload.op}]`);
     return payload;
   }
 }

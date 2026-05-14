@@ -20,7 +20,7 @@ export class CharacterVersionRead extends Model {
   @Column({ type: DataType.INTEGER, allowNull: false })
   character_id!: number;
 
-  @BelongsTo(() => CharacterRead, 'character_id')
+  @BelongsTo(() => CharacterRead, { foreignKey: 'character_id', constraints: false })
   character!: CharacterRead;
 
   @Column({ type: DataType.STRING, allowNull: true }) 
