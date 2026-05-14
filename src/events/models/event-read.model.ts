@@ -1,6 +1,8 @@
-import { Column, DataType, Model, Table, BelongsToMany } from 'sequelize-typescript';
+import { Column, DataType, Model, Table, BelongsToMany, ForeignKey } from 'sequelize-typescript';
 import { CharacterVersionRead } from '../../character-versions/models/character-version-read.model';
 import { EventParticipantRead } from './event-participant-read.model';
+
+import { IslandRead } from '../../islands/models/island-read.model';
 
 @Table({
   tableName: 'event_reads',
@@ -17,6 +19,7 @@ export class EventRead extends Model {
   })
   id!: number;
 
+  @ForeignKey(() => IslandRead)
   @Column({
     type: DataType.INTEGER,
     allowNull: false,

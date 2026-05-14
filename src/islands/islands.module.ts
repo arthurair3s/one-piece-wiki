@@ -6,11 +6,18 @@ import { IslandsController } from './islands.controller';
 import { IslandsService } from './islands.service';
 
 import { Island } from './models/island.model';
+import { IslandRead } from './models/island-read.model';
 import { Arc } from '../arcs/models/arc.model';
+import { ArcRead } from '../arcs/models/arc-read.model';
 import { ArcIsland } from '../arcs/models/arc-island.model';
+import { ArcIslandRead } from '../arcs/models/arc-island-read.model';
 import { CharacterVersion } from '../character-versions/models/character-version.model';
+import { CharacterVersionRead } from '../character-versions/models/character-version-read.model';
 import { Character } from '../characters/models/character.model';
+import { CharacterRead } from '../characters/models/character-read.model';
 import { IslandCharacterVersion } from '../island-character-versions/models/island-character-version.model';
+import { IslandCharacterVersionRead } from '../island-character-versions/models/island-character-version-read.model';
+import { EventRead } from '../events/models/event-read.model';
 
 import { CreateIslandHandler } from './commands/handlers/create-island.handler';
 import { CreateIslandsBulkHandler } from './commands/handlers/create-islands-bulk.handler';
@@ -48,6 +55,15 @@ const QueryHandlers = [
       Character,
       IslandCharacterVersion,
     ]),
+    SequelizeModule.forFeature([
+      IslandRead,
+      ArcRead,
+      ArcIslandRead,
+      CharacterVersionRead,
+      CharacterRead,
+      IslandCharacterVersionRead,
+      EventRead,
+    ], 'read-db'),
   ],
   controllers: [IslandsController],
   providers: [

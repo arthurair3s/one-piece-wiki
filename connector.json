@@ -9,7 +9,7 @@
     "database.password": "postgres",
     "database.dbname": "grand_line_db",
     "database.server.name": "pg_server",
-    "table.include.list": "public.events,public.event_participants,public.character_versions,public.characters",
+    "table.include.list": "public.events,public.event_participants,public.character_versions,public.characters,public.islands,public.arcs,public.arc_islands,public.island_character_versions",
     "topic.prefix": "pg",
     "slot.name": "debezium_slot",
     "publication.name": "debezium_publication",

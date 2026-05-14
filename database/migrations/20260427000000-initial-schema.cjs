@@ -148,11 +148,6 @@ module.exports = {
       updatedAt: { type: Sequelize.DATE, allowNull: false },
       deletedAt: { type: Sequelize.DATE, allowNull: true },
     });
-    await queryInterface.addIndex('arc_islands', ['arc_id', 'order'], {
-      unique: true,
-      where: { deletedAt: null },
-      name: 'unique_arc_island_order'
-    });
     await queryInterface.addIndex('arc_islands', ['deletedAt', 'arc_id', 'island_id']);
 
     // 9. events

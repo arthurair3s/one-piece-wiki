@@ -7,29 +7,28 @@ import {
   PrimaryKey,
   AutoIncrement,
 } from 'sequelize-typescript';
-import { Arc } from './arc.model';
-import { Island } from '../../islands/models/island.model';
+import { ArcRead } from './arc-read.model';
+import { IslandRead } from '../../islands/models/island-read.model';
 
 @Table({
   tableName: 'arc_islands',
   timestamps: true,
   paranoid: true,
 })
-export class ArcIsland extends Model {
+export class ArcIslandRead extends Model {
   @PrimaryKey
   @AutoIncrement
   @Column({ type: DataType.INTEGER })
   id!: number;
 
-  @ForeignKey(() => Arc)
+  @ForeignKey(() => ArcRead)
   @Column({ type: DataType.INTEGER, allowNull: false })
   arc_id!: number;
 
-  @ForeignKey(() => Island)
+  @ForeignKey(() => IslandRead)
   @Column({ type: DataType.INTEGER, allowNull: false })
   island_id!: number;
 
-  // ordem da ilha dentro do contexto desse arco específico
   @Column({ type: DataType.INTEGER, allowNull: false, defaultValue: 0 })
   order!: number;
 }

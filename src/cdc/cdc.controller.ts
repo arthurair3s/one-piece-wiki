@@ -32,6 +32,30 @@ export class CdcController {
     if (payload) await this.cdcService.processEventParticipantChange(payload);
   }
 
+  @MessagePattern('pg.public.islands')
+  async handleIslandChange(@Payload() message: any) {
+    const payload = this.extractPayload(message);
+    if (payload) await this.cdcService.processIslandChange(payload);
+  }
+
+  @MessagePattern('pg.public.arcs')
+  async handleArcChange(@Payload() message: any) {
+    const payload = this.extractPayload(message);
+    if (payload) await this.cdcService.processArcChange(payload);
+  }
+
+  @MessagePattern('pg.public.arc_islands')
+  async handleArcIslandChange(@Payload() message: any) {
+    const payload = this.extractPayload(message);
+    if (payload) await this.cdcService.processArcIslandChange(payload);
+  }
+
+  @MessagePattern('pg.public.island_character_versions')
+  async handleIslandCharacterVersionChange(@Payload() message: any) {
+    const payload = this.extractPayload(message);
+    if (payload) await this.cdcService.processIslandCharacterVersionChange(payload);
+  }
+
   private extractPayload(message: any) {
     let payload = message;
     if (message && message.payload !== undefined) {

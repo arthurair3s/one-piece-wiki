@@ -44,6 +44,9 @@ async function bootstrap() {
       consumer: {
         groupId: 'nestjs-cdc-consumer',
       },
+      subscribe: {
+        fromBeginning: true,
+      },
     },
   });
 
