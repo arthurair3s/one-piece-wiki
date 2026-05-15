@@ -10,6 +10,7 @@ import { IslandRead } from '../islands/models/island-read.model';
 import { ArcRead } from '../arcs/models/arc-read.model';
 import { ArcIslandRead } from '../arcs/models/arc-island-read.model';
 import { IslandCharacterVersionRead } from '../island-character-versions/models/island-character-version-read.model';
+import { ArcCharacterVersionRead } from '../arcs/models/arc-character-version-read.model';
 import { SagaRead } from '../sagas/models/saga-read.model';
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { SagaRead } from '../sagas/models/saga-read.model';
       ArcIslandRead,
       IslandCharacterVersionRead,
       SagaRead,
+      ArcCharacterVersionRead,
     ], 'read-db')
   ],
   controllers: [CdcController],

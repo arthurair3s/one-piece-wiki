@@ -9,6 +9,7 @@ import { ArcRead } from '../arcs/models/arc-read.model';
 import { ArcIslandRead } from '../arcs/models/arc-island-read.model';
 import { IslandCharacterVersionRead } from '../island-character-versions/models/island-character-version-read.model';
 import { SagaRead } from '../sagas/models/saga-read.model';
+import { ArcCharacterVersionRead } from '../arcs/models/arc-character-version-read.model';
 
 export interface DebeziumPayload<T> {
   before: T | null;
@@ -42,6 +43,8 @@ export class CdcService {
     private readonly islandCharacterVersionReadModel: typeof IslandCharacterVersionRead,
     @InjectModel(SagaRead, 'read-db')
     private readonly sagaReadModel: typeof SagaRead,
+    @InjectModel(ArcCharacterVersionRead, 'read-db')
+    private readonly arcCharacterVersionReadModel: typeof ArcCharacterVersionRead,
   ) { }
 
   async processEventChange(payload: DebeziumPayload<any>) {
@@ -49,11 +52,9 @@ export class CdcService {
 
     try {
       if (payload.op === 'c' || payload.op === 'r') {
-        // Create ou Snapshot inicial (Read)
         const data = payload.after;
         if (!data) return;
 
-        // Utilizamos o id exato gerado no Write DB. O "upsert" garante que mensagens duplicadas no Kafka não criem registros a mais (idempotência básica).
         await this.eventReadModel.upsert({
           id: data.id,
           island_id: data.island_id,
@@ -62,34 +63,24 @@ export class CdcService {
           description: data.description,
           type: data.type,
           order: data.order,
-          // Debezium pode enviar em formatos epoch micro/milli. O Sequelize geralmente consegue realizar parse se cair bem com Date() ou podemos simplificar apenas setando o ts.
-          // Para simplificar, o sequelize atualizará o createdAt via schema se não enviarmos, ou usaremos a do payload caso convertida:
-          // createdAt: new Date(data.createdAt),
-          // updatedAt: new Date(data.updatedAt)
         });
 
         this.logger.log(`[CDC] EventRead criado/upserted para ID: ${data.id}`);
 
       } else if (payload.op === 'u') {
-        // Update (ou Soft Delete)
         const data = payload.after;
         const beforeData = payload.before;
         if (!data) return;
 
-        // Como usamos "paranoid: true", um DELETE na API gera um UPDATE no banco preenchendo o "deletedAt".
-        // O Debezium captura isso como uma operação de Update ('u').
         if (data.deletedAt && (!beforeData || !beforeData.deletedAt)) {
-          // Se agora tem deletedAt, disparamos o soft delete no Read Model
           await this.eventReadModel.destroy({ where: { id: data.id } });
           this.logger.log(`[CDC] EventRead marcado como deletado (Soft Delete) para ID: ${data.id}`);
         } else {
-          // Se for um Restore (tinha deletedAt e agora não tem mais)
           if (beforeData && beforeData.deletedAt && !data.deletedAt) {
             await this.eventReadModel.restore({ where: { id: data.id } });
-            this.logger.log(`[CDC] EventRead restaurado (Restore) para ID: ${data.id}`);
+            this.logger.log(`[CDC] EventRead restaurado para ID: ${data.id}`);
           }
 
-          // Atualização normal dos campos
           await this.eventReadModel.update({
             island_id: data.island_id,
             arc_id: data.arc_id,
@@ -103,16 +94,14 @@ export class CdcService {
         }
 
       } else if (payload.op === 'd') {
-        // Delete
         const data = payload.before;
         if (!data) return;
 
         await this.eventReadModel.destroy({ where: { id: data.id } });
-
-        this.logger.log(`[CDC] EventRead deletado (soft/hard dependendo da config) para ID: ${data.id}`);
+        this.logger.log(`[CDC] EventRead deletado para ID: ${data.id}`);
       }
     } catch (error: any) {
-      this.logger.error(`Erro ao processar payload do CDC Events: ${error.message}`, error.stack);
+      this.logger.error(`Erro no CDC Event: ${error.message}`, error.stack);
     }
   }
 
@@ -122,24 +111,29 @@ export class CdcService {
         const data = payload.after;
         if (!data) return;
         await this.characterReadModel.upsert(data);
+        this.logger.log(`[CDC] CharacterRead criado/upserted para ID: ${data.id}`);
       } else if (payload.op === 'u') {
         const data = payload.after;
         if (!data) return;
         if (data.deletedAt && (!payload.before || !payload.before.deletedAt)) {
           await this.characterReadModel.destroy({ where: { id: data.id } });
+          this.logger.log(`[CDC] CharacterRead marcado como deletado (Soft Delete) para ID: ${data.id}`);
         } else {
           if (payload.before && payload.before.deletedAt && !data.deletedAt) {
             await this.characterReadModel.restore({ where: { id: data.id } });
+            this.logger.log(`[CDC] CharacterRead restaurado para ID: ${data.id}`);
           }
           await this.characterReadModel.update(data, { where: { id: data.id } });
+          this.logger.log(`[CDC] CharacterRead atualizado para ID: ${data.id}`);
         }
       } else if (payload.op === 'd') {
         const data = payload.before;
         if (!data) return;
         await this.characterReadModel.destroy({ where: { id: data.id } });
+        this.logger.log(`[CDC] CharacterRead deletado para ID: ${data.id}`);
       }
     } catch (error: any) {
-      this.logger.error(`Erro no CDC Character: ${error.message}`);
+      this.logger.error(`Erro no CDC Character: ${error.message}`, error.stack);
     }
   }
 
@@ -149,24 +143,29 @@ export class CdcService {
         const data = payload.after;
         if (!data) return;
         await this.characterVersionReadModel.upsert(data);
+        this.logger.log(`[CDC] CharacterVersionRead criado/upserted para ID: ${data.id}`);
       } else if (payload.op === 'u') {
         const data = payload.after;
         if (!data) return;
         if (data.deletedAt && (!payload.before || !payload.before.deletedAt)) {
           await this.characterVersionReadModel.destroy({ where: { id: data.id } });
+          this.logger.log(`[CDC] CharacterVersionRead marcado como deletado (Soft Delete) para ID: ${data.id}`);
         } else {
           if (payload.before && payload.before.deletedAt && !data.deletedAt) {
             await this.characterVersionReadModel.restore({ where: { id: data.id } });
+            this.logger.log(`[CDC] CharacterVersionRead restaurado para ID: ${data.id}`);
           }
           await this.characterVersionReadModel.update(data, { where: { id: data.id } });
+          this.logger.log(`[CDC] CharacterVersionRead atualizado para ID: ${data.id}`);
         }
       } else if (payload.op === 'd') {
         const data = payload.before;
         if (!data) return;
         await this.characterVersionReadModel.destroy({ where: { id: data.id } });
+        this.logger.log(`[CDC] CharacterVersionRead deletado para ID: ${data.id}`);
       }
     } catch (error: any) {
-      this.logger.error(`Erro no CDC CharacterVersion: ${error.message}`);
+      this.logger.error(`Erro no CDC CharacterVersion: ${error.message}`, error.stack);
     }
   }
 
@@ -176,24 +175,29 @@ export class CdcService {
         const data = payload.after;
         if (!data) return;
         await this.eventParticipantReadModel.upsert(data);
+        this.logger.log(`[CDC] EventParticipantRead criado/upserted para ID: ${data.id}`);
       } else if (payload.op === 'u') {
         const data = payload.after;
         if (!data) return;
         if (data.deletedAt && (!payload.before || !payload.before.deletedAt)) {
           await this.eventParticipantReadModel.destroy({ where: { id: data.id } });
+          this.logger.log(`[CDC] EventParticipantRead marcado como deletado (Soft Delete) para ID: ${data.id}`);
         } else {
           if (payload.before && payload.before.deletedAt && !data.deletedAt) {
             await this.eventParticipantReadModel.restore({ where: { id: data.id } });
+            this.logger.log(`[CDC] EventParticipantRead restaurado para ID: ${data.id}`);
           }
           await this.eventParticipantReadModel.update(data, { where: { id: data.id } });
+          this.logger.log(`[CDC] EventParticipantRead atualizado para ID: ${data.id}`);
         }
       } else if (payload.op === 'd') {
         const data = payload.before;
         if (!data) return;
         await this.eventParticipantReadModel.destroy({ where: { id: data.id } });
+        this.logger.log(`[CDC] EventParticipantRead deletado para ID: ${data.id}`);
       }
     } catch (error: any) {
-      this.logger.error(`Erro no CDC EventParticipant: ${error.message}`);
+      this.logger.error(`Erro no CDC EventParticipant: ${error.message}`, error.stack);
     }
   }
 
@@ -203,24 +207,29 @@ export class CdcService {
         const data = payload.after;
         if (!data) return;
         await this.islandReadModel.upsert(data);
+        this.logger.log(`[CDC] IslandRead criado/upserted para ID: ${data.id}`);
       } else if (payload.op === 'u') {
         const data = payload.after;
         if (!data) return;
         if (data.deletedAt && (!payload.before || !payload.before.deletedAt)) {
           await this.islandReadModel.destroy({ where: { id: data.id } });
+          this.logger.log(`[CDC] IslandRead marcado como deletado (Soft Delete) para ID: ${data.id}`);
         } else {
           if (payload.before && payload.before.deletedAt && !data.deletedAt) {
             await this.islandReadModel.restore({ where: { id: data.id } });
+            this.logger.log(`[CDC] IslandRead restaurado para ID: ${data.id}`);
           }
           await this.islandReadModel.update(data, { where: { id: data.id } });
+          this.logger.log(`[CDC] IslandRead atualizado para ID: ${data.id}`);
         }
       } else if (payload.op === 'd') {
         const data = payload.before;
         if (!data) return;
         await this.islandReadModel.destroy({ where: { id: data.id } });
+        this.logger.log(`[CDC] IslandRead deletado para ID: ${data.id}`);
       }
     } catch (error: any) {
-      this.logger.error(`Erro no CDC Island: ${error.message}`);
+      this.logger.error(`Erro no CDC Island: ${error.message}`, error.stack);
     }
   }
 
@@ -230,24 +239,29 @@ export class CdcService {
         const data = payload.after;
         if (!data) return;
         await this.arcReadModel.upsert(data);
+        this.logger.log(`[CDC] ArcRead criado/upserted para ID: ${data.id}`);
       } else if (payload.op === 'u') {
         const data = payload.after;
         if (!data) return;
         if (data.deletedAt && (!payload.before || !payload.before.deletedAt)) {
           await this.arcReadModel.destroy({ where: { id: data.id } });
+          this.logger.log(`[CDC] ArcRead marcado como deletado (Soft Delete) para ID: ${data.id}`);
         } else {
           if (payload.before && payload.before.deletedAt && !data.deletedAt) {
             await this.arcReadModel.restore({ where: { id: data.id } });
+            this.logger.log(`[CDC] ArcRead restaurado para ID: ${data.id}`);
           }
           await this.arcReadModel.update(data, { where: { id: data.id } });
+          this.logger.log(`[CDC] ArcRead atualizado para ID: ${data.id}`);
         }
       } else if (payload.op === 'd') {
         const data = payload.before;
         if (!data) return;
         await this.arcReadModel.destroy({ where: { id: data.id } });
+        this.logger.log(`[CDC] ArcRead deletado para ID: ${data.id}`);
       }
     } catch (error: any) {
-      this.logger.error(`Erro no CDC Arc: ${error.message}`);
+      this.logger.error(`Erro no CDC Arc: ${error.message}`, error.stack);
     }
   }
 
@@ -257,24 +271,29 @@ export class CdcService {
         const data = payload.after;
         if (!data) return;
         await this.arcIslandReadModel.upsert(data);
+        this.logger.log(`[CDC] ArcIslandRead criado/upserted para ID: ${data.id}`);
       } else if (payload.op === 'u') {
         const data = payload.after;
         if (!data) return;
         if (data.deletedAt && (!payload.before || !payload.before.deletedAt)) {
           await this.arcIslandReadModel.destroy({ where: { id: data.id } });
+          this.logger.log(`[CDC] ArcIslandRead marcado como deletado (Soft Delete) para ID: ${data.id}`);
         } else {
           if (payload.before && payload.before.deletedAt && !data.deletedAt) {
             await this.arcIslandReadModel.restore({ where: { id: data.id } });
+            this.logger.log(`[CDC] ArcIslandRead restaurado para ID: ${data.id}`);
           }
           await this.arcIslandReadModel.update(data, { where: { id: data.id } });
+          this.logger.log(`[CDC] ArcIslandRead atualizado para ID: ${data.id}`);
         }
       } else if (payload.op === 'd') {
         const data = payload.before;
         if (!data) return;
         await this.arcIslandReadModel.destroy({ where: { id: data.id } });
+        this.logger.log(`[CDC] ArcIslandRead deletado para ID: ${data.id}`);
       }
     } catch (error: any) {
-      this.logger.error(`Erro no CDC ArcIsland: ${error.message}`);
+      this.logger.error(`Erro no CDC ArcIsland: ${error.message}`, error.stack);
     }
   }
 
@@ -284,24 +303,29 @@ export class CdcService {
         const data = payload.after;
         if (!data) return;
         await this.islandCharacterVersionReadModel.upsert(data);
+        this.logger.log(`[CDC] IslandCharacterVersionRead criado/upserted para ID: ${data.id}`);
       } else if (payload.op === 'u') {
         const data = payload.after;
         if (!data) return;
         if (data.deletedAt && (!payload.before || !payload.before.deletedAt)) {
           await this.islandCharacterVersionReadModel.destroy({ where: { id: data.id } });
+          this.logger.log(`[CDC] IslandCharacterVersionRead marcado como deletado (Soft Delete) para ID: ${data.id}`);
         } else {
           if (payload.before && payload.before.deletedAt && !data.deletedAt) {
             await this.islandCharacterVersionReadModel.restore({ where: { id: data.id } });
+            this.logger.log(`[CDC] IslandCharacterVersionRead restaurado para ID: ${data.id}`);
           }
           await this.islandCharacterVersionReadModel.update(data, { where: { id: data.id } });
+          this.logger.log(`[CDC] IslandCharacterVersionRead atualizado para ID: ${data.id}`);
         }
       } else if (payload.op === 'd') {
         const data = payload.before;
         if (!data) return;
         await this.islandCharacterVersionReadModel.destroy({ where: { id: data.id } });
+        this.logger.log(`[CDC] IslandCharacterVersionRead deletado para ID: ${data.id}`);
       }
     } catch (error: any) {
-      this.logger.error(`Erro no CDC IslandCharacterVersion: ${error.message}`);
+      this.logger.error(`Erro no CDC IslandCharacterVersion: ${error.message}`, error.stack);
     }
   }
 
@@ -317,7 +341,7 @@ export class CdcService {
         if (!data) return;
         if (data.deletedAt && (!payload.before || !payload.before.deletedAt)) {
           await this.sagaReadModel.destroy({ where: { id: data.id } });
-          this.logger.log(`[CDC] SagaRead marcado como deletado para ID: ${data.id}`);
+          this.logger.log(`[CDC] SagaRead marcado como deletado (Soft Delete) para ID: ${data.id}`);
         } else {
           if (payload.before && payload.before.deletedAt && !data.deletedAt) {
             await this.sagaReadModel.restore({ where: { id: data.id } });
@@ -333,7 +357,39 @@ export class CdcService {
         this.logger.log(`[CDC] SagaRead deletado para ID: ${data.id}`);
       }
     } catch (error: any) {
-      this.logger.error(`Erro no CDC Saga: ${error.message}`);
+      this.logger.error(`Erro no CDC Saga: ${error.message}`, error.stack);
+    }
+  }
+
+  async processArcCharacterVersionChange(payload: DebeziumPayload<any>) {
+    try {
+      if (payload.op === 'c' || payload.op === 'r') {
+        const data = payload.after;
+        if (!data) return;
+        await this.arcCharacterVersionReadModel.upsert(data);
+        this.logger.log(`[CDC] ArcCharacterVersionRead criado/upserted para ID: ${data.id}`);
+      } else if (payload.op === 'u') {
+        const data = payload.after;
+        if (!data) return;
+        if (data.deletedAt && (!payload.before || !payload.before.deletedAt)) {
+          await this.arcCharacterVersionReadModel.destroy({ where: { id: data.id } });
+          this.logger.log(`[CDC] ArcCharacterVersionRead marcado como deletado (Soft Delete) para ID: ${data.id}`);
+        } else {
+          if (payload.before && payload.before.deletedAt && !data.deletedAt) {
+            await this.arcCharacterVersionReadModel.restore({ where: { id: data.id } });
+            this.logger.log(`[CDC] ArcCharacterVersionRead restaurado para ID: ${data.id}`);
+          }
+          await this.arcCharacterVersionReadModel.update(data, { where: { id: data.id } });
+          this.logger.log(`[CDC] ArcCharacterVersionRead atualizado para ID: ${data.id}`);
+        }
+      } else if (payload.op === 'd') {
+        const data = payload.before;
+        if (!data) return;
+        await this.arcCharacterVersionReadModel.destroy({ where: { id: data.id } });
+        this.logger.log(`[CDC] ArcCharacterVersionRead deletado para ID: ${data.id}`);
+      }
+    } catch (error: any) {
+      this.logger.error(`Erro no CDC ArcCharacterVersion: ${error.message}`, error.stack);
     }
   }
 }

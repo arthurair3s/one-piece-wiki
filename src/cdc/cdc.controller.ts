@@ -62,6 +62,12 @@ export class CdcController {
     if (payload) await this.cdcService.processSagaChange(payload);
   }
 
+  @MessagePattern('pg.public.arc_character_versions')
+  async handleArcCharacterVersionChange(@Payload() message: any) {
+    const payload = this.extractPayload(message);
+    if (payload) await this.cdcService.processArcCharacterVersionChange(payload);
+  }
+
   private extractPayload(message: any) {
     let payload = message;
     if (message && message.payload !== undefined) {

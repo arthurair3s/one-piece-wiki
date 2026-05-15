@@ -10,6 +10,8 @@ import {
 import { IslandRead } from '../../islands/models/island-read.model';
 import { ArcIslandRead } from './arc-island-read.model';
 import { SagaRead } from '../../sagas/models/saga-read.model';
+import { CharacterVersionRead } from '../../character-versions/models/character-version-read.model';
+import { ArcCharacterVersionRead } from './arc-character-version-read.model';
 
 @Table({
   tableName: 'arcs',
@@ -55,4 +57,7 @@ export class ArcRead extends Model {
 
   @BelongsToMany(() => IslandRead, { through: () => ArcIslandRead, constraints: false })
   islands!: IslandRead[];
+
+  @BelongsToMany(() => CharacterVersionRead, { through: () => ArcCharacterVersionRead, constraints: false })
+  character_versions!: CharacterVersionRead[];
 }
