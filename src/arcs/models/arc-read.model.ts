@@ -3,11 +3,13 @@ import {
   Column,
   Model,
   DataType,
+  BelongsTo,
   BelongsToMany,
 } from 'sequelize-typescript';
 
 import { IslandRead } from '../../islands/models/island-read.model';
 import { ArcIslandRead } from './arc-island-read.model';
+import { SagaRead } from '../../sagas/models/saga-read.model';
 
 @Table({
   tableName: 'arcs',
@@ -41,6 +43,9 @@ export class ArcRead extends Model {
     allowNull: false,
   })
   saga_id!: number;
+
+  @BelongsTo(() => SagaRead, { constraints: false, foreignKey: 'saga_id' })
+  saga!: SagaRead;
 
   @Column({
     type: DataType.INTEGER,

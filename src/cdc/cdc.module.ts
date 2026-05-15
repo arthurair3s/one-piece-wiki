@@ -10,6 +10,7 @@ import { IslandRead } from '../islands/models/island-read.model';
 import { ArcRead } from '../arcs/models/arc-read.model';
 import { ArcIslandRead } from '../arcs/models/arc-island-read.model';
 import { IslandCharacterVersionRead } from '../island-character-versions/models/island-character-version-read.model';
+import { SagaRead } from '../sagas/models/saga-read.model';
 @Module({
   imports: [
     SequelizeModule.forFeature([
@@ -21,6 +22,7 @@ import { IslandCharacterVersionRead } from '../island-character-versions/models/
       ArcRead,
       ArcIslandRead,
       IslandCharacterVersionRead,
+      SagaRead,
     ], 'read-db')
   ],
   controllers: [CdcController],

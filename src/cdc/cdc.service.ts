@@ -8,6 +8,7 @@ import { IslandRead } from '../islands/models/island-read.model';
 import { ArcRead } from '../arcs/models/arc-read.model';
 import { ArcIslandRead } from '../arcs/models/arc-island-read.model';
 import { IslandCharacterVersionRead } from '../island-character-versions/models/island-character-version-read.model';
+import { SagaRead } from '../sagas/models/saga-read.model';
 
 export interface DebeziumPayload<T> {
   before: T | null;
@@ -39,7 +40,9 @@ export class CdcService {
     private readonly arcIslandReadModel: typeof ArcIslandRead,
     @InjectModel(IslandCharacterVersionRead, 'read-db')
     private readonly islandCharacterVersionReadModel: typeof IslandCharacterVersionRead,
-  ) {}
+    @InjectModel(SagaRead, 'read-db')
+    private readonly sagaReadModel: typeof SagaRead,
+  ) { }
 
   async processEventChange(payload: DebeziumPayload<any>) {
     this.logger.log(`Processando CDC Event com op: ${payload.op}`);
@@ -64,7 +67,7 @@ export class CdcService {
           // createdAt: new Date(data.createdAt),
           // updatedAt: new Date(data.updatedAt)
         });
-        
+
         this.logger.log(`[CDC] EventRead criado/upserted para ID: ${data.id}`);
 
       } else if (payload.op === 'u') {
@@ -95,7 +98,7 @@ export class CdcService {
             type: data.type,
             order: data.order,
           }, { where: { id: data.id } });
-          
+
           this.logger.log(`[CDC] EventRead atualizado para ID: ${data.id}`);
         }
 
@@ -105,7 +108,7 @@ export class CdcService {
         if (!data) return;
 
         await this.eventReadModel.destroy({ where: { id: data.id } });
-        
+
         this.logger.log(`[CDC] EventRead deletado (soft/hard dependendo da config) para ID: ${data.id}`);
       }
     } catch (error: any) {
@@ -299,6 +302,38 @@ export class CdcService {
       }
     } catch (error: any) {
       this.logger.error(`Erro no CDC IslandCharacterVersion: ${error.message}`);
+    }
+  }
+
+  async processSagaChange(payload: DebeziumPayload<any>) {
+    try {
+      if (payload.op === 'c' || payload.op === 'r') {
+        const data = payload.after;
+        if (!data) return;
+        await this.sagaReadModel.upsert(data);
+        this.logger.log(`[CDC] SagaRead criado/upserted para ID: ${data.id}`);
+      } else if (payload.op === 'u') {
+        const data = payload.after;
+        if (!data) return;
+        if (data.deletedAt && (!payload.before || !payload.before.deletedAt)) {
+          await this.sagaReadModel.destroy({ where: { id: data.id } });
+          this.logger.log(`[CDC] SagaRead marcado como deletado para ID: ${data.id}`);
+        } else {
+          if (payload.before && payload.before.deletedAt && !data.deletedAt) {
+            await this.sagaReadModel.restore({ where: { id: data.id } });
+            this.logger.log(`[CDC] SagaRead restaurado para ID: ${data.id}`);
+          }
+          await this.sagaReadModel.update(data, { where: { id: data.id } });
+          this.logger.log(`[CDC] SagaRead atualizado para ID: ${data.id}`);
+        }
+      } else if (payload.op === 'd') {
+        const data = payload.before;
+        if (!data) return;
+        await this.sagaReadModel.destroy({ where: { id: data.id } });
+        this.logger.log(`[CDC] SagaRead deletado para ID: ${data.id}`);
+      }
+    } catch (error: any) {
+      this.logger.error(`Erro no CDC Saga: ${error.message}`);
     }
   }
 }

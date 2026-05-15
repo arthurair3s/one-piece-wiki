@@ -3,13 +3,13 @@ import { InjectModel } from '@nestjs/sequelize';
 import { Op } from 'sequelize';
 
 import { GetSagasQuery } from '../impl/get-sagas.query';
-import { Saga } from '../../models/saga.model';
+import { SagaRead } from '../../models/saga-read.model';
 
 @QueryHandler(GetSagasQuery)
 export class GetSagasHandler implements IQueryHandler<GetSagasQuery> {
   constructor(
-    @InjectModel(Saga)
-    private readonly sagaModel: typeof Saga,
+    @InjectModel(SagaRead, 'read-db')
+    private readonly sagaModel: typeof SagaRead,
   ) {}
 
   async execute(query: GetSagasQuery) {

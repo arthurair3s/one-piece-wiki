@@ -56,6 +56,12 @@ export class CdcController {
     if (payload) await this.cdcService.processIslandCharacterVersionChange(payload);
   }
 
+  @MessagePattern('pg.public.sagas')
+  async handleSagaChange(@Payload() message: any) {
+    const payload = this.extractPayload(message);
+    if (payload) await this.cdcService.processSagaChange(payload);
+  }
+
   private extractPayload(message: any) {
     let payload = message;
     if (message && message.payload !== undefined) {
