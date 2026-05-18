@@ -15,7 +15,14 @@ import { Arc } from '../../arcs/models/arc.model';
 import { CharacterVersion } from '../../character-versions/models/character-version.model';
 import { EventParticipant } from './event-participant.model';
 
-@Table({ tableName: 'events', timestamps: true, paranoid: true })
+@Table({
+  tableName: 'events',
+  timestamps: true,
+  paranoid: true,
+  indexes: [
+    { unique: true, fields: ['island_id', 'arc_id', 'order'], where: { deletedAt: null }, name: 'unique_event_order_context' }
+  ]
+})
 export class Event extends Model {
   @PrimaryKey @AutoIncrement @Column(DataType.INTEGER) id!: number;
 

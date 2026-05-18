@@ -2,6 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { Logger, ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { Transport, MicroserviceOptions } from '@nestjs/microservices';
 import 'reflect-metadata';
 
 async function bootstrap() {
@@ -32,6 +33,24 @@ async function bootstrap() {
       docExpansion: 'none',
     },
   });
+
+  // Configura e conecta o microservice Kafka para consumir os tópicos CDC do Debezium
+  app.connectMicroservice<MicroserviceOptions>({
+    transport: Transport.KAFKA,
+    options: {
+      client: {
+        brokers: ['localhost:9092'], // Porta exposta no compose.yml
+      },
+      consumer: {
+        groupId: 'nestjs-cdc-consumer-v3',
+      },
+      subscribe: {
+        fromBeginning: true,
+      },
+    },
+  });
+
+  await app.startAllMicroservices();
 
   const port = process.env.PORT ?? 3000;
   await app.listen(port);

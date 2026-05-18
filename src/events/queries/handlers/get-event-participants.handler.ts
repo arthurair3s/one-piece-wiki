@@ -2,29 +2,27 @@ import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
 import { InjectModel } from '@nestjs/sequelize';
 import { NotFoundException } from '@nestjs/common';
 import { GetEventParticipantsQuery } from '../impl/get-event-participants.query';
-import { Event } from '../../models/event.model';
-import { CharacterVersion } from '../../../character-versions/models/character-version.model';
-import { Character } from '../../../characters/models/character.model';
-import { EventParticipant } from '../../models/event-participant.model';
+import { EventRead } from '../../models/event-read.model';
+import { CharacterVersionRead } from '../../../character-versions/models/character-version-read.model';
+import { CharacterRead } from '../../../characters/models/character-read.model';
 
 @QueryHandler(GetEventParticipantsQuery)
 export class GetEventParticipantsHandler
-  implements IQueryHandler<GetEventParticipantsQuery>
-{
+  implements IQueryHandler<GetEventParticipantsQuery> {
   constructor(
-    @InjectModel(Event)
-    private readonly eventModel: typeof Event,
-  ) {}
+    @InjectModel(EventRead, 'read-db')
+    private readonly eventReadModel: typeof EventRead,
+  ) { }
 
   async execute(query: GetEventParticipantsQuery) {
     const { event_id } = query;
 
-    const event = await this.eventModel.findByPk(event_id, {
+    const event = await this.eventReadModel.findByPk(event_id, {
       include: [
         {
-          model: CharacterVersion,
-          through: { attributes: [] }, // oculta a tabela pivot
-          include: [{ model: Character }],
+          model: CharacterVersionRead,
+          through: { attributes: [] },
+          include: [{ model: CharacterRead }],
         },
       ],
     });

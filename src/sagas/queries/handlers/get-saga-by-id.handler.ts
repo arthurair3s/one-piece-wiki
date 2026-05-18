@@ -3,27 +3,27 @@ import { InjectModel } from '@nestjs/sequelize';
 import { NotFoundException } from '@nestjs/common';
 
 import { GetSagaByIdQuery } from '../impl/get-saga-by-id.query';
-import { Saga } from '../../models/saga.model';
-import { Arc } from '../../../arcs/models/arc.model';
+import { SagaRead } from '../../models/saga-read.model';
+import { ArcRead } from '../../../arcs/models/arc-read.model';
 
 @QueryHandler(GetSagaByIdQuery)
 export class GetSagaByIdHandler implements IQueryHandler<GetSagaByIdQuery> {
   constructor(
-    @InjectModel(Saga)
-    private readonly sagaModel: typeof Saga,
+    @InjectModel(SagaRead, 'read-db')
+    private readonly sagaModel: typeof SagaRead,
   ) {}
 
-  async execute(query: GetSagaByIdQuery): Promise<Saga> {
+  async execute(query: GetSagaByIdQuery): Promise<SagaRead> {
     const { id } = query;
 
     const saga = await this.sagaModel.findByPk(id, {
       include: [
         {
-          model: Arc,
+          model: ArcRead,
           attributes: ['id', 'name', 'order', 'description'],
         },
       ],
-      order: [[{ model: Arc, as: 'arcs' }, 'order', 'ASC']],
+      order: [[{ model: ArcRead, as: 'arcs' }, 'order', 'ASC']],
     });
 
     // validação: precisa existir

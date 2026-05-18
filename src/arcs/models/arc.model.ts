@@ -30,6 +30,9 @@ interface ArcCreationAttributes
   tableName: 'arcs',
   timestamps: true,
   paranoid: true,
+  indexes: [
+    { unique: true, fields: ['order', 'saga_id'], where: { deletedAt: null }, name: 'unique_arc_order_per_saga' }
+  ]
 })
 export class Arc extends Model<ArcAttributes, ArcCreationAttributes> {
   @Column({
