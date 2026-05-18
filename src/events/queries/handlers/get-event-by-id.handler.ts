@@ -2,25 +2,25 @@ import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
 import { InjectModel } from '@nestjs/sequelize';
 import { NotFoundException } from '@nestjs/common';
 import { GetEventByIdQuery } from '../impl/get-event-by-id.query';
-import { Event } from '../../models/event.model';
-import { CharacterVersion } from '../../../character-versions/models/character-version.model';
-import { Character } from '../../../characters/models/character.model';
+import { EventRead } from '../../models/event-read.model';
+import { CharacterVersionRead } from '../../../character-versions/models/character-version-read.model';
+import { CharacterRead } from '../../../characters/models/character-read.model';
 
 @QueryHandler(GetEventByIdQuery)
 export class GetEventByIdHandler implements IQueryHandler<GetEventByIdQuery> {
   constructor(
-    @InjectModel(Event)
-    private readonly eventModel: typeof Event,
+    @InjectModel(EventRead, 'read-db')
+    private readonly eventReadModel: typeof EventRead,
   ) {}
 
-  async execute(query: GetEventByIdQuery): Promise<Event> {
-    const event = await this.eventModel.findByPk(query.id, {
+  async execute(query: GetEventByIdQuery): Promise<any> {
+    const event = await this.eventReadModel.findByPk(query.id, {
       include: [
         {
-          model: CharacterVersion,
+          model: CharacterVersionRead,
           as: 'participants',
           through: { attributes: [] },
-          include: [{ model: Character }],
+          include: [{ model: CharacterRead }],
         },
       ],
     });

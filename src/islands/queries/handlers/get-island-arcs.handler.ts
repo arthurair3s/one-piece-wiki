@@ -2,8 +2,8 @@ import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
 import { InjectModel } from '@nestjs/sequelize';
 import { NotFoundException } from '@nestjs/common';
 
-import { Island } from '../../models/island.model';
-import { Arc } from '../../../arcs/models/arc.model';
+import { IslandRead } from '../../models/island-read.model';
+import { ArcRead } from '../../../arcs/models/arc-read.model';
 import { GetIslandArcsQuery } from '../impl/get-island-arcs.query';
 
 
@@ -13,15 +13,15 @@ export class GetIslandArcsHandler
   implements IQueryHandler<GetIslandArcsQuery>
 {
   constructor(
-    @InjectModel(Island)
-    private readonly islandModel: typeof Island,
+    @InjectModel(IslandRead, 'read-db')
+    private readonly islandModel: typeof IslandRead,
   ) {}
 
   async execute(query: GetIslandArcsQuery) {
     const island = await this.islandModel.findByPk(query.islandId, {
       include: [
         {
-          model: Arc,
+          model: ArcRead,
           attributes: ['id', 'name'],
           through: { attributes: ['order'] },
         },

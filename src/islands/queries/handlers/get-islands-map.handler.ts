@@ -1,6 +1,6 @@
 import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
 import { InjectModel } from '@nestjs/sequelize'; 
-import { Island } from '@/islands/models/island.model';
+import { IslandRead } from '@/islands/models/island-read.model';
 import { GetIslandsMapQuery } from '../impl/get-islands-map.query';
 
 
@@ -9,8 +9,8 @@ export class GetIslandsMapHandler
   implements IQueryHandler<GetIslandsMapQuery>
 {
   constructor(
-    @InjectModel(Island)
-    private readonly islandModel: typeof Island,
+    @InjectModel(IslandRead, 'read-db')
+    private readonly islandModel: typeof IslandRead,
   ) {}
 
   async execute() {

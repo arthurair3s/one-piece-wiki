@@ -10,7 +10,7 @@ export class CreateCharacterHandler implements ICommandHandler<CreateCharacterCo
   constructor(
     @InjectModel(Character)
     private readonly characterModel: typeof Character,
-  ) {}
+  ) { }
 
   async execute(command: CreateCharacterCommand) {
     try {

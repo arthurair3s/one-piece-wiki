@@ -13,7 +13,14 @@ import { CharacterVersion } from '../../character-versions/models/character-vers
 import { Island } from '../../islands/models/island.model';
 import { Arc } from '../../arcs/models/arc.model';
 
-@Table({ tableName: 'island_character_versions', timestamps: true, paranoid: true })
+@Table({
+  tableName: 'island_character_versions',
+  timestamps: true,
+  paranoid: true,
+  indexes: [
+    { unique: true, fields: ['island_id', 'arc_id', 'order'], where: { deletedAt: null }, name: 'unique_island_arc_order_version' }
+  ]
+})
 export class IslandCharacterVersion extends Model {
   @PrimaryKey @AutoIncrement @Column(DataType.INTEGER) id!: number;
 

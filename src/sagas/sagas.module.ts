@@ -3,6 +3,7 @@ import { CqrsModule } from '@nestjs/cqrs';
 import { SequelizeModule } from '@nestjs/sequelize';
 
 import { Saga } from './models/saga.model';
+import { SagaRead } from './models/saga-read.model';
 import { Arc } from '../arcs/models/arc.model';
 
 import { SagasController } from './sagas.controller';
@@ -33,6 +34,7 @@ const QueryHandlers = [
   imports: [
     CqrsModule,
     SequelizeModule.forFeature([Saga, Arc]),
+    SequelizeModule.forFeature([SagaRead], 'read-db'),
   ],
   controllers: [SagasController],
   providers: [SagasService, 

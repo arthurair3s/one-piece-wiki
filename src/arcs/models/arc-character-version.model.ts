@@ -15,6 +15,9 @@ import { CharacterVersion } from '../../character-versions/models/character-vers
   tableName: 'arc_character_versions',
   timestamps: true,
   paranoid: true,
+  indexes: [
+    { unique: true, fields: ['arc_id', 'character_id'], where: { deletedAt: null }, name: 'unique_one_version_per_character_in_arc' }
+  ]
 })
 export class ArcCharacterVersion extends Model {
   @ForeignKey(() => Arc)

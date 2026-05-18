@@ -1,6 +1,11 @@
 import { Module } from '@nestjs/common';
 import { CqrsModule } from '@nestjs/cqrs';
 import { SequelizeModule } from '@nestjs/sequelize';
+import { EventRead } from './models/event-read.model';
+import { EventParticipantRead } from './models/event-participant-read.model';
+import { CharacterVersionRead } from '../character-versions/models/character-version-read.model';
+import { CharacterRead } from '../characters/models/character-read.model';
+
 import { Event } from './models/event.model';
 import { EventParticipant } from './models/event-participant.model';
 import { Island } from '../islands/models/island.model';
@@ -38,6 +43,7 @@ const QueryHandlers = [
   imports: [
     CqrsModule,
     SequelizeModule.forFeature([Event, EventParticipant, Island, CharacterVersion, Character]),
+    SequelizeModule.forFeature([EventRead, EventParticipantRead, CharacterVersionRead, CharacterRead], 'read-db'),
   ],
   controllers: [EventsController],
   providers: [
@@ -47,4 +53,4 @@ const QueryHandlers = [
   ],
   exports: [EventsService],
 })
-export class EventsModule {}
+export class EventsModule { }
