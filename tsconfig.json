@@ -1,32 +1,7 @@
 {
+  "extends": "./api/tsconfig.json",
   "compilerOptions": {
-    "ignoreDeprecations": "5.0",
-    "target": "ES2021",
-    "module": "CommonJS",
-    "moduleResolution": "node",
-    "lib": ["ES2021"],
-    "outDir": "./dist",
-    "rootDir": "src",
-
-    "baseUrl": "./",
-    "paths": {
-      "@/*": ["src/*"]
-    },
-
-    "declaration": true,
-    "removeComments": true,
-    "emitDecoratorMetadata": true,
-    "experimentalDecorators": true,
-    "allowSyntheticDefaultImports": true,
-    "sourceMap": true,
-    "skipLibCheck": true,
-    "strictNullChecks": true,
-    "noImplicitAny": false,
-    "strictBindCallApply": false,
-    "forceConsistentCasingInFileNames": true,
-    "noFallthroughCasesInSwitch": false,
-    "esModuleInterop": true
+    "baseUrl": "./api"
   },
-  "include": ["src/**/*"],
-  "exclude": ["node_modules", "dist", "database"]
+  "include": ["api/src/**/*"]
 }

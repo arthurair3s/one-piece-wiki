@@ -10,7 +10,7 @@ import { ArcRead } from '../../../arcs/models/arc-read.model';
 import { CharacterVersionRead } from '../../../character-versions/models/character-version-read.model';
 import { CharacterRead } from '../../../characters/models/character-read.model';
 import { EventRead } from '../../../events/models/event-read.model';
-import { IslandCharacterVersionRead } from 'src/island-character-versions/models/island-character-version-read.model';
+import { IslandCharacterVersionRead } from '../../../island-character-versions/models/island-character-version-read.model';
 
 @QueryHandler(GetIslandDetailsQuery)
 export class GetIslandDetailsHandler
@@ -58,14 +58,14 @@ export class GetIslandDetailsHandler
       ],
     });
 
+    if (!island || island.is_active === false) {
+      throw new NotFoundException('Island não encontrada');
+    }
+
     const hasArc = island.arcs?.some(a => a.id === arcId);
 
     if (!hasArc) {
       throw new BadRequestException('Este arco não pertence à ilha');
-    }
-    
-    if (!island || island.is_active === false) {
-      throw new NotFoundException('Island não encontrada');
     }
 
     const characters = (island.island_character_versions || [])

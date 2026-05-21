@@ -16,6 +16,7 @@ import { CdcModule } from './cdc/cdc.module';
 
 @Module({
   imports: [
+    ConfigModule.forRoot({ isGlobal: true }),
     AuthModule,
     UsersModule,
     ProfilesModule,
@@ -29,7 +30,6 @@ import { CdcModule } from './cdc/cdc.module';
     EventsModule,
     CdcModule,
 
-    ConfigModule.forRoot({ isGlobal: true }),
     SequelizeModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
