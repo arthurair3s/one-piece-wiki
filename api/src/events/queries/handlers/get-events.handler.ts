@@ -1,13 +1,13 @@
 import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
 import { InjectModel } from '@nestjs/sequelize';
 import { GetEventsQuery } from '../impl/get-events.query';
-import { Event } from '../../models/event.model';
+import { EventRead } from '../../models/event-read.model';
 
 @QueryHandler(GetEventsQuery)
 export class GetEventsHandler implements IQueryHandler<GetEventsQuery> {
   constructor(
-    @InjectModel(Event)
-    private readonly eventModel: typeof Event,
+    @InjectModel(EventRead, 'read-db')
+    private readonly eventReadModel: typeof EventRead,
   ) {}
 
   async execute(query: GetEventsQuery) {
@@ -22,7 +22,7 @@ export class GetEventsHandler implements IQueryHandler<GetEventsQuery> {
       where.type = type;
     }
 
-    return this.eventModel.findAndCountAll({
+    return this.eventReadModel.findAndCountAll({
       where,
       limit: Number(limit),
       offset: Number(offset),

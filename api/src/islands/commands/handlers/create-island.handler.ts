@@ -2,11 +2,12 @@ import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { InjectModel } from '@nestjs/sequelize';
 import { ConflictException, NotFoundException } from '@nestjs/common';
 import { Sequelize } from 'sequelize-typescript';
-import { UniqueConstraintError } from 'sequelize';
+import { UniqueConstraintError, Op } from 'sequelize';
 
 import { CreateIslandCommand } from '../impl/create-island.command';
 import { Island } from '../../models/island.model';
 import { Arc } from '../../../arcs/models/arc.model';
+import { ArcIsland } from '../../../arcs/models/arc-island.model';
 
 @CommandHandler(CreateIslandCommand)
 export class CreateIslandHandler
@@ -18,6 +19,9 @@ export class CreateIslandHandler
 
     @InjectModel(Arc)
     private readonly arcModel: typeof Arc,
+
+    @InjectModel(ArcIsland)
+    private readonly arcIslandModel: typeof ArcIsland,
 
     private readonly sequelize: Sequelize,
   ) {}
@@ -59,15 +63,28 @@ export class CreateIslandHandler
 
         // vincula a ilha aos arcos via pivot preservando a ordem
         if (arc_ids && arc_ids.length > 0) {
-          const pivots = arc_ids.map((arc_id, index) => ({
-            arc_id,
-            island_id: island.id,
-            order: index + 1, // Ordem baseada na posição do array
-          }));
+          const arcOrderMap = new Map<number, number>();
+          const currentMaxOrders = await this.arcIslandModel.findAll({
+            attributes: ['arc_id', [Sequelize.fn('MAX', Sequelize.col('order')), 'maxOrder']],
+            where: { arc_id: { [Op.in]: arc_ids } },
+            group: ['arc_id'],
+            transaction: t
+          });
+          currentMaxOrders.forEach((item: any) => {
+            arcOrderMap.set(item.arc_id, Number(item.get('maxOrder')));
+          });
 
-          // usamos injeção direta via modelo pivot para poder passar o atributo order
-          const { ArcIsland } = require('../../../arcs/models/arc-island.model');
-          await ArcIsland.bulkCreate(pivots, { transaction: t });
+          const pivots = arc_ids.map((arc_id) => {
+            const nextOrder = (arcOrderMap.get(arc_id) || 0) + 1;
+            arcOrderMap.set(arc_id, nextOrder);
+            return {
+              arc_id,
+              island_id: island.id,
+              order: nextOrder,
+            };
+          });
+
+          await this.arcIslandModel.bulkCreate(pivots, { transaction: t });
         }
 
         return island;

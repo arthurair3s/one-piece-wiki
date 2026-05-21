@@ -13,16 +13,16 @@ export class CreateEventHandler implements ICommandHandler<CreateEventCommand> {
     private readonly eventModel: typeof Event,
     @InjectModel(Island)
     private readonly islandModel: typeof Island,
-  ) {}
+  ) { }
 
   async execute(command: CreateEventCommand): Promise<Event> {
     const { island_id, title, type, description, arc_id: providedArcId, order } = command;
-    
+
     // ilha deve existir e trazer seus arcos associados
     const island: any = await this.islandModel.findByPk(island_id, {
       include: [{ model: Arc, attributes: ['id', 'order'], through: { attributes: [] } }],
     });
-    
+
     if (!island) {
       throw new NotFoundException(`Island com ID ${island_id} não encontrada.`);
     }
@@ -48,7 +48,7 @@ export class CreateEventHandler implements ICommandHandler<CreateEventCommand> {
         `O arco com ID ${providedArcId} não está associado à ilha ${island_id}. Arcos disponíveis: [${arcIds.join(', ')}].`,
       );
     }
-    
+
     const arc_id = providedArcId;
 
     // impede duplicidade de ordem na mesma ilha

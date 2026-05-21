@@ -1,0 +1,7 @@
+{
+  "extends": "./api/tsconfig.json",
+  "compilerOptions": {
+    "baseUrl": "./api"
+  },
+  "include": ["api/src/**/*"]
+}

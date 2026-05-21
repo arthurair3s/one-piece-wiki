@@ -71,10 +71,10 @@ module.exports = {
     }));
 
     const playerPermissions = permissions
-      .filter(p => 
-        p.slug.endsWith('.view') && 
-        !p.slug.startsWith('users.') && 
-        !p.slug.startsWith('profiles.') && 
+      .filter(p =>
+        p.slug.endsWith('.view') &&
+        !p.slug.startsWith('users.') &&
+        !p.slug.startsWith('profiles.') &&
         !p.slug.startsWith('permissions.')
       )
       .map(p => ({
@@ -107,6 +107,13 @@ module.exports = {
         updatedAt: new Date(),
       },
     ]);
+
+    // Sincronizar sequências (PostgreSQL) para evitar erro de ID duplicado após seed com IDs explícitos
+    if (queryInterface.sequelize.options.dialect === 'postgres') {
+      await queryInterface.sequelize.query(`SELECT setval('"profiles_id_seq"', (SELECT COALESCE(MAX(id), 1) FROM "profiles"));`);
+      await queryInterface.sequelize.query(`SELECT setval('"permissions_id_seq"', (SELECT COALESCE(MAX(id), 1) FROM "permissions"));`);
+      await queryInterface.sequelize.query(`SELECT setval('"users_id_seq"', (SELECT COALESCE(MAX(id), 1) FROM "users"));`);
+    }
   },
 
   down: async (queryInterface, Sequelize) => {

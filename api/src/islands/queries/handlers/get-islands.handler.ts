@@ -2,16 +2,16 @@ import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
 import { InjectModel } from '@nestjs/sequelize';
 
 import { GetIslandsQuery } from '../impl/get-islands.query';
-import { Island } from '../../models/island.model';
-import { Arc } from '../../../arcs/models/arc.model';
+import { IslandRead } from '../../models/island-read.model';
+import { ArcRead } from '../../../arcs/models/arc-read.model';
 
 @QueryHandler(GetIslandsQuery)
 export class GetIslandsHandler
   implements IQueryHandler<GetIslandsQuery>
 {
   constructor(
-    @InjectModel(Island)
-    private readonly islandModel: typeof Island,
+    @InjectModel(IslandRead, 'read-db')
+    private readonly islandModel: typeof IslandRead,
   ) {}
 
   async execute(query: GetIslandsQuery) {
@@ -27,7 +27,7 @@ export class GetIslandsHandler
 
     if (arc_id) {
       include.push({
-        model: Arc,
+        model: ArcRead,
         where: { id: arc_id },
         through: { attributes: [] },
         required: true,
