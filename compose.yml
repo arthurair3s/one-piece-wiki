@@ -3,7 +3,7 @@ version: '3.8'
 services:
   # Banco de Dados Principal (Write Model e Read Model)
   postgres_db:
-    image: postgres:15
+    image: postgres:15-alpine
     restart: always
     environment:
       POSTGRES_USER: ${DB_USERNAME:-postgres}
