@@ -22,9 +22,9 @@ O projeto foi construído como trabalho acadêmico (P1) e segue padrões de dese
 | Fase | Descrição | Status |
 |---|---|---|
 | **Fase 1 - API & Segurança** | Criação de todos os endpoints CRUD, implementação de RBAC, autenticação JWT e documentação Swagger | ✅ Concluída |
-| **Fase 2 - Regras de Negócio** | Implementação de 11 regras de domínio (bloqueios, cronologia, ilhas globais, status dinâmico) | ✅ Concluída |
+| **Fase 2 - Regras de Negócio** | Implementação de 13 regras de domínio (bloqueios, cronologia, ilhas globais, status dinâmico) | ✅ Concluída |
 | **Fase 3 - Dados & Narrativa** | Refatoração para Ilhas Globais, Eventos com Participantes e Status Inteligente | ✅ Concluída |
-| **Fase 4 - Conteúdo (Seeds)** | Coleta e inserção de dados reais de One Piece: sagas, arcos, personagens e eventos | 📋 Pendente |
+| **Fase 4 - Conteúdo (Seeds)** | Coleta e inserção de dados reais (Romance Dawn, Shells Town, Orange Town) | ✅ Concluída |
 | **Fase 5 - Modelagem 3D** | Modelagem das ilhas icônicas (Alabasta, Marineford, etc.) em 3D para o mapa | 📋 Futura |
 
 ---
@@ -67,7 +67,7 @@ graph TD
     subgraph API ["Grand Line API (NestJS)"]
         AUTH["Auth Module<br/>Login + JWT"]
         RBAC["RBAC Module<br/>Profiles & Permissions"]
-        CONTENT["Content Modules<br/>Sagas, Arcs, Islands<br/>Characters, Events"]
+        CONTENT["Content Modules<br/>Sagas, Arcs, Islands<br/>Characters, Versions<br/>Events"]
         GUARD["PermissionsGuard<br/>Intercepta todas as rotas<br/>valida JWT + permissão"]
     end
 
@@ -195,7 +195,7 @@ Para obter um token, faça login com um usuário cadastrado:
 ```bash
 POST /auth/login
 {
-  "username": "admin",
+  "email": "admin@admin.com",
   "password": "sua_senha"
 }
 ```

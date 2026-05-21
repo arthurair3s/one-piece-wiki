@@ -12,6 +12,7 @@ import { ArcsModule } from './arcs/arcs.module';
 import { SagasModule } from './sagas/sagas.module';
 import { IslandsModule } from './islands/islands.module';
 import { EventsModule } from './events/events.module';
+import { CdcModule } from './cdc/cdc.module';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { EventsModule } from './events/events.module';
     SagasModule,
     IslandsModule,
     EventsModule,
+    CdcModule,
 
     ConfigModule.forRoot({ isGlobal: true }),
     SequelizeModule.forRootAsync({
@@ -40,8 +42,23 @@ import { EventsModule } from './events/events.module';
         database: configService.get<string>('DB_DATABASE'),
         autoLoadModels: true,
         synchronize: false,
+      })
+    }),
+    SequelizeModule.forRootAsync({
+      name: 'read-db',
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => ({
+        dialect: 'postgres',
+        host: configService.get<string>('DB_HOST'),
+        port: configService.get<number>('DB_PORT', 5432),
+        username: configService.get<string>('DB_USERNAME'),
+        password: configService.get<string>('DB_PASSWORD'),
+        database: configService.get<string>('DB_DATABASE_READ'),
+        autoLoadModels: true,
+        synchronize: true, // cria tabelas do Read DB automaticamente
       }),
     }),
   ],
 })
-export class AppModule {}
+export class AppModule { }

@@ -12,6 +12,9 @@ import { CharacterVersion } from '../../character-versions/models/character-vers
   tableName: 'event_participants',
   timestamps: true,
   paranoid: true,
+  indexes: [
+    { unique: true, fields: ['event_id', 'character_version_id'], where: { deletedAt: null }, name: 'unique_event_participant' }
+  ]
 })
 export class EventParticipant extends Model {
   @ForeignKey(() => Event)

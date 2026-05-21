@@ -7,6 +7,11 @@ export class CreateEventDto {
   @IsNotEmpty()
   island_id!: number;
 
+  @ApiProperty({ example: 1, description: 'ID do arco onde o evento ocorre. OBRIGATÓRIO e deve estar associado à ilha' })
+  @IsInt()
+  @IsNotEmpty()
+  arc_id!: number;
+
   @ApiProperty({ example: 'Destruição de Ohara', description: 'Título do evento' })
   @IsString()
   @IsNotEmpty()

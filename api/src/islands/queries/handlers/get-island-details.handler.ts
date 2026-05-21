@@ -5,20 +5,20 @@ import { BadRequestException } from '@nestjs/common';
 
 import { GetIslandDetailsQuery } from '../impl/get-island-details.query';
 
-import { Island } from '../../models/island.model';
-import { Arc } from '../../../arcs/models/arc.model';
-import { CharacterVersion } from '../../../character-versions/models/character-version.model';
-import { Character } from '../../../characters/models/character.model';
-import { Event } from '../../../events/models/event.model';
-import { IslandCharacterVersion } from 'src/island-character-versions/models/island-character-version.model';
+import { IslandRead } from '../../models/island-read.model';
+import { ArcRead } from '../../../arcs/models/arc-read.model';
+import { CharacterVersionRead } from '../../../character-versions/models/character-version-read.model';
+import { CharacterRead } from '../../../characters/models/character-read.model';
+import { EventRead } from '../../../events/models/event-read.model';
+import { IslandCharacterVersionRead } from 'src/island-character-versions/models/island-character-version-read.model';
 
 @QueryHandler(GetIslandDetailsQuery)
 export class GetIslandDetailsHandler
   implements IQueryHandler<GetIslandDetailsQuery>
 {
   constructor(
-    @InjectModel(Island)
-    private readonly islandModel: typeof Island,
+    @InjectModel(IslandRead, 'read-db')
+    private readonly islandModel: typeof IslandRead,
   ) {}
 
   async execute(query: GetIslandDetailsQuery) {
@@ -31,20 +31,20 @@ export class GetIslandDetailsHandler
     const island: any = await this.islandModel.findByPk(islandId, {
       include: [
         {
-          model: Arc,
+          model: ArcRead,
           attributes: ['id', 'name'],
         },
         {
-          model: IslandCharacterVersion,
+          model: IslandCharacterVersionRead,
           include: [
             {
-              model: CharacterVersion,
+              model: CharacterVersionRead,
               include: [
                 {
-                  model: Arc,
+                  model: ArcRead,
                 },
                 {
-                  model: Character,
+                  model: CharacterRead,
                   attributes: ['id', 'name'],
                 },
               ],
@@ -52,7 +52,7 @@ export class GetIslandDetailsHandler
           ],
         },
         {
-          model: Event,
+          model: EventRead,
           attributes: ['id', 'title', 'description', 'order'],
         },
       ],
