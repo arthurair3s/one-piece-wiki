@@ -16,19 +16,6 @@ import { CdcModule } from './cdc/cdc.module';
 
 @Module({
   imports: [
-    AuthModule,
-    UsersModule,
-    ProfilesModule,
-    PermissionsModule,
-    CharactersModule,
-    CharacterVersionsModule,
-    IslandCharacterVersionsModule,
-    ArcsModule,
-    SagasModule,
-    IslandsModule,
-    EventsModule,
-    CdcModule,
-
     ConfigModule.forRoot({ isGlobal: true }),
     SequelizeModule.forRootAsync({
       imports: [ConfigModule],
@@ -59,6 +46,18 @@ import { CdcModule } from './cdc/cdc.module';
         synchronize: true, // cria tabelas do Read DB automaticamente
       }),
     }),
+    AuthModule,
+    UsersModule,
+    ProfilesModule,
+    PermissionsModule,
+    CharactersModule,
+    CharacterVersionsModule,
+    IslandCharacterVersionsModule,
+    ArcsModule,
+    SagasModule,
+    IslandsModule,
+    EventsModule,
+    CdcModule,
   ],
 })
 export class AppModule { }

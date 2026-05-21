@@ -35,11 +35,12 @@ async function bootstrap() {
   });
 
   // Configura e conecta o microservice Kafka para consumir os tópicos CDC do Debezium
+  const kafkaBrokers = (process.env.KAFKA_BROKERS ?? 'kafka:29092').split(',');
   app.connectMicroservice<MicroserviceOptions>({
     transport: Transport.KAFKA,
     options: {
       client: {
-        brokers: ['localhost:9092'], // Porta exposta no compose.yml
+        brokers: kafkaBrokers,
       },
       consumer: {
         groupId: 'nestjs-cdc-consumer-v3',
