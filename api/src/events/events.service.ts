@@ -23,7 +23,7 @@ export class EventsService {
 
   create(dto: CreateEventDto) {
     return this.commandBus.execute(
-      new CreateEventCommand(dto.island_id, dto.arc_id, dto.title, dto.type, dto.description, dto.order)
+      new CreateEventCommand(dto.arcIslandId, dto.title, dto.type, dto.description, dto.order)
     );
   }
 
@@ -35,7 +35,7 @@ export class EventsService {
 
   findAll(query: EventFilterDto) {
     return this.queryBus.execute(
-      new GetEventsQuery(query.page, query.limit, query.island_id, query.type)
+      new GetEventsQuery(query.page, query.limit, query.arcIslandId, query.type)
     );
   }
 
@@ -45,7 +45,7 @@ export class EventsService {
 
   update(id: number, dto: UpdateEventDto) {
     return this.commandBus.execute(
-      new UpdateEventCommand(id, dto.island_id, dto.title, dto.type, dto.description, dto.arc_id, dto.order)
+      new UpdateEventCommand(id, dto.arcIslandId, dto.title, dto.type, dto.description, dto.order)
     );
   }
 

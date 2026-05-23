@@ -7,7 +7,6 @@ import { PermissionsModule } from './permissions/permissions.module';
 import { AuthModule } from './auth/auth.module';
 import { CharactersModule } from './characters/characters.module';
 import { CharacterVersionsModule } from './character-versions/character-versions.module';
-import { IslandCharacterVersionsModule } from './island-character-versions/island-character-versions.module';
 import { ArcsModule } from './arcs/arcs.module';
 import { SagasModule } from './sagas/sagas.module';
 import { IslandsModule } from './islands/islands.module';
@@ -23,7 +22,6 @@ import { CdcModule } from './cdc/cdc.module';
     PermissionsModule,
     CharactersModule,
     CharacterVersionsModule,
-    IslandCharacterVersionsModule,
     ArcsModule,
     SagasModule,
     IslandsModule,

@@ -2,14 +2,14 @@ import { Column, DataType, Model, Table, BelongsToMany, ForeignKey, BelongsTo } 
 import { CharacterVersionRead } from '../../character-versions/models/character-version-read.model';
 import { EventParticipantRead } from './event-participant-read.model';
 
-import { IslandRead } from '../../islands/models/island-read.model';
+import { ArcIslandRead } from '../../arcs/models/arc-island-read.model';
 
 @Table({
-  tableName: 'event_reads',
+  tableName: 'events',
   timestamps: true,
   paranoid: true,
   indexes: [
-    { unique: true, fields: ['island_id', 'arc_id', 'order'], where: { deletedAt: null }, name: 'unique_event_order_context_read' }
+    { unique: true, fields: ['arc_island_id', 'order'], where: { deletedAt: null }, name: 'unique_event_order_context_read' }
   ]
 })
 export class EventRead extends Model {
@@ -19,21 +19,12 @@ export class EventRead extends Model {
   })
   id!: number;
 
-  @ForeignKey(() => IslandRead)
-  @Column({
-    type: DataType.INTEGER,
-    allowNull: false,
-  })
-  island_id!: number;
+  @ForeignKey(() => ArcIslandRead)
+  @Column(DataType.INTEGER)
+  arc_island_id!: number;
 
-  @BelongsTo(() => IslandRead, { constraints: false })
-  island!: IslandRead;
-
-  @Column({
-    type: DataType.INTEGER,
-    allowNull: false,
-  })
-  arc_id!: number;
+  @BelongsTo(() => ArcIslandRead, { constraints: false })
+  arcIsland!: ArcIslandRead;
 
   @Column({
     type: DataType.STRING,

@@ -4,14 +4,10 @@ import {
   Model,
   DataType,
   BelongsToMany,
-  HasMany,
 } from 'sequelize-typescript';
 
 import { ArcRead } from '../../arcs/models/arc-read.model';
 import { ArcIslandRead } from '../../arcs/models/arc-island-read.model';
-import { CharacterVersionRead } from '../../character-versions/models/character-version-read.model';
-import { IslandCharacterVersionRead } from '../../island-character-versions/models/island-character-version-read.model';
-import { EventRead } from '../../events/models/event-read.model';
 
 @Table({
   tableName: 'islands',
@@ -51,13 +47,4 @@ export class IslandRead extends Model {
 
   @BelongsToMany(() => ArcRead, { through: () => ArcIslandRead, constraints: false })
   arcs!: ArcRead[];
-
-  @BelongsToMany(() => CharacterVersionRead, { through: () => IslandCharacterVersionRead, constraints: false })
-  character_versions!: CharacterVersionRead[];
-
-  @HasMany(() => EventRead, { constraints: false })
-  events!: EventRead[];
-
-  @HasMany(() => IslandCharacterVersionRead, { constraints: false })
-  island_character_versions!: IslandCharacterVersionRead[];
 }

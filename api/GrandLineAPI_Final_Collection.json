@@ -89,16 +89,10 @@
       ]
     },
     {
-      "name": "8. ISLAND CHARACTER VERSIONS",
-      "item": [
-        { "name": "POST /island-character-versions", "request": { "method": "POST", "body": { "mode": "raw", "raw": "{\"island_id\": 1, \"character_version_id\": 1, \"order\": 1}", "options": { "raw": { "language": "json" } } }, "url": { "raw": "{{baseUrl}}/island-character-versions", "host": ["{{baseUrl}}"], "path": ["island-character-versions"] } } }
-      ]
-    },
-    {
       "name": "9. EVENTS",
       "item": [
         { "name": "GET /events", "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/events", "host": ["{{baseUrl}}"], "path": ["events"] } } },
-        { "name": "POST /events/bulk", "request": { "method": "POST", "body": { "mode": "raw", "raw": "[{\"island_id\": 1, \"title\": \"Evento\", \"type\": \"Lore\", \"order\": 1}]", "options": { "raw": { "language": "json" } } }, "url": { "raw": "{{baseUrl}}/events/bulk", "host": ["{{baseUrl}}"], "path": ["events", "bulk"] } } },
+        { "name": "POST /events/bulk", "request": { "method": "POST", "body": { "mode": "raw", "raw": "[{\"arcIslandId\": 1, \"title\": \"Evento\", \"type\": \"Lore\", \"order\": 1}]", "options": { "raw": { "language": "json" } } }, "url": { "raw": "{{baseUrl}}/events/bulk", "host": ["{{baseUrl}}"], "path": ["events", "bulk"] } } },
         { "name": "GET /events/:id", "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/events/1", "host": ["{{baseUrl}}"], "path": ["events", "1"] } } },
         { "name": "GET /events/:id/participants", "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/events/1/participants", "host": ["{{baseUrl}}"], "path": ["events", "1", "participants"] } } },
         { "name": "POST /events/:id/participants", "request": { "method": "POST", "body": { "mode": "raw", "raw": "{\"character_version_id\": 1}", "options": { "raw": { "language": "json" } } }, "url": { "raw": "{{baseUrl}}/events/1/participants", "host": ["{{baseUrl}}"], "path": ["events", "1", "participants"] } } },

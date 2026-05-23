@@ -1,6 +1,7 @@
-import { IsOptional, IsString, IsNumber, IsBoolean, IsUrl, IsArray } from 'class-validator';
+import { IsOptional, IsString, IsNumber, IsBoolean, IsUrl, IsArray, ValidateNested } from 'class-validator';
 import { Type } from 'class-transformer';
 import { ApiPropertyOptional } from '@nestjs/swagger';
+import { ArcIslandAssociationDto } from './arc-island-association.dto';
 
 export class UpdateIslandDto {
   @ApiPropertyOptional({ example: 'Marineford', description: 'Nome da ilha' })
@@ -13,11 +14,15 @@ export class UpdateIslandDto {
   @IsString()
   description?: string;
 
-  @ApiPropertyOptional({ example: [1, 2], description: 'IDs dos arcos em que esta ilha aparece', type: [Number] })
+  @ApiPropertyOptional({
+    type: [ArcIslandAssociationDto],
+    description: 'Associações de arcos e ordem da ilha em cada um deles',
+  })
   @IsOptional()
   @IsArray()
-  @IsNumber({}, { each: true })
-  arc_ids?: number[];
+  @ValidateNested({ each: true })
+  @Type(() => ArcIslandAssociationDto)
+  arc_ids?: ArcIslandAssociationDto[];
 
   @ApiPropertyOptional({ example: 150.0, description: 'Coordenada X no mapa 3D' })
   @IsOptional()

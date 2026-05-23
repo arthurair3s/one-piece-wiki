@@ -65,22 +65,24 @@ export class UpdateIslandHandler
         });
 
         if (arc_ids.length > 0) {
-          // busca ordens atuais para os arcos alvo
-          const arcOrderMap = new Map<number, number>();
-          const currentMaxOrders = await this.arcIslandModel.findAll({
-            attributes: ['arc_id', [Sequelize.fn('MAX', Sequelize.col('order')), 'maxOrder']],
-            where: { arc_id: { [Op.in]: arc_ids } },
-            group: ['arc_id'],
+          // busca e valida se os arcos informados existem
+          const targetArcIds = arc_ids.map(a => a.arc_id);
+          const foundArcs = await this.arcModel.findAll({
+            where: { id: { [Op.in]: targetArcIds } },
             transaction: t
           });
-          currentMaxOrders.forEach((item: any) => {
-            arcOrderMap.set(item.arc_id, Number(item.get('maxOrder')));
-          });
+          if (foundArcs.length !== targetArcIds.length) {
+            const foundIds = foundArcs.map(a => a.id);
+            const missingIds = targetArcIds.filter(id => !foundIds.includes(id));
+            throw new NotFoundException(`Arcos com IDs [${missingIds.join(', ')}] não encontrados.`);
+          }
 
-          const pivots = arc_ids.map((arc_id) => {
-            const nextOrder = (arcOrderMap.get(arc_id) || 0) + 1;
-            arcOrderMap.set(arc_id, nextOrder);
-            return { arc_id, island_id: id, order: nextOrder };
+          const pivots = arc_ids.map((assoc) => {
+            return {
+              arc_id: assoc.arc_id,
+              island_id: id,
+              order: assoc.order,
+            };
           });
           await this.arcIslandModel.bulkCreate(pivots, { transaction: t });
         }

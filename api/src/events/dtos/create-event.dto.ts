@@ -2,15 +2,10 @@ import { IsString, IsInt, IsOptional, IsNotEmpty } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateEventDto {
-  @ApiProperty({ example: 1, description: 'ID da ilha onde o evento ocorreu' })
+  @ApiProperty({ example: 1, description: 'ID do contexto (arco-ilha) onde o evento ocorreu' })
   @IsInt()
   @IsNotEmpty()
-  island_id!: number;
-
-  @ApiProperty({ example: 1, description: 'ID do arco onde o evento ocorre. OBRIGATÓRIO e deve estar associado à ilha' })
-  @IsInt()
-  @IsNotEmpty()
-  arc_id!: number;
+  arcIslandId!: number;
 
   @ApiProperty({ example: 'Destruição de Ohara', description: 'Título do evento' })
   @IsString()
@@ -27,8 +22,8 @@ export class CreateEventDto {
   @IsNotEmpty()
   type!: string;
 
-  @ApiProperty({ default: 0, example: 1, description: 'Ordem cronológica do evento na ilha' })
+  @ApiProperty({ example: 1, description: 'Ordem cronológica do evento no arco/ilha' })
   @IsInt()
-  @IsOptional()
-  order?: number;
+  @IsNotEmpty()
+  order!: number;
 }

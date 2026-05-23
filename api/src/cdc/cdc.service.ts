@@ -7,7 +7,6 @@ import { EventParticipantRead } from '../events/models/event-participant-read.mo
 import { IslandRead } from '../islands/models/island-read.model';
 import { ArcRead } from '../arcs/models/arc-read.model';
 import { ArcIslandRead } from '../arcs/models/arc-island-read.model';
-import { IslandCharacterVersionRead } from '../island-character-versions/models/island-character-version-read.model';
 import { SagaRead } from '../sagas/models/saga-read.model';
 import { ArcCharacterVersionRead } from '../arcs/models/arc-character-version-read.model';
 
@@ -39,8 +38,6 @@ export class CdcService {
     private readonly arcReadModel: typeof ArcRead,
     @InjectModel(ArcIslandRead, 'read-db')
     private readonly arcIslandReadModel: typeof ArcIslandRead,
-    @InjectModel(IslandCharacterVersionRead, 'read-db')
-    private readonly islandCharacterVersionReadModel: typeof IslandCharacterVersionRead,
     @InjectModel(SagaRead, 'read-db')
     private readonly sagaReadModel: typeof SagaRead,
     @InjectModel(ArcCharacterVersionRead, 'read-db')
@@ -57,8 +54,7 @@ export class CdcService {
 
         await this.eventReadModel.upsert({
           id: data.id,
-          island_id: data.island_id,
-          arc_id: data.arc_id,
+          arc_island_id: data.arc_island_id,
           title: data.title,
           description: data.description,
           type: data.type,
@@ -82,8 +78,7 @@ export class CdcService {
           }
 
           await this.eventReadModel.update({
-            island_id: data.island_id,
-            arc_id: data.arc_id,
+            arc_island_id: data.arc_island_id,
             title: data.title,
             description: data.description,
             type: data.type,
@@ -294,38 +289,6 @@ export class CdcService {
       }
     } catch (error: any) {
       this.logger.error(`Erro no CDC ArcIsland: ${error.message}`, error.stack);
-    }
-  }
-
-  async processIslandCharacterVersionChange(payload: DebeziumPayload<any>) {
-    try {
-      if (payload.op === 'c' || payload.op === 'r') {
-        const data = payload.after;
-        if (!data) return;
-        await this.islandCharacterVersionReadModel.upsert(data);
-        this.logger.log(`[CDC] IslandCharacterVersionRead criado/upserted para ID: ${data.id}`);
-      } else if (payload.op === 'u') {
-        const data = payload.after;
-        if (!data) return;
-        if (data.deletedAt && (!payload.before || !payload.before.deletedAt)) {
-          await this.islandCharacterVersionReadModel.destroy({ where: { id: data.id } });
-          this.logger.log(`[CDC] IslandCharacterVersionRead marcado como deletado (Soft Delete) para ID: ${data.id}`);
-        } else {
-          if (payload.before && payload.before.deletedAt && !data.deletedAt) {
-            await this.islandCharacterVersionReadModel.restore({ where: { id: data.id } });
-            this.logger.log(`[CDC] IslandCharacterVersionRead restaurado para ID: ${data.id}`);
-          }
-          await this.islandCharacterVersionReadModel.update(data, { where: { id: data.id } });
-          this.logger.log(`[CDC] IslandCharacterVersionRead atualizado para ID: ${data.id}`);
-        }
-      } else if (payload.op === 'd') {
-        const data = payload.before;
-        if (!data) return;
-        await this.islandCharacterVersionReadModel.destroy({ where: { id: data.id } });
-        this.logger.log(`[CDC] IslandCharacterVersionRead deletado para ID: ${data.id}`);
-      }
-    } catch (error: any) {
-      this.logger.error(`Erro no CDC IslandCharacterVersion: ${error.message}`, error.stack);
     }
   }
 

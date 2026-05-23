@@ -3,11 +3,11 @@ import { Type } from 'class-transformer';
 import { ApiPropertyOptional } from '@nestjs/swagger';
 
 export class EventFilterDto {
-  @ApiPropertyOptional({ example: 1, description: 'Filtro por ID da ilha' })
+  @ApiPropertyOptional({ example: 1, description: 'Filtro por ID da junção arco-ilha' })
   @IsOptional()
   @Type(() => Number)
   @IsInt()
-  island_id?: number;
+  arcIslandId?: number;
 
   @ApiPropertyOptional({ example: 'Batalha', description: 'Filtro por tipo de evento' })
   @IsOptional()

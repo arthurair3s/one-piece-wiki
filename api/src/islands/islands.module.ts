@@ -15,8 +15,7 @@ import { CharacterVersion } from '../character-versions/models/character-version
 import { CharacterVersionRead } from '../character-versions/models/character-version-read.model';
 import { Character } from '../characters/models/character.model';
 import { CharacterRead } from '../characters/models/character-read.model';
-import { IslandCharacterVersion } from '../island-character-versions/models/island-character-version.model';
-import { IslandCharacterVersionRead } from '../island-character-versions/models/island-character-version-read.model';
+import { ArcCharacterVersionRead } from '../arcs/models/arc-character-version-read.model';
 import { EventRead } from '../events/models/event-read.model';
 
 import { CreateIslandHandler } from './commands/handlers/create-island.handler';
@@ -53,7 +52,6 @@ const QueryHandlers = [
       ArcIsland,
       CharacterVersion,
       Character,
-      IslandCharacterVersion,
     ]),
     SequelizeModule.forFeature([
       IslandRead,
@@ -61,8 +59,8 @@ const QueryHandlers = [
       ArcIslandRead,
       CharacterVersionRead,
       CharacterRead,
-      IslandCharacterVersionRead,
       EventRead,
+      ArcCharacterVersionRead,
     ], 'read-db'),
   ],
   controllers: [IslandsController],

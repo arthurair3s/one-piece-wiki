@@ -10,8 +10,7 @@ import {
   BelongsTo,
   BelongsToMany,
 } from 'sequelize-typescript';
-import { Island } from '../../islands/models/island.model';
-import { Arc } from '../../arcs/models/arc.model';
+import { ArcIsland } from '../../arcs/models/arc-island.model';
 import { CharacterVersion } from '../../character-versions/models/character-version.model';
 import { EventParticipant } from './event-participant.model';
 
@@ -20,27 +19,19 @@ import { EventParticipant } from './event-participant.model';
   timestamps: true,
   paranoid: true,
   indexes: [
-    { unique: true, fields: ['island_id', 'arc_id', 'order'], where: { deletedAt: null }, name: 'unique_event_order_context' }
+    { unique: true, fields: ['arc_island_id', 'order'], where: { deletedAt: null }, name: 'unique_event_order_context' }
   ]
 })
 export class Event extends Model {
   @PrimaryKey @AutoIncrement @Column(DataType.INTEGER) id!: number;
 
-  @ForeignKey(() => Island)
+  @ForeignKey(() => ArcIsland)
   @AllowNull(false)
   @Column(DataType.INTEGER)
-  island_id!: number;
+  arc_island_id!: number;
 
-  @BelongsTo(() => Island)
-  island!: Island;
-
-  @ForeignKey(() => Arc)
-  @AllowNull(false)
-  @Column(DataType.INTEGER)
-  arc_id!: number;
-
-  @BelongsTo(() => Arc)
-  arc!: Arc;
+  @BelongsTo(() => ArcIsland)
+  arcIsland!: ArcIsland;
 
   @AllowNull(false)
   @Column(DataType.STRING)

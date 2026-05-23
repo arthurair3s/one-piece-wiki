@@ -1,16 +1,15 @@
 import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
 import { InjectModel } from '@nestjs/sequelize';
-import { NotFoundException } from '@nestjs/common';
-import { BadRequestException } from '@nestjs/common';
+import { NotFoundException, BadRequestException } from '@nestjs/common';
 
 import { GetIslandDetailsQuery } from '../impl/get-island-details.query';
 
 import { IslandRead } from '../../models/island-read.model';
-import { ArcRead } from '../../../arcs/models/arc-read.model';
+import { ArcIslandRead } from '../../../arcs/models/arc-island-read.model';
+import { ArcCharacterVersionRead } from '../../../arcs/models/arc-character-version-read.model';
 import { CharacterVersionRead } from '../../../character-versions/models/character-version-read.model';
 import { CharacterRead } from '../../../characters/models/character-read.model';
 import { EventRead } from '../../../events/models/event-read.model';
-import { IslandCharacterVersionRead } from '../../../island-character-versions/models/island-character-version-read.model';
 
 @QueryHandler(GetIslandDetailsQuery)
 export class GetIslandDetailsHandler
@@ -19,6 +18,10 @@ export class GetIslandDetailsHandler
   constructor(
     @InjectModel(IslandRead, 'read-db')
     private readonly islandModel: typeof IslandRead,
+    @InjectModel(ArcIslandRead, 'read-db')
+    private readonly arcIslandModel: typeof ArcIslandRead,
+    @InjectModel(ArcCharacterVersionRead, 'read-db')
+    private readonly arcCharacterVersionModel: typeof ArcCharacterVersionRead,
   ) {}
 
   async execute(query: GetIslandDetailsQuery) {
@@ -28,29 +31,16 @@ export class GetIslandDetailsHandler
       throw new BadRequestException('arc_id é obrigatório');
     }
 
-    const island: any = await this.islandModel.findByPk(islandId, {
+    const island = await this.islandModel.findByPk(islandId);
+
+    if (!island || island.is_active === false) {
+      throw new NotFoundException('Island não encontrada');
+    }
+
+    // Buscar a relação ArcIsland
+    const arcIsland = await this.arcIslandModel.findOne({
+      where: { island_id: islandId, arc_id: arcId },
       include: [
-        {
-          model: ArcRead,
-          attributes: ['id', 'name'],
-        },
-        {
-          model: IslandCharacterVersionRead,
-          include: [
-            {
-              model: CharacterVersionRead,
-              include: [
-                {
-                  model: ArcRead,
-                },
-                {
-                  model: CharacterRead,
-                  attributes: ['id', 'name'],
-                },
-              ],
-            },
-          ],
-        },
         {
           model: EventRead,
           attributes: ['id', 'title', 'description', 'order'],
@@ -58,34 +48,38 @@ export class GetIslandDetailsHandler
       ],
     });
 
-    if (!island || island.is_active === false) {
-      throw new NotFoundException('Island não encontrada');
-    }
-
-    const hasArc = island.arcs?.some(a => a.id === arcId);
-
-    if (!hasArc) {
+    if (!arcIsland) {
       throw new BadRequestException('Este arco não pertence à ilha');
     }
 
-    const characters = (island.island_character_versions || [])
-      .filter((icv: any) =>
-        icv.characterVersion?.arcs?.some((a: any) => a.id === arcId),
-      )
-      .map((icv: any) => ({
-        id: icv.characterVersion.id,
-        name:
-          icv.characterVersion.alias ||
-          icv.characterVersion.character?.name,
-        epithet: icv.characterVersion.epithet,
-        image: icv.characterVersion.image_url,
-        bounty: icv.characterVersion.bounty,
-        status: icv.characterVersion.status,
-      }));
+    // Buscar personagens do Arco
+    const arcCharacters = await this.arcCharacterVersionModel.findAll({
+      where: { arc_id: arcId },
+      include: [
+        {
+          model: CharacterVersionRead,
+          include: [
+            {
+              model: CharacterRead,
+              attributes: ['id', 'name'],
+            },
+          ],
+        },
+      ],
+    });
 
-    const events = (island.events || [])
+    const characters = arcCharacters.map((acv: any) => ({
+      id: acv.characterVersion.id,
+      name: acv.characterVersion.alias || acv.characterVersion.character?.name,
+      epithet: acv.characterVersion.epithet,
+      image: acv.characterVersion.image_url,
+      bounty: acv.characterVersion.bounty,
+      status: acv.characterVersion.status,
+    }));
+
+    const events = (arcIsland.events || [])
       .sort((a, b) => a.order - b.order)
-      .map((e) => ({
+      .map((e: any) => ({
         id: e.id,
         title: e.title,
         description: e.description,

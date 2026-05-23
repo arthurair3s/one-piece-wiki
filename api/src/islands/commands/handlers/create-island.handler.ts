@@ -40,10 +40,10 @@ export class CreateIslandHandler
     } = command;
 
     // valida existência de todos os arcos
-    for (const arc_id of arc_ids) {
-      const arc = await this.arcModel.findByPk(arc_id);
+    for (const assoc of arc_ids) {
+      const arc = await this.arcModel.findByPk(assoc.arc_id);
       if (!arc) {
-        throw new NotFoundException(`Arco com ID ${arc_id} não encontrado`);
+        throw new NotFoundException(`Arco com ID ${assoc.arc_id} não encontrado`);
       }
     }
 
@@ -63,24 +63,11 @@ export class CreateIslandHandler
 
         // vincula a ilha aos arcos via pivot preservando a ordem
         if (arc_ids && arc_ids.length > 0) {
-          const arcOrderMap = new Map<number, number>();
-          const currentMaxOrders = await this.arcIslandModel.findAll({
-            attributes: ['arc_id', [Sequelize.fn('MAX', Sequelize.col('order')), 'maxOrder']],
-            where: { arc_id: { [Op.in]: arc_ids } },
-            group: ['arc_id'],
-            transaction: t
-          });
-          currentMaxOrders.forEach((item: any) => {
-            arcOrderMap.set(item.arc_id, Number(item.get('maxOrder')));
-          });
-
-          const pivots = arc_ids.map((arc_id) => {
-            const nextOrder = (arcOrderMap.get(arc_id) || 0) + 1;
-            arcOrderMap.set(arc_id, nextOrder);
+          const pivots = arc_ids.map((assoc) => {
             return {
-              arc_id,
+              arc_id: assoc.arc_id,
               island_id: island.id,
-              order: nextOrder,
+              order: assoc.order,
             };
           });
 
