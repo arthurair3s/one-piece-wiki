@@ -4,9 +4,7 @@ echo "Resetando ambiente One Piece (Write Model + CDC Read Model)..."
 
 # 1. Limpa o Docker (derruba e apaga volumes para recriar os bancos do zero)
 docker compose down -v
-
 # 2. Sobe os containers novamente
-docker compose pull
 docker compose up -d
 
 echo "Aguardando Kafka Connect (Debezium) estar 100% pronto..."

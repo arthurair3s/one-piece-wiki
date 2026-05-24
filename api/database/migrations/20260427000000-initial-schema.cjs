@@ -154,6 +154,9 @@ module.exports = {
       where: { deletedAt: null },
       name: 'unique_arc_island_pair'
     });
+    await queryInterface.addIndex('arc_islands', ['island_id'], {
+      name: 'idx_arc_islands_island_id'
+    });
 
     // 9. events
     await queryInterface.createTable('events', {

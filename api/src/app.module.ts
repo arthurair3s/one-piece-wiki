@@ -12,10 +12,11 @@ import { SagasModule } from './sagas/sagas.module';
 import { IslandsModule } from './islands/islands.module';
 import { EventsModule } from './events/events.module';
 import { CdcModule } from './cdc/cdc.module';
+import { WikiModule } from './wiki/wiki.module';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({ isGlobal: true }),
+    ConfigModule.forRoot({ isGlobal: true, envFilePath: '../.env' }),
     AuthModule,
     UsersModule,
     ProfilesModule,
@@ -27,6 +28,7 @@ import { CdcModule } from './cdc/cdc.module';
     IslandsModule,
     EventsModule,
     CdcModule,
+    WikiModule,
 
     SequelizeModule.forRootAsync({
       imports: [ConfigModule],
