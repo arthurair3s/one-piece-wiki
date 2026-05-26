@@ -93,6 +93,24 @@ services:
     networks:
       - project-network
 
+  app:
+    build:
+      context: ./app
+      dockerfile: Dockerfile
+    restart: always
+    ports:
+      - "3001:3001"
+    volumes:
+      - ./app:/usr/src/app
+      - /usr/src/app/node_modules
+    environment:
+      - PORT=3001
+      - NEXT_PUBLIC_API_URL=http://localhost:3000
+    depends_on:
+      - api
+    networks:
+      - project-network
+
 volumes:
   postgres_data:
 
