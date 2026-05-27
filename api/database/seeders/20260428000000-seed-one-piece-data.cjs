@@ -16,12 +16,12 @@ module.exports = {
       { id: 3, name: 'Orange Town', description: 'Luffy enfrenta Buggy e conhece Nami.', saga_id: 1, order: 3, createdAt: now, updatedAt: now }
     ]);
 
-    // 3. Ilhas
+    // 3. Ilhas (coordenadas bem distribuídas para posicionamento isométrico no mapa)
     await queryInterface.bulkInsert('islands', [
-      { id: 1, name: 'Dawn Island', description: 'Ilha natal de Luffy.', coordinate_x: 10, coordinate_y: 5, coordinate_z: 0, model_url: '', thumbnail_url: '', is_active: true, createdAt: now, updatedAt: now },
-      { id: 2, name: 'Alvida Ship', description: 'Navio onde Coby era prisioneiro de Alvida.', coordinate_x: 12, coordinate_y: 6, coordinate_z: 0, model_url: '', thumbnail_url: '', is_active: true, createdAt: now, updatedAt: now },
-      { id: 3, name: 'Shells Town', description: 'Base da Marinha comandada por Morgan.', coordinate_x: 20, coordinate_y: 10, coordinate_z: 0, model_url: '', thumbnail_url: '', is_active: true, createdAt: now, updatedAt: now },
-      { id: 4, name: 'Orange Town', description: 'Cidade dominada por Buggy.', coordinate_x: 30, coordinate_y: 15, coordinate_z: 0, model_url: '', thumbnail_url: '', is_active: true, createdAt: now, updatedAt: now }
+      { id: 1, name: 'Dawn Island', description: 'Ilha natal de Luffy.', coordinate_x: 15, coordinate_y: 45, coordinate_z: 0, model_url: '', thumbnail_url: '', is_active: true, createdAt: now, updatedAt: now },
+      { id: 2, name: 'Alvida Ship', description: 'Navio onde Coby era prisioneiro de Alvida.', coordinate_x: 35, coordinate_y: 25, coordinate_z: 0, model_url: '', thumbnail_url: '', is_active: true, createdAt: now, updatedAt: now },
+      { id: 3, name: 'Shells Town', description: 'Base da Marinha comandada por Morgan.', coordinate_x: 55, coordinate_y: 40, coordinate_z: 0, model_url: '', thumbnail_url: '', is_active: true, createdAt: now, updatedAt: now },
+      { id: 4, name: 'Orange Town', description: 'Cidade dominada por Buggy.', coordinate_x: 75, coordinate_y: 20, coordinate_z: 0, model_url: '', thumbnail_url: '', is_active: true, createdAt: now, updatedAt: now }
     ]);
 
     // 4. Arc_Islands (Pivot)
