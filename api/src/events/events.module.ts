@@ -8,7 +8,8 @@ import { CharacterRead } from '../characters/models/character-read.model';
 
 import { Event } from './models/event.model';
 import { EventParticipant } from './models/event-participant.model';
-import { Island } from '../islands/models/island.model';
+import { ArcIsland } from '../arcs/models/arc-island.model';
+import { ArcIslandRead } from '../arcs/models/arc-island-read.model';
 import { CharacterVersion } from '../character-versions/models/character-version.model';
 import { Character } from '../characters/models/character.model';
 import { EventsService } from './events.service';
@@ -42,8 +43,8 @@ const QueryHandlers = [
 @Module({
   imports: [
     CqrsModule,
-    SequelizeModule.forFeature([Event, EventParticipant, Island, CharacterVersion, Character]),
-    SequelizeModule.forFeature([EventRead, EventParticipantRead, CharacterVersionRead, CharacterRead], 'read-db'),
+    SequelizeModule.forFeature([Event, EventParticipant, ArcIsland, CharacterVersion, Character]),
+    SequelizeModule.forFeature([EventRead, EventParticipantRead, ArcIslandRead, CharacterVersionRead, CharacterRead], 'read-db'),
   ],
   controllers: [EventsController],
   providers: [

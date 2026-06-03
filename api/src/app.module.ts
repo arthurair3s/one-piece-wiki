@@ -7,28 +7,28 @@ import { PermissionsModule } from './permissions/permissions.module';
 import { AuthModule } from './auth/auth.module';
 import { CharactersModule } from './characters/characters.module';
 import { CharacterVersionsModule } from './character-versions/character-versions.module';
-import { IslandCharacterVersionsModule } from './island-character-versions/island-character-versions.module';
 import { ArcsModule } from './arcs/arcs.module';
 import { SagasModule } from './sagas/sagas.module';
 import { IslandsModule } from './islands/islands.module';
 import { EventsModule } from './events/events.module';
 import { CdcModule } from './cdc/cdc.module';
+import { WikiModule } from './wiki/wiki.module';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({ isGlobal: true }),
+    ConfigModule.forRoot({ isGlobal: true, envFilePath: '../.env' }),
     AuthModule,
     UsersModule,
     ProfilesModule,
     PermissionsModule,
     CharactersModule,
     CharacterVersionsModule,
-    IslandCharacterVersionsModule,
     ArcsModule,
     SagasModule,
     IslandsModule,
     EventsModule,
     CdcModule,
+    WikiModule,
 
     SequelizeModule.forRootAsync({
       imports: [ConfigModule],

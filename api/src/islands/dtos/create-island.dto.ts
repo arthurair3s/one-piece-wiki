@@ -7,9 +7,11 @@ import {
   IsUrl,
   IsArray,
   ArrayNotEmpty,
+  ValidateNested,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { ArcIslandAssociationDto } from './arc-island-association.dto';
 
 export class CreateIslandDto {
   @ApiProperty({ example: 'Dawn Island', description: 'Nome da ilha' })
@@ -22,11 +24,15 @@ export class CreateIslandDto {
   @IsNotEmpty()
   description!: string;
 
-  @ApiProperty({ example: [1], description: 'IDs dos arcos em que esta ilha aparece', type: [Number] })
+  @ApiProperty({
+    type: [ArcIslandAssociationDto],
+    description: 'Associações de arcos e ordem da ilha em cada um deles',
+  })
   @IsArray()
   @ArrayNotEmpty()
-  @IsNumber({}, { each: true })
-  arc_ids!: number[];
+  @ValidateNested({ each: true })
+  @Type(() => ArcIslandAssociationDto)
+  arc_ids!: ArcIslandAssociationDto[];
 
   @ApiProperty({ example: 100.5, description: 'Coordenada X no mapa 3D' })
   @Type(() => Number)

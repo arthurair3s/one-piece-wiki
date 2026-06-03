@@ -50,11 +50,6 @@ export class CdcController {
     if (payload) await this.cdcService.processArcIslandChange(payload);
   }
 
-  @MessagePattern('pg.public.island_character_versions')
-  async handleIslandCharacterVersionChange(@Payload() message: any) {
-    const payload = this.extractPayload(message);
-    if (payload) await this.cdcService.processIslandCharacterVersionChange(payload);
-  }
 
   @MessagePattern('pg.public.sagas')
   async handleSagaChange(@Payload() message: any) {

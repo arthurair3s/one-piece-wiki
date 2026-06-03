@@ -25,7 +25,7 @@ export class CreateIslandsBulkHandler implements ICommandHandler<CreateIslandsBu
     const { islands } = command;
 
     // 1. Validar arcos de forma performática
-    const allArcIds = [...new Set(islands.flatMap(i => i.arc_ids || []))];
+    const allArcIds = [...new Set(islands.flatMap(i => (i.arc_ids || []).map(a => a.arc_id)))];
     if (allArcIds.length > 0) {
       const foundArcs = await this.arcModel.findAll({
         where: { id: { [Op.in]: allArcIds } }
@@ -42,26 +42,6 @@ export class CreateIslandsBulkHandler implements ICommandHandler<CreateIslandsBu
       try {
         const createdIslands: Island[] = [];
 
-        // Rastreia a próxima ordem disponível para cada arco neste lote
-        const arcOrderMap = new Map<number, number>();
-
-        // Busca ordens atuais no banco para inicializar o mapa
-        if (allArcIds.length > 0) {
-          const currentMaxOrders = await this.arcIslandModel.findAll({
-            attributes: [
-              'arc_id',
-              [Sequelize.fn('MAX', Sequelize.col('order')), 'maxOrder']
-            ],
-            where: { arc_id: { [Op.in]: allArcIds } },
-            group: ['arc_id'],
-            transaction: t
-          });
-
-          currentMaxOrders.forEach((item: any) => {
-            arcOrderMap.set(item.arc_id, Number(item.get('maxOrder')));
-          });
-        }
-
         for (const dto of islands) {
           const island = await this.islandModel.create({
             name: dto.name,
@@ -75,15 +55,11 @@ export class CreateIslandsBulkHandler implements ICommandHandler<CreateIslandsBu
           }, { transaction: t });
 
           if (dto.arc_ids && dto.arc_ids.length > 0) {
-            const pivots = dto.arc_ids.map((arc_id) => {
-              // Incrementa e obtém a ordem
-              const nextOrder = (arcOrderMap.get(arc_id) || 0) + 1;
-              arcOrderMap.set(arc_id, nextOrder);
-
+            const pivots = dto.arc_ids.map((assoc) => {
               return {
-                arc_id,
+                arc_id: assoc.arc_id,
                 island_id: island.id,
-                order: nextOrder,
+                order: assoc.order,
               };
             });
             await this.arcIslandModel.bulkCreate(pivots, { transaction: t });

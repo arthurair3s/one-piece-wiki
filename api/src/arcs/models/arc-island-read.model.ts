@@ -7,14 +7,19 @@ import {
   PrimaryKey,
   AutoIncrement,
   BelongsTo,
+  HasMany,
 } from 'sequelize-typescript';
 import { ArcRead } from './arc-read.model';
 import { IslandRead } from '../../islands/models/island-read.model';
+import { EventRead } from '../../events/models/event-read.model';
 
 @Table({
   tableName: 'arc_islands',
   timestamps: true,
   paranoid: true,
+  indexes: [
+    { unique: true, fields: ['arc_id', 'island_id'], where: { deletedAt: null }, name: 'unique_arc_island_pair_read' }
+  ],
 })
 export class ArcIslandRead extends Model {
   @PrimaryKey
@@ -38,4 +43,7 @@ export class ArcIslandRead extends Model {
 
   @Column({ type: DataType.INTEGER, allowNull: false, defaultValue: 0 })
   order!: number;
+
+  @HasMany(() => EventRead, { constraints: false })
+  events!: EventRead[];
 }

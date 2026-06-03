@@ -4,15 +4,11 @@ import {
   Model,
   DataType,
   BelongsToMany,
-  HasMany,
 } from 'sequelize-typescript';
 
 import { Optional } from 'sequelize';
 import { Arc } from '../../arcs/models/arc.model';
 import { ArcIsland } from '../../arcs/models/arc-island.model';
-import { CharacterVersion } from '../../character-versions/models/character-version.model';
-import { IslandCharacterVersion } from '../../island-character-versions/models/island-character-version.model';
-import { Event } from '../../events/models/event.model';
 
 interface IslandAttributes {
   id: number;
@@ -71,13 +67,4 @@ export class Island extends Model<
   // ilha pode pertencer a múltiplos arcos (entidade geográfica global)
   @BelongsToMany(() => Arc, () => ArcIsland)
   arcs!: Arc[];
-
-  @BelongsToMany(() => CharacterVersion, () => IslandCharacterVersion)
-  character_versions!: CharacterVersion[];
-
-  @HasMany(() => Event)
-  events!: Event[];
-
-  @HasMany(() => IslandCharacterVersion)
-  island_character_versions!: IslandCharacterVersion[];
 }

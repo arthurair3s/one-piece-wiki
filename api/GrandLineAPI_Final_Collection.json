@@ -89,22 +89,30 @@
       ]
     },
     {
-      "name": "8. ISLAND CHARACTER VERSIONS",
-      "item": [
-        { "name": "POST /island-character-versions", "request": { "method": "POST", "body": { "mode": "raw", "raw": "{\"island_id\": 1, \"character_version_id\": 1, \"order\": 1}", "options": { "raw": { "language": "json" } } }, "url": { "raw": "{{baseUrl}}/island-character-versions", "host": ["{{baseUrl}}"], "path": ["island-character-versions"] } } }
-      ]
-    },
-    {
       "name": "9. EVENTS",
       "item": [
         { "name": "GET /events", "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/events", "host": ["{{baseUrl}}"], "path": ["events"] } } },
-        { "name": "POST /events/bulk", "request": { "method": "POST", "body": { "mode": "raw", "raw": "[{\"island_id\": 1, \"title\": \"Evento\", \"type\": \"Lore\", \"order\": 1}]", "options": { "raw": { "language": "json" } } }, "url": { "raw": "{{baseUrl}}/events/bulk", "host": ["{{baseUrl}}"], "path": ["events", "bulk"] } } },
+        { "name": "POST /events/bulk", "request": { "method": "POST", "body": { "mode": "raw", "raw": "[{\"arcIslandId\": 1, \"title\": \"Evento\", \"type\": \"Lore\", \"order\": 1}]", "options": { "raw": { "language": "json" } } }, "url": { "raw": "{{baseUrl}}/events/bulk", "host": ["{{baseUrl}}"], "path": ["events", "bulk"] } } },
         { "name": "GET /events/:id", "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/events/1", "host": ["{{baseUrl}}"], "path": ["events", "1"] } } },
         { "name": "GET /events/:id/participants", "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/events/1/participants", "host": ["{{baseUrl}}"], "path": ["events", "1", "participants"] } } },
         { "name": "POST /events/:id/participants", "request": { "method": "POST", "body": { "mode": "raw", "raw": "{\"character_version_id\": 1}", "options": { "raw": { "language": "json" } } }, "url": { "raw": "{{baseUrl}}/events/1/participants", "host": ["{{baseUrl}}"], "path": ["events", "1", "participants"] } } },
         { "name": "DELETE /events/:id/participants/:vid", "request": { "method": "DELETE", "url": { "raw": "{{baseUrl}}/events/1/participants/1", "host": ["{{baseUrl}}"], "path": ["events", "1", "participants", "1"] } } },
         { "name": "PATCH /events/:id", "request": { "method": "PATCH", "body": { "mode": "raw", "raw": "{\"title\": \"Novo Título\"}", "options": { "raw": { "language": "json" } } }, "url": { "raw": "{{baseUrl}}/events/1", "host": ["{{baseUrl}}"], "path": ["events", "1"] } } },
         { "name": "DELETE /events/:id", "request": { "method": "DELETE", "url": { "raw": "{{baseUrl}}/events/1", "host": ["{{baseUrl}}"], "path": ["events", "1"] } } }
+      ]
+    },
+    {
+      "name": "9. WIKI",
+      "item": [
+        { "name": "GET /wiki/sagas", "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/wiki/sagas", "host": ["{{baseUrl}}"], "path": ["wiki", "sagas"] } } },
+        { "name": "GET /wiki/arcs", "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/wiki/arcs", "host": ["{{baseUrl}}"], "path": ["wiki", "arcs"] } } },
+        { "name": "GET /wiki/arcs?sagaId=1", "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/wiki/arcs?sagaId=1", "host": ["{{baseUrl}}"], "path": ["wiki", "arcs"], "query": [{ "key": "sagaId", "value": "1" }] } } },
+        { "name": "GET /wiki/map", "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/wiki/map", "host": ["{{baseUrl}}"], "path": ["wiki", "map"] } } },
+        { "name": "GET /wiki/map/filter?sagaId=1", "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/wiki/map/filter?sagaId=1", "host": ["{{baseUrl}}"], "path": ["wiki", "map", "filter"], "query": [{ "key": "sagaId", "value": "1" }] } } },
+        { "name": "GET /wiki/map/filter?search=Dawn", "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/wiki/map/filter?search=Dawn", "host": ["{{baseUrl}}"], "path": ["wiki", "map", "filter"], "query": [{ "key": "search", "value": "Dawn" }] } } },
+        { "name": "GET /wiki/islands/:id", "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/wiki/islands/1", "host": ["{{baseUrl}}"], "path": ["wiki", "islands", "1"] } } },
+        { "name": "GET /wiki/islands/:id?sagaId=1", "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/wiki/islands/1?sagaId=1", "host": ["{{baseUrl}}"], "path": ["wiki", "islands", "1"], "query": [{ "key": "sagaId", "value": "1" }] } } },
+        { "name": "GET /wiki/islands/:islandId/arcs/:arcId", "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/wiki/islands/1/arcs/1", "host": ["{{baseUrl}}"], "path": ["wiki", "islands", "1", "arcs", "1"] } } }
       ]
     }
   ],
