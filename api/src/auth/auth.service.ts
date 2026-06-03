@@ -1,15 +1,25 @@
 import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { QueryBus } from '@nestjs/cqrs';
+import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import * as bcrypt from 'bcrypt';
 import { GetUserByEmailQuery } from '../users/queries/impl/get-user-by-email.query';
+import { CreateUserCommand } from '../users/commands/impl/create-user.command';
+import { RegisterDto } from './dtos/register.dto';
 
 @Injectable()
 export class AuthService {
   constructor(
+    private readonly commandBus: CommandBus,
     private readonly queryBus: QueryBus,
     private readonly jwtService: JwtService,
   ) {}
+
+  async register(data: RegisterDto) {
+    const DEFAULT_PROFILE_ID = 2; // perfil USER
+    return this.commandBus.execute(
+      new CreateUserCommand({ ...data, profile_id: DEFAULT_PROFILE_ID }),
+    );
+  }
 
   async validateUser(email: string, pass: string): Promise<any> {
     const user = await this.queryBus.execute(new GetUserByEmailQuery(email));
