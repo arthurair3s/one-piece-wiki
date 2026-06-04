@@ -58,6 +58,8 @@ module.exports = {
       { id: 70, name: 'Ver Vínculos Ilha-Personagem', slug: 'island_char.view' },
       { id: 71, name: 'Criar Vínculo Ilha-Personagem', slug: 'island_char.create' },
       { id: 72, name: 'Deletar Vínculo Ilha-Personagem', slug: 'island_char.delete' },
+      // Wiki
+      { id: 80, name: 'Acessar Wiki', slug: 'wiki.read' },
     ].map(p => ({ ...p, createdAt: new Date(), updatedAt: new Date() }));
 
     await queryInterface.bulkInsert('permissions', permissions);
@@ -72,7 +74,7 @@ module.exports = {
 
     const playerPermissions = permissions
       .filter(p =>
-        p.slug.endsWith('.view') &&
+        (p.slug.endsWith('.view') || p.slug === 'wiki.read') &&
         !p.slug.startsWith('users.') &&
         !p.slug.startsWith('profiles.') &&
         !p.slug.startsWith('permissions.')

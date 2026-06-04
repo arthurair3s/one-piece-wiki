@@ -11,12 +11,12 @@ export class GetEventsHandler implements IQueryHandler<GetEventsQuery> {
   ) {}
 
   async execute(query: GetEventsQuery) {
-    const { page = 1, limit = 10, island_id, type } = query;
+    const { page = 1, limit = 10, arcIslandId, type } = query;
     const offset = (page - 1) * limit;
 
     const where: any = {};
-    if (island_id) {
-      where.island_id = island_id;
+    if (arcIslandId) {
+      where.arc_island_id = arcIslandId;
     }
     if (type) {
       where.type = type;

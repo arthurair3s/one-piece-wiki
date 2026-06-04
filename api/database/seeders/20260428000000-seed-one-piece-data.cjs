@@ -66,34 +66,20 @@ module.exports = {
       { arc_id: 1, character_version_id: 6, character_id: 5, order: 0, createdAt: now, updatedAt: now }
     ]);
 
-    // 8. Island_CharacterVersions (Vínculo da Ilha)
-    await queryInterface.bulkInsert('island_character_versions', [
-      { arc_id: 1, island_id: 1, character_version_id: 1, order: 1, createdAt: now, updatedAt: now },
-      { arc_id: 2, island_id: 3, character_version_id: 2, order: 1, createdAt: now, updatedAt: now },
-      { arc_id: 3, island_id: 4, character_version_id: 3, order: 1, createdAt: now, updatedAt: now },
-      { arc_id: 3, island_id: 4, character_version_id: 4, order: 2, createdAt: now, updatedAt: now },
-      { arc_id: 1, island_id: 2, character_version_id: 5, order: 1, createdAt: now, updatedAt: now },
-      { arc_id: 1, island_id: 2, character_version_id: 6, order: 2, createdAt: now, updatedAt: now },
-      { arc_id: 1, island_id: 2, character_version_id: 1, order: 3, createdAt: now, updatedAt: now },
-      { arc_id: 2, island_id: 3, character_version_id: 1, order: 2, createdAt: now, updatedAt: now },
-      { arc_id: 3, island_id: 4, character_version_id: 1, order: 3, createdAt: now, updatedAt: now },
-      { arc_id: 3, island_id: 4, character_version_id: 2, order: 4, createdAt: now, updatedAt: now }
-    ]);
-
     // 9. Eventos
     await queryInterface.bulkInsert('events', [
-      { id: 1, arc_id: 1, island_id: 1, title: 'Partida de Luffy', description: 'Luffy sai de sua vila decidido a se tornar o Rei dos Piratas.', type: 'Início', order: 1, createdAt: now, updatedAt: now },
-      { id: 2, arc_id: 1, island_id: 2, title: 'Encontro com Coby', description: 'Luffy conhece Coby preso no navio de Alvida.', type: 'Encontro', order: 1, createdAt: now, updatedAt: now },
-      { id: 3, arc_id: 1, island_id: 2, title: 'Derrota de Alvida', description: 'Luffy derrota Alvida com um golpe.', type: 'Batalha', order: 2, createdAt: now, updatedAt: now },
-      { id: 4, arc_id: 1, island_id: 2, title: 'Libertação de Coby', description: 'Coby decide seguir seu sonho de entrar para a Marinha.', type: 'Momento-chave', order: 3, createdAt: now, updatedAt: now },
-      { id: 5, arc_id: 2, island_id: 3, title: 'Encontro com Zoro', description: 'Luffy encontra Zoro preso na base da Marinha.', type: 'Encontro', order: 1, createdAt: now, updatedAt: now },
-      { id: 6, arc_id: 2, island_id: 3, title: 'Promessa de Zoro', description: 'Zoro aceita se juntar a Luffy caso sobreviva.', type: 'Momento-chave', order: 2, createdAt: now, updatedAt: now },
-      { id: 7, arc_id: 2, island_id: 3, title: 'Recuperação das espadas', description: 'Luffy recupera as espadas de Zoro.', type: 'Ação', order: 3, createdAt: now, updatedAt: now },
-      { id: 8, arc_id: 2, island_id: 3, title: 'Derrota de Morgan', description: 'Luffy derrota o Capitão Morgan.', type: 'Batalha', order: 4, createdAt: now, updatedAt: now },
-      { id: 9, arc_id: 2, island_id: 3, title: 'Zoro entra para o bando', description: 'Zoro se torna o primeiro companheiro de Luffy.', type: 'Recrutamento', order: 5, createdAt: now, updatedAt: now },
-      { id: 10, arc_id: 3, island_id: 4, title: 'Encontro com Nami', description: 'Luffy conhece Nami, uma ladra habilidosa.', type: 'Encontro', order: 1, createdAt: now, updatedAt: now },
-      { id: 11, arc_id: 3, island_id: 4, title: 'Conflito com Buggy', description: 'Buggy revela seus poderes e ameaça a cidade.', type: 'Introdução', order: 2, createdAt: now, updatedAt: now },
-      { id: 12, arc_id: 3, island_id: 4, title: 'Derrota de Buggy', description: 'Luffy derrota Buggy e liberta Orange Town.', type: 'Batalha', order: 3, createdAt: now, updatedAt: now }
+      { id: 1, arc_island_id: 1, title: 'Partida de Luffy', description: 'Luffy sai de sua vila decidido a se tornar o Rei dos Piratas.', type: 'Início', order: 1, createdAt: now, updatedAt: now },
+      { id: 2, arc_island_id: 2, title: 'Encontro com Coby', description: 'Luffy conhece Coby preso no navio de Alvida.', type: 'Encontro', order: 1, createdAt: now, updatedAt: now },
+      { id: 3, arc_island_id: 2, title: 'Derrota de Alvida', description: 'Luffy derrota Alvida com um golpe.', type: 'Batalha', order: 2, createdAt: now, updatedAt: now },
+      { id: 4, arc_island_id: 2, title: 'Libertação de Coby', description: 'Coby decide seguir seu sonho de entrar para a Marinha.', type: 'Momento-chave', order: 3, createdAt: now, updatedAt: now },
+      { id: 5, arc_island_id: 3, title: 'Encontro com Zoro', description: 'Luffy encontra Zoro preso na base da Marinha.', type: 'Encontro', order: 1, createdAt: now, updatedAt: now },
+      { id: 6, arc_island_id: 3, title: 'Promessa de Zoro', description: 'Zoro aceita se juntar a Luffy caso sobreviva.', type: 'Momento-chave', order: 2, createdAt: now, updatedAt: now },
+      { id: 7, arc_island_id: 3, title: 'Recuperação das espadas', description: 'Luffy recupera as espadas de Zoro.', type: 'Ação', order: 3, createdAt: now, updatedAt: now },
+      { id: 8, arc_island_id: 3, title: 'Derrota de Morgan', description: 'Luffy derrota o Capitão Morgan.', type: 'Batalha', order: 4, createdAt: now, updatedAt: now },
+      { id: 9, arc_island_id: 3, title: 'Zoro entra para o bando', description: 'Zoro se torna o primeiro companheiro de Luffy.', type: 'Recrutamento', order: 5, createdAt: now, updatedAt: now },
+      { id: 10, arc_island_id: 4, title: 'Encontro com Nami', description: 'Luffy conhece Nami, uma ladra habilidosa.', type: 'Encontro', order: 1, createdAt: now, updatedAt: now },
+      { id: 11, arc_island_id: 4, title: 'Conflito com Buggy', description: 'Buggy revela seus poderes e ameaça a cidade.', type: 'Introdução', order: 2, createdAt: now, updatedAt: now },
+      { id: 12, arc_island_id: 4, title: 'Derrota de Buggy', description: 'Luffy derrota Buggy e liberta Orange Town.', type: 'Batalha', order: 3, createdAt: now, updatedAt: now }
     ]);
 
     // 10. Participantes dos Eventos
@@ -139,7 +125,6 @@ module.exports = {
   down: async (queryInterface, Sequelize) => {
     await queryInterface.bulkDelete('event_participants', null, {});
     await queryInterface.bulkDelete('events', null, {});
-    await queryInterface.bulkDelete('island_character_versions', null, {});
     await queryInterface.bulkDelete('arc_character_versions', null, {});
     await queryInterface.bulkDelete('character_versions', null, {});
     await queryInterface.bulkDelete('characters', null, {});

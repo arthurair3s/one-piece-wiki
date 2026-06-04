@@ -149,21 +149,22 @@ module.exports = {
       deletedAt: { type: Sequelize.DATE, allowNull: true },
     });
     await queryInterface.addIndex('arc_islands', ['deletedAt', 'arc_id', 'island_id']);
+    await queryInterface.addIndex('arc_islands', ['arc_id', 'island_id'], {
+      unique: true,
+      where: { deletedAt: null },
+      name: 'unique_arc_island_pair'
+    });
+    await queryInterface.addIndex('arc_islands', ['island_id'], {
+      name: 'idx_arc_islands_island_id'
+    });
 
     // 9. events
     await queryInterface.createTable('events', {
       id: { type: Sequelize.INTEGER, primaryKey: true, autoIncrement: true },
-      island_id: {
+      arc_island_id: {
         type: Sequelize.INTEGER,
         allowNull: false,
-        references: { model: 'islands', key: 'id' },
-        onUpdate: 'CASCADE',
-        onDelete: 'RESTRICT',
-      },
-      arc_id: { // Adicionado para contexto (RN09)
-        type: Sequelize.INTEGER,
-        allowNull: false,
-        references: { model: 'arcs', key: 'id' },
+        references: { model: 'arc_islands', key: 'id' },
         onUpdate: 'CASCADE',
         onDelete: 'RESTRICT',
       },
@@ -175,12 +176,12 @@ module.exports = {
       updatedAt: { type: Sequelize.DATE, allowNull: false },
       deletedAt: { type: Sequelize.DATE, allowNull: true },
     });
-    await queryInterface.addIndex('events', ['island_id', 'arc_id', 'order'], {
+    await queryInterface.addIndex('events', ['arc_island_id', 'order'], {
       unique: true,
       where: { deletedAt: null },
       name: 'unique_event_order_context'
     });
-    await queryInterface.addIndex('events', ['deletedAt', 'island_id', 'arc_id']);
+    await queryInterface.addIndex('events', ['deletedAt', 'arc_island_id']);
 
     // 10. characters
     await queryInterface.createTable('characters', {
@@ -256,41 +257,6 @@ module.exports = {
     });
     await queryInterface.addIndex('arc_character_versions', ['deletedAt', 'arc_id']);
 
-    // 12. island_character_versions
-    await queryInterface.createTable('island_character_versions', {
-      id: { type: Sequelize.INTEGER, primaryKey: true, autoIncrement: true },
-      island_id: {
-        type: Sequelize.INTEGER,
-        allowNull: false,
-        references: { model: 'islands', key: 'id' },
-        onUpdate: 'CASCADE',
-        onDelete: 'RESTRICT',
-      },
-      arc_id: { // Adicionado para contexto (Revisitas)
-        type: Sequelize.INTEGER,
-        allowNull: false,
-        references: { model: 'arcs', key: 'id' },
-        onUpdate: 'CASCADE',
-        onDelete: 'RESTRICT',
-      },
-      character_version_id: {
-        type: Sequelize.INTEGER,
-        allowNull: false,
-        references: { model: 'character_versions', key: 'id' },
-        onUpdate: 'CASCADE',
-        onDelete: 'RESTRICT',
-      },
-      order: { type: Sequelize.INTEGER, defaultValue: 0, allowNull: false },
-      createdAt: { type: Sequelize.DATE, allowNull: false },
-      updatedAt: { type: Sequelize.DATE, allowNull: false },
-      deletedAt: { type: Sequelize.DATE, allowNull: true },
-    });
-    await queryInterface.addIndex('island_character_versions', ['island_id', 'arc_id', 'order'], {
-      unique: true,
-      where: { deletedAt: null },
-      name: 'unique_island_arc_order_version'
-    });
-    await queryInterface.addIndex('island_character_versions', ['deletedAt']);
 
     // 13. event_participants
     await queryInterface.createTable('event_participants', {
@@ -324,7 +290,6 @@ module.exports = {
   down: async (queryInterface, Sequelize) => {
     // A ordem do drop table deve ser exatamente a inversa da criação para não quebrar FKs
     await queryInterface.dropTable('event_participants');
-    await queryInterface.dropTable('island_character_versions');
     await queryInterface.dropTable('arc_character_versions');
     await queryInterface.dropTable('character_versions');
     await queryInterface.dropTable('characters');
