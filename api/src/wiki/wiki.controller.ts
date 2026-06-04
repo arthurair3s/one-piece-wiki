@@ -7,7 +7,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { QueryBus } from '@nestjs/cqrs';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiParam, ApiQuery } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiParam, ApiQuery , getSchemaPath, ApiExtraModels} from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { PermissionsGuard } from '../common/guards/permissions.guard';
 import { RequirePermissions } from '../common/decorators/require-permissions.decorator';
@@ -21,13 +21,15 @@ import { GetWikiMapQuery } from './queries/impl/get-wiki-map.query';
 import { GetWikiMapFilteredQuery } from './queries/impl/get-wiki-map-filtered.query';
 import { GetWikiIslandQuery } from './queries/impl/get-wiki-island.query';
 import { GetWikiIslandArcQuery } from './queries/impl/get-wiki-island-arc.query';
+import { ApiDefaultResponses } from '../common/decorators/api-default-responses.decorator';
+import { ErrorResponseDto } from '../common/dtos/error-response.dto';
 
 @ApiBearerAuth('access-token')
 @ApiTags('Wiki')
 @Controller('wiki')
 @UseGuards(JwtAuthGuard, PermissionsGuard)
-@ApiResponse({ status: 401, description: 'Não autorizado.' })
-@ApiResponse({ status: 403, description: 'Sem permissão.' })
+@ApiDefaultResponses()
+@ApiExtraModels(ErrorResponseDto)
 export class WikiController {
   constructor(private readonly queryBus: QueryBus) {}
 
@@ -78,7 +80,20 @@ export class WikiController {
   @ApiQuery({ name: 'sagaId', required: false, type: Number, description: 'Contexto de saga ativo' })
   @ApiQuery({ name: 'arcId', required: false, type: Number, description: 'Contexto de arco ativo' })
   @ApiResponse({ status: 200, description: 'Detalhes da ilha retornados.' })
-  @ApiResponse({ status: 404, description: 'Ilha não encontrada.' })
+  @ApiResponse({
+    status: 404,
+    description: 'Ilha não encontrada.',
+    schema: {
+      allOf: [{ $ref: getSchemaPath(ErrorResponseDto) }],
+      example: {
+        statusCode: 404,
+        message: 'Ilha não encontrada.',
+        error: 'Not Found',
+        timestamp: '2026-06-03T20:42:05.123Z',
+        path: '/api/example-path'
+      }
+    }
+  })
   @RequirePermissions('wiki.read')
   @Get('islands/:id')
   getIsland(
@@ -95,7 +110,20 @@ export class WikiController {
   @ApiParam({ name: 'islandId', type: Number, description: 'ID da ilha' })
   @ApiParam({ name: 'arcId', type: Number, description: 'ID do arco' })
   @ApiResponse({ status: 200, description: 'Conteúdo retornado.' })
-  @ApiResponse({ status: 400, description: 'Arco não vinculado à ilha.' })
+  @ApiResponse({
+    status: 400,
+    description: 'Arco não vinculado à ilha.',
+    schema: {
+      allOf: [{ $ref: getSchemaPath(ErrorResponseDto) }],
+      example: {
+        statusCode: 400,
+        message: 'Arco não vinculado à ilha.',
+        error: 'Bad Request',
+        timestamp: '2026-06-03T20:42:05.123Z',
+        path: '/api/example-path'
+      }
+    }
+  })
   @RequirePermissions('wiki.read')
   @Get('islands/:islandId/arcs/:arcId')
   getIslandArc(

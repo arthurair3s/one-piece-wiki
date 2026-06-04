@@ -11,7 +11,7 @@ import {
   UseGuards,
   BadRequestException,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiBody, ApiParam, ApiQuery } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiBody, ApiParam, ApiQuery , getSchemaPath, ApiExtraModels} from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { PermissionsGuard } from '../common/guards/permissions.guard';
 import { RequirePermissions } from '../common/decorators/require-permissions.decorator';
@@ -21,14 +21,15 @@ import { IslandsService } from './islands.service';
 import { CreateIslandDto } from './dtos/create-island.dto';
 import { UpdateIslandDto } from './dtos/update-island.dto';
 import { FilterIslandDto } from './dtos/filter-island.dto';
+import { ApiDefaultResponses } from '../common/decorators/api-default-responses.decorator';
+import { ErrorResponseDto } from '../common/dtos/error-response.dto';
 
 @ApiBearerAuth('access-token')
 @ApiTags('Islands')
 @Controller('islands')
 @UseGuards(JwtAuthGuard, PermissionsGuard)
-@ApiResponse({ status: 400, description: 'Requisição inválida.' })
-@ApiResponse({ status: 401, description: 'Não autorizado (Token ausente ou inválido).' })
-@ApiResponse({ status: 403, description: 'Proibido (Falta de permissão).' })
+@ApiDefaultResponses()
+@ApiExtraModels(ErrorResponseDto)
 export class IslandsController {
   constructor(private readonly islandsService: IslandsService) {}
   
@@ -41,6 +42,34 @@ export class IslandsController {
   }
   @ApiOperation({ summary: 'Criar uma nova ilha no mapa' })
   @ApiResponse({ status: 201, description: 'Ilha criada com sucesso.' })
+  @ApiResponse({
+    status: 404,
+    description: 'Arco não encontrado.',
+    schema: {
+      allOf: [{ $ref: getSchemaPath(ErrorResponseDto) }],
+      example: {
+        statusCode: 404,
+        message: 'Arco não encontrado.',
+        error: 'Not Found',
+        timestamp: '2026-06-03T20:42:05.123Z',
+        path: '/api/example-path'
+      }
+    }
+  })
+  @ApiResponse({
+    status: 409,
+    description: 'Já existe uma ilha com este nome ou conflito de vínculos.',
+    schema: {
+      allOf: [{ $ref: getSchemaPath(ErrorResponseDto) }],
+      example: {
+        statusCode: 409,
+        message: 'Já existe uma ilha com este nome ou conflito de vínculos.',
+        error: 'Conflict',
+        timestamp: '2026-06-03T20:42:05.123Z',
+        path: '/api/example-path'
+      }
+    }
+  })
   @RequirePermissions('islands.create')
   @Post()
   create(@Body() dto: CreateIslandDto) {
@@ -58,7 +87,20 @@ export class IslandsController {
   @ApiOperation({ summary: 'Obter arcos de uma ilha específica', description: 'Lista todos os arcos temporais vinculados a esta ilha.' })
   @ApiParam({ name: 'id', description: 'ID numérico da ilha', type: 'integer' })
   @ApiResponse({ status: 200, description: 'Arcos da ilha retornados com sucesso.' })
-  @ApiResponse({ status: 404, description: 'Ilha não encontrada.' })
+  @ApiResponse({
+    status: 404,
+    description: 'Ilha não encontrada.',
+    schema: {
+      allOf: [{ $ref: getSchemaPath(ErrorResponseDto) }],
+      example: {
+        statusCode: 404,
+        message: 'Ilha não encontrada.',
+        error: 'Not Found',
+        timestamp: '2026-06-03T20:42:05.123Z',
+        path: '/api/example-path'
+      }
+    }
+  })
   @RequirePermissions('islands.view')
   @Get(':id/arcs')
   getArcs(@Param('id', ParseIntPipe) id: number) {
@@ -69,8 +111,34 @@ export class IslandsController {
   @ApiParam({ name: 'id', description: 'ID numérico da ilha', type: 'integer' })
   @ApiQuery({ name: 'arc_id', description: 'Filtro obrigatório do arco temporal', type: 'integer', required: true })
   @ApiResponse({ status: 200, description: 'Detalhes da ilha retornados com sucesso.' })
-  @ApiResponse({ status: 400, description: 'O parâmetro arc_id é obrigatório.' })
-  @ApiResponse({ status: 404, description: 'Ilha não encontrada.' })
+  @ApiResponse({
+    status: 400,
+    description: 'O parâmetro arc_id é obrigatório ou arco não pertence à ilha.',
+    schema: {
+      allOf: [{ $ref: getSchemaPath(ErrorResponseDto) }],
+      example: {
+        statusCode: 400,
+        message: 'O parâmetro arc_id é obrigatório ou arco não pertence à ilha.',
+        error: 'Bad Request',
+        timestamp: '2026-06-03T20:42:05.123Z',
+        path: '/api/example-path'
+      }
+    }
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Ilha não encontrada.',
+    schema: {
+      allOf: [{ $ref: getSchemaPath(ErrorResponseDto) }],
+      example: {
+        statusCode: 404,
+        message: 'Ilha não encontrada.',
+        error: 'Not Found',
+        timestamp: '2026-06-03T20:42:05.123Z',
+        path: '/api/example-path'
+      }
+    }
+  })
   @RequirePermissions('islands.view')
   @Get(':id/details')
   findDetails(
@@ -86,6 +154,34 @@ export class IslandsController {
   @ApiOperation({ summary: 'Criar múltiplas ilhas em lote' })
   @ApiBody({ type: [CreateIslandDto] })
   @ApiResponse({ status: 201, description: 'Ilhas criadas com sucesso.' })
+  @ApiResponse({
+    status: 404,
+    description: 'Arcos não encontrados.',
+    schema: {
+      allOf: [{ $ref: getSchemaPath(ErrorResponseDto) }],
+      example: {
+        statusCode: 404,
+        message: 'Arcos não encontrados.',
+        error: 'Not Found',
+        timestamp: '2026-06-03T20:42:05.123Z',
+        path: '/api/example-path'
+      }
+    }
+  })
+  @ApiResponse({
+    status: 409,
+    description: 'Conflito de nome ou vínculos duplicados.',
+    schema: {
+      allOf: [{ $ref: getSchemaPath(ErrorResponseDto) }],
+      example: {
+        statusCode: 409,
+        message: 'Conflito de nome ou vínculos duplicados.',
+        error: 'Conflict',
+        timestamp: '2026-06-03T20:42:05.123Z',
+        path: '/api/example-path'
+      }
+    }
+  })
   @RequirePermissions('islands.create')
   @Post('bulk')
   createBulk(@Body() dtos: CreateIslandDto[]) {
@@ -94,7 +190,20 @@ export class IslandsController {
 
   @ApiOperation({ summary: 'Atualizar os dados de uma ilha existente' })
   @ApiResponse({ status: 200, description: 'Ilha atualizada com sucesso.' })
-  @ApiResponse({ status: 404, description: 'Ilha não encontrada.' })
+  @ApiResponse({
+    status: 404,
+    description: 'Ilha não encontrada.',
+    schema: {
+      allOf: [{ $ref: getSchemaPath(ErrorResponseDto) }],
+      example: {
+        statusCode: 404,
+        message: 'Ilha não encontrada.',
+        error: 'Not Found',
+        timestamp: '2026-06-03T20:42:05.123Z',
+        path: '/api/example-path'
+      }
+    }
+  })
   @RequirePermissions('islands.update')
   @Patch(':id')
   update(
@@ -106,7 +215,20 @@ export class IslandsController {
 
   @ApiOperation({ summary: 'Remover uma ilha do mapa (Soft Delete)' })
   @ApiResponse({ status: 200, description: 'Ilha removida com sucesso.' })
-  @ApiResponse({ status: 404, description: 'Ilha não encontrada.' })
+  @ApiResponse({
+    status: 404,
+    description: 'Ilha não encontrada.',
+    schema: {
+      allOf: [{ $ref: getSchemaPath(ErrorResponseDto) }],
+      example: {
+        statusCode: 404,
+        message: 'Ilha não encontrada.',
+        error: 'Not Found',
+        timestamp: '2026-06-03T20:42:05.123Z',
+        path: '/api/example-path'
+      }
+    }
+  })
   @RequirePermissions('islands.delete')
   @Delete(':id')
   remove(@Param('id', ParseIntPipe) id: number) {

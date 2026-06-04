@@ -1,5 +1,5 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, Query, ParseIntPipe, UseGuards } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth , getSchemaPath, ApiExtraModels} from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { PermissionsGuard } from '../common/guards/permissions.guard';
 import { RequirePermissions } from '../common/decorators/require-permissions.decorator';
@@ -7,14 +7,15 @@ import { PermissionsService } from './permissions.service';
 import { CreatePermissionDto } from './dtos/create-permission.dto';
 import { UpdatePermissionDto } from './dtos/update-permission.dto';
 import { PermissionFilterDto } from './dtos/filter-permission.dto';
+import { ApiDefaultResponses } from '../common/decorators/api-default-responses.decorator';
+import { ErrorResponseDto } from '../common/dtos/error-response.dto';
 
 @ApiBearerAuth('access-token')
 @ApiTags('Permissions')
 @Controller('permissions')
 @UseGuards(JwtAuthGuard, PermissionsGuard)
-@ApiResponse({ status: 400, description: 'Requisição inválida.' })
-@ApiResponse({ status: 401, description: 'Não autorizado (Token ausente ou inválido).' })
-@ApiResponse({ status: 403, description: 'Proibido (Falta de permissão).' })
+@ApiDefaultResponses()
+@ApiExtraModels(ErrorResponseDto)
 export class PermissionsController {
   constructor(private readonly permissionsService: PermissionsService) { }
 
@@ -36,7 +37,20 @@ export class PermissionsController {
 
   @ApiOperation({ summary: 'Buscar dados de uma permissão específica pelo ID' })
   @ApiResponse({ status: 200, description: 'Permissão encontrada.' })
-  @ApiResponse({ status: 404, description: 'Permissão não encontrada.' })
+  @ApiResponse({
+    status: 404,
+    description: 'Permissão não encontrada.',
+    schema: {
+      allOf: [{ $ref: getSchemaPath(ErrorResponseDto) }],
+      example: {
+        statusCode: 404,
+        message: 'Permissão não encontrada.',
+        error: 'Not Found',
+        timestamp: '2026-06-03T20:42:05.123Z',
+        path: '/api/example-path'
+      }
+    }
+  })
   @RequirePermissions('permissions.view')
   @Get(':id')
   findOne(@Param('id', ParseIntPipe) id: number) { 
@@ -45,7 +59,20 @@ export class PermissionsController {
 
   @ApiOperation({ summary: 'Atualizar os dados de uma permissão existente' })
   @ApiResponse({ status: 200, description: 'Permissão atualizada com sucesso.' })
-  @ApiResponse({ status: 404, description: 'Permissão não encontrada.' })
+  @ApiResponse({
+    status: 404,
+    description: 'Permissão não encontrada.',
+    schema: {
+      allOf: [{ $ref: getSchemaPath(ErrorResponseDto) }],
+      example: {
+        statusCode: 404,
+        message: 'Permissão não encontrada.',
+        error: 'Not Found',
+        timestamp: '2026-06-03T20:42:05.123Z',
+        path: '/api/example-path'
+      }
+    }
+  })
   @RequirePermissions('permissions.update')
   @Patch(':id')
   update(@Param('id', ParseIntPipe) id: number, @Body() data: UpdatePermissionDto) { 
@@ -54,7 +81,20 @@ export class PermissionsController {
 
   @ApiOperation({ summary: 'Remover permanentemente uma permissão do sistema' })
   @ApiResponse({ status: 200, description: 'Permissão removida com sucesso.' })
-  @ApiResponse({ status: 404, description: 'Permissão não encontrada.' })
+  @ApiResponse({
+    status: 404,
+    description: 'Permissão não encontrada.',
+    schema: {
+      allOf: [{ $ref: getSchemaPath(ErrorResponseDto) }],
+      example: {
+        statusCode: 404,
+        message: 'Permissão não encontrada.',
+        error: 'Not Found',
+        timestamp: '2026-06-03T20:42:05.123Z',
+        path: '/api/example-path'
+      }
+    }
+  })
   @RequirePermissions('permissions.delete')
   @Delete(':id')
   remove(@Param('id', ParseIntPipe) id: number) { 
