@@ -64,19 +64,25 @@ graph TD
 graph TD
     CLIENT["🖥️ Cliente HTTP<br/>(Swagger UI / Frontend / Postman)"]
 
-    subgraph API ["Grand Line API (NestJS)"]
-        AUTH["Auth Module<br/>Login + JWT"]
-        RBAC["RBAC Module<br/>Profiles & Permissions"]
+    subgraph API ["Grand Line API (Monolito NestJS)"]
+        
+        subgraph IDENTITY ["Identity / Auth Service"]
+            AUTH["Auth Module<br/>POST /auth/login<br/>POST /auth/register"]
+            RBAC["RBAC Module<br/>Profiles & Permissions"]
+            GUARD["PermissionsGuard<br/>Valida JWT + Permissão"]
+        end
+        
         CONTENT["Content Modules<br/>Sagas, Arcs, Islands<br/>Characters, Versions<br/>Events"]
-        GUARD["PermissionsGuard<br/>Intercepta todas as rotas<br/>valida JWT + permissão"]
     end
 
     DB[("PostgreSQL<br/>Banco Principal")]
 
-    CLIENT -->|"POST /auth/login"| AUTH
-    CLIENT -->|"GET/POST/PATCH/DELETE<br/>com Bearer Token"| GUARD
+    CLIENT -->|"Autenticação (Credenciais)"| AUTH
+    CLIENT -->|"Requisições Protegidas<br/>(Bearer Token)"| GUARD
+    
     GUARD --> RBAC
     GUARD --> CONTENT
+    
     AUTH --> DB
     RBAC --> DB
     CONTENT --> DB
