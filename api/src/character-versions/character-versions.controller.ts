@@ -1,5 +1,5 @@
 import { Controller, Post, Get, Body, Query, Param, Patch, Delete, ParseIntPipe, ParseArrayPipe, UseGuards } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiBody, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiBody, ApiResponse, ApiBearerAuth , getSchemaPath, ApiExtraModels} from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { PermissionsGuard } from '../common/guards/permissions.guard';
 import { RequirePermissions } from '../common/decorators/require-permissions.decorator';
@@ -7,19 +7,34 @@ import { CharacterVersionsService } from './character-versions.service';
 import { CreateCharacterVersionDto } from './dtos/create-character-version.dto';
 import { UpdateCharacterVersionDto } from './dtos/update-character-version.dto';
 import { CharacterVersionFilterDto } from './dtos/character-version-filter.dto';
+import { ApiDefaultResponses } from '../common/decorators/api-default-responses.decorator';
+import { ErrorResponseDto } from '../common/dtos/error-response.dto';
 
 @ApiBearerAuth('access-token')
 @ApiTags('CharacterVersions')
 @Controller('character-versions')
 @UseGuards(JwtAuthGuard, PermissionsGuard)
-@ApiResponse({ status: 400, description: 'Requisição inválida.' })
-@ApiResponse({ status: 401, description: 'Não autorizado (Token ausente ou inválido).' })
-@ApiResponse({ status: 403, description: 'Proibido (Falta de permissão).' })
+@ApiDefaultResponses()
+@ApiExtraModels(ErrorResponseDto)
 export class CharacterVersionsController {
   constructor(private readonly characterVersionsService: CharacterVersionsService) {}
 
   @ApiOperation({ summary: 'Criar uma nova versão de personagem' })
   @ApiResponse({ status: 201, description: 'Versão de personagem criada com sucesso.' })
+  @ApiResponse({
+    status: 404,
+    description: 'Personagem não encontrado.',
+    schema: {
+      allOf: [{ $ref: getSchemaPath(ErrorResponseDto) }],
+      example: {
+        statusCode: 404,
+        message: 'Personagem não encontrado.',
+        error: 'Not Found',
+        timestamp: '2026-06-03T20:42:05.123Z',
+        path: '/api/example-path'
+      }
+    }
+  })
   @RequirePermissions('character_versions.create')
   @Post()
   create(@Body() body: CreateCharacterVersionDto) {
@@ -29,6 +44,20 @@ export class CharacterVersionsController {
   @ApiOperation({ summary: 'Criar múltiplas versões de personagens em lote (Bulk)' })
   @ApiBody({ type: [CreateCharacterVersionDto] })
   @ApiResponse({ status: 201, description: 'Versões de personagens criadas em lote com sucesso.' })
+  @ApiResponse({
+    status: 404,
+    description: 'Um ou mais Characters ou Arcos informados não existem.',
+    schema: {
+      allOf: [{ $ref: getSchemaPath(ErrorResponseDto) }],
+      example: {
+        statusCode: 404,
+        message: 'Um ou mais Characters ou Arcos informados não existem.',
+        error: 'Not Found',
+        timestamp: '2026-06-03T20:42:05.123Z',
+        path: '/api/example-path'
+      }
+    }
+  })
   @RequirePermissions('character_versions.create')
   @Post('bulk')
   createBulk(@Body(new ParseArrayPipe({ items: CreateCharacterVersionDto })) bodies: CreateCharacterVersionDto[]) {
@@ -45,7 +74,20 @@ export class CharacterVersionsController {
 
   @ApiOperation({ summary: 'Buscar versão de personagem pelo ID' })
   @ApiResponse({ status: 200, description: 'Versão de personagem encontrada.' })
-  @ApiResponse({ status: 404, description: 'Versão de personagem não encontrada.' })
+  @ApiResponse({
+    status: 404,
+    description: 'Versão de personagem não encontrada.',
+    schema: {
+      allOf: [{ $ref: getSchemaPath(ErrorResponseDto) }],
+      example: {
+        statusCode: 404,
+        message: 'Versão de personagem não encontrada.',
+        error: 'Not Found',
+        timestamp: '2026-06-03T20:42:05.123Z',
+        path: '/api/example-path'
+      }
+    }
+  })
   @RequirePermissions('character_versions.view')
   @Get(':id')
   findOne(@Param('id', ParseIntPipe) id: number) {
@@ -54,7 +96,20 @@ export class CharacterVersionsController {
 
   @ApiOperation({ summary: 'Atualizar uma versão de personagem' })
   @ApiResponse({ status: 200, description: 'Versão de personagem atualizada com sucesso.' })
-  @ApiResponse({ status: 404, description: 'Versão de personagem não encontrada.' })
+  @ApiResponse({
+    status: 404,
+    description: 'Versão de personagem não encontrada.',
+    schema: {
+      allOf: [{ $ref: getSchemaPath(ErrorResponseDto) }],
+      example: {
+        statusCode: 404,
+        message: 'Versão de personagem não encontrada.',
+        error: 'Not Found',
+        timestamp: '2026-06-03T20:42:05.123Z',
+        path: '/api/example-path'
+      }
+    }
+  })
   @RequirePermissions('character_versions.update')
   @Patch(':id')
   update(@Param('id', ParseIntPipe) id: number, @Body() body: UpdateCharacterVersionDto) {
@@ -63,7 +118,20 @@ export class CharacterVersionsController {
 
   @ApiOperation({ summary: 'Remover uma versão de personagem (Soft Delete)' })
   @ApiResponse({ status: 200, description: 'Versão de personagem removida com sucesso.' })
-  @ApiResponse({ status: 404, description: 'Versão de personagem não encontrada.' })
+  @ApiResponse({
+    status: 404,
+    description: 'Versão de personagem não encontrada.',
+    schema: {
+      allOf: [{ $ref: getSchemaPath(ErrorResponseDto) }],
+      example: {
+        statusCode: 404,
+        message: 'Versão de personagem não encontrada.',
+        error: 'Not Found',
+        timestamp: '2026-06-03T20:42:05.123Z',
+        path: '/api/example-path'
+      }
+    }
+  })
   @RequirePermissions('character_versions.delete')
   @Delete(':id')
   remove(@Param('id', ParseIntPipe) id: number) {
