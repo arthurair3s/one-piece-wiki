@@ -1,5 +1,7 @@
 "use client";
 
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   Card,
   CardContent,
@@ -11,8 +13,59 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { registerUser } from "./_service";
+import { REGISTER_CONFIG } from "./_configuration";
 
 export default function RegisterPage() {
+  const router = useRouter();
+  const [isLoading, setIsLoading] = useState(false);
+  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [errorMsg, setErrorMsg] = useState("");
+  const [successMsg, setSuccessMsg] = useState("");
+
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    setErrorMsg("");
+    setSuccessMsg("");
+
+    if (!username || username.length < REGISTER_CONFIG.validationRules.name.minLength) {
+      setErrorMsg(REGISTER_CONFIG.validationRules.name.errorMessage);
+      return;
+    }
+    if (!email) {
+      setErrorMsg(REGISTER_CONFIG.validationRules.email.required);
+      return;
+    }
+    if (!REGISTER_CONFIG.validationRules.email.pattern.test(email)) {
+      setErrorMsg(REGISTER_CONFIG.validationRules.email.errorMessage);
+      return;
+    }
+    if (!password || password.length < REGISTER_CONFIG.validationRules.password.minLength) {
+      setErrorMsg(REGISTER_CONFIG.validationRules.password.errorMessage);
+      return;
+    }
+    if (password !== confirmPassword) {
+      setErrorMsg(REGISTER_CONFIG.validationRules.confirmPassword.matchMessage);
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      await registerUser(username, email, password);
+      setSuccessMsg("Conta criada com sucesso! Redirecionando para o login...");
+      setTimeout(() => {
+        router.push(REGISTER_CONFIG.redirectUrl);
+      }, 1500);
+    } catch (err: any) {
+      setErrorMsg(err.message || "Erro ao realizar o cadastro. Tente novamente.");
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
   return (
     <div className="flex min-h-screen items-center justify-center px-4">
       <Card className="w-full max-w-sm">
@@ -27,17 +80,28 @@ export default function RegisterPage() {
         </CardHeader>
 
         <CardContent>
-          <form
-            className="flex flex-col gap-4"
-            onSubmit={(e) => e.preventDefault()}
-          >
+          <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
+            {errorMsg && (
+              <div className="text-sm text-red-500 font-medium bg-red-500/10 p-2 rounded text-center border border-red-500/20">
+                {errorMsg}
+              </div>
+            )}
+            {successMsg && (
+              <div className="text-sm text-green-500 font-medium bg-green-500/10 p-2 rounded text-center border border-green-500/20">
+                {successMsg}
+              </div>
+            )}
+
             <div className="flex flex-col gap-2">
-              <Label htmlFor="name">Nome</Label>
+              <Label htmlFor="username">Nome de usuário</Label>
               <Input
-                id="name"
+                id="username"
                 type="text"
-                placeholder="Monkey D. Luffy"
-                autoComplete="name"
+                placeholder="mugiwara"
+                autoComplete="username"
+                disabled={isLoading}
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
               />
             </div>
 
@@ -48,6 +112,9 @@ export default function RegisterPage() {
                 type="email"
                 placeholder="luffy@grandline.com"
                 autoComplete="email"
+                disabled={isLoading}
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
               />
             </div>
 
@@ -58,6 +125,9 @@ export default function RegisterPage() {
                 type="password"
                 placeholder="••••••••"
                 autoComplete="new-password"
+                disabled={isLoading}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
               />
             </div>
 
@@ -68,11 +138,14 @@ export default function RegisterPage() {
                 type="password"
                 placeholder="••••••••"
                 autoComplete="new-password"
+                disabled={isLoading}
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
               />
             </div>
 
-            <Button type="submit" className="w-full mt-2">
-              Registrar
+            <Button type="submit" className="w-full mt-2" disabled={isLoading}>
+              {isLoading ? "Registrando..." : "Registrar"}
             </Button>
 
             <div className="text-center text-sm text-muted-foreground mt-2">

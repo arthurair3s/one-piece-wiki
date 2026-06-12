@@ -13,23 +13,55 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { loginUser } from "./_service";
+import { LOGIN_CONFIG } from "./_configuration";
 
 export default function LoginPage() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [errorMsg, setErrorMsg] = useState("");
 
-  function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    setIsLoading(true);
+    setErrorMsg("");
 
-    // TODO: integrar com a API real (login JWT)
-    // Por enquanto, simula um login, grava o token e redireciona para a loading screen
-    setTimeout(() => {
-      localStorage.setItem("token", "dummy-session-token-one-piece");
-      sessionStorage.removeItem("dashboard_loaded"); // Garante que a loading screen execute
-      router.push("/loading-screen");
-    }, 500);
+    if (!email) {
+      setErrorMsg(LOGIN_CONFIG.validationRules.email.required);
+      return;
+    }
+    if (!LOGIN_CONFIG.validationRules.email.pattern.test(email)) {
+      setErrorMsg(LOGIN_CONFIG.validationRules.email.errorMessage);
+      return;
+    }
+    if (!password) {
+      setErrorMsg(LOGIN_CONFIG.validationRules.password.required);
+      return;
+    }
+    if (password.length < LOGIN_CONFIG.validationRules.password.minLength) {
+      setErrorMsg(LOGIN_CONFIG.validationRules.password.errorMessage);
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      await loginUser(email, password);
+      // Garante que a tela de loading-screen execute ao redirecionar
+      sessionStorage.removeItem("dashboard_loaded");
+      router.push(LOGIN_CONFIG.redirectUrl);
+    } catch (err: any) {
+      setErrorMsg(err.message || "Erro ao realizar o login. Verifique suas credenciais.");
+    } finally {
+      setIsLoading(false);
+    }
   }
+
+  const handleQuickLogin = (demoUser: typeof LOGIN_CONFIG.demoUsers[number]) => {
+    setEmail(demoUser.email);
+    setPassword(demoUser.password);
+    setErrorMsg("");
+  };
 
   return (
     <div className="flex min-h-screen items-center justify-center px-4">
@@ -44,6 +76,12 @@ export default function LoginPage() {
 
         <CardContent>
           <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
+            {errorMsg && (
+              <div className="text-sm text-red-500 font-medium bg-red-500/10 p-2 rounded text-center border border-red-500/20">
+                {errorMsg}
+              </div>
+            )}
+
             <div className="flex flex-col gap-2">
               <Label htmlFor="email">E-mail</Label>
               <Input
@@ -52,6 +90,8 @@ export default function LoginPage() {
                 placeholder="admin@admin.com"
                 autoComplete="email"
                 disabled={isLoading}
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
               />
             </div>
 
@@ -63,12 +103,35 @@ export default function LoginPage() {
                 placeholder="••••••••"
                 autoComplete="current-password"
                 disabled={isLoading}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
               />
             </div>
 
             <Button type="submit" className="w-full mt-2" disabled={isLoading}>
               {isLoading ? "Entrando..." : "Entrar"}
             </Button>
+
+            <div className="mt-4 pt-4 border-t border-muted/50 flex flex-col gap-2">
+              <span className="text-xs text-muted-foreground text-center font-medium">
+                Acesso Rápido (Dados das Seeds)
+              </span>
+              <div className="grid grid-cols-2 gap-2">
+                {LOGIN_CONFIG.demoUsers.map((user, i) => (
+                  <Button
+                    key={i}
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="text-xs py-1 h-auto"
+                    onClick={() => handleQuickLogin(user)}
+                    disabled={isLoading}
+                  >
+                    {user.label}
+                  </Button>
+                ))}
+              </div>
+            </div>
 
             <div className="text-center text-sm text-muted-foreground mt-2">
               Não tem conta?{" "}
