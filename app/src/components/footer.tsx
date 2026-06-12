@@ -16,21 +16,13 @@ export function Footer({
   arcs = [],
   onArcClick
 }: FooterProps) {
-  // Caso os arcos reais não estejam carregados ou vazios, usa os fallbacks estáticos realistas do One Piece
-  const fallbackArcs = [
-    { id: 1, name: 'Romance Dawn' },
-    { id: 2, name: 'Shells Town' },
-    { id: 3, name: 'Orange Town' }
-  ]
-
-  const currentArcs = arcs && arcs.length > 0 ? arcs : fallbackArcs
+  const currentArcs = arcs || []
 
   const activeIndex = currentArcs.findIndex(arc => arc.id === activeArcId)
   const initialSliderVal = activeIndex >= 0 ? activeIndex : 0
 
   const [sliderVal, setSliderVal] = React.useState<number>(initialSliderVal)
 
-  // Sincroniza o slider local quando o arco ativo mudar externamente (ex: selects no header)
   React.useEffect(() => {
     const idx = currentArcs.findIndex(arc => arc.id === activeArcId)
     if (idx >= 0) {
@@ -42,13 +34,23 @@ export function Footer({
     const val = parseFloat(e.target.value)
     setSliderVal(val)
 
-    // Identifica o arco mais próximo pelo arredondamento matemático
     const closestIdx = Math.round(val)
     const closestArc = currentArcs[closestIdx]
     if (closestArc && closestArc.id !== activeArcId) {
       onArcClick && onArcClick(closestArc.id)
     }
   }
+
+  // Identifica quais arcos marcam o início de uma nova Saga (menor ID ou ordem de arco daquela Saga)
+  const sagaStartArcIds = React.useMemo(() => {
+    const map: Record<number, number> = {}
+    currentArcs.forEach((arc) => {
+      if (!map[arc.sagaId] || arc.id < map[arc.sagaId]) {
+        map[arc.sagaId] = arc.id
+      }
+    })
+    return new Set(Object.values(map))
+  }, [currentArcs])
 
   const progressPercent =
     currentArcs.length > 1 ? (sliderVal / (currentArcs.length - 1)) * 100 : 0
@@ -65,12 +67,9 @@ export function Footer({
             </span>
           </div>
 
-          {/* Área da Timeline e Marcadores */}
           <div className="flex-1 relative flex items-center h-full px-4">
-            {/* Linha Horizontal Fina de Fundo (Track Estático) */}
             <div className="absolute left-4 right-4 h-[2px] bg-border/40 rounded-full pointer-events-none" />
 
-            {/* Linha Horizontal de Progresso Ativo Dinamicamente Compensada para o Thumb (32px de largura / 16px de raio) */}
             <div
               className="absolute left-4 h-[2px] bg-primary/40 rounded-full pointer-events-none transition-all duration-75"
               style={{
@@ -78,7 +77,6 @@ export function Footer({
               }}
             />
 
-            {/* O Slider de Range Interativo com o Thumb Customizado (Pílula da Cor da Identidade) */}
             <div className="relative w-full flex items-center h-8">
               <input
                 type="range"
@@ -111,7 +109,6 @@ export function Footer({
                   [&::-moz-range-thumb]:active:scale-95"
               />
 
-              {/* Pontos de História Absolutos com Revelação Sob Proximidade */}
               <div className="absolute left-4 right-4 top-0 bottom-0 pointer-events-none z-10">
                 {currentArcs.map((arc, index) => {
                   const pct =
@@ -119,7 +116,12 @@ export function Footer({
                       ? (index / (currentArcs.length - 1)) * 100
                       : 0
                   const distance = Math.abs(sliderVal - index)
-                  const isNear = distance <= 0.35 // A pílula passou por cima!
+                  const isNear = distance <= 0.35
+
+                  // Anti-spoiler: Oculta arcos posteriores ao selecionado
+                  if (index > activeIndex) return null;
+
+                  const isSagaStart = sagaStartArcIds.has(arc.id)
 
                   return (
                     <div
@@ -127,7 +129,6 @@ export function Footer({
                       className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 flex flex-col items-center animate-fade-in"
                       style={{ left: `${pct}%` }}
                     >
-                      {/* Nome do Arco - Flutua e clareia apenas quando perto da pílula */}
                       <span
                         className={`absolute bottom-5 whitespace-nowrap text-[10px] font-bold tracking-tight rounded-md px-1.5 py-0.5 bg-background/95 border border-border/40 shadow-sm transition-all duration-300 ${
                           isNear
@@ -135,17 +136,28 @@ export function Footer({
                             : 'opacity-0 translate-y-1 scale-75'
                         }`}
                       >
-                        {arc.name}
+                        {isSagaStart && arc.sagaName 
+                          ? `${arc.sagaName.toUpperCase()} • ${arc.name}` 
+                          : arc.name}
                       </span>
 
-                      {/* Pontinho Discreto da Linha */}
-                      <div
-                        className={`rounded-full transition-all duration-300 ${
-                          isNear
-                            ? 'w-2.5 h-2.5 bg-primary ring-2 ring-primary/20 scale-110'
-                            : 'w-1 h-1 bg-border/80 scale-90'
-                        }`}
-                      />
+                      {isSagaStart ? (
+                        <div
+                          className={`rotate-45 transition-all duration-300 border-2 shadow-[0_1px_3px_rgba(0,0,0,0.15)] ${
+                            isNear
+                              ? 'w-3.5 h-3.5 bg-primary border-primary ring-4 ring-primary/10 scale-110'
+                              : 'w-2.5 h-2.5 bg-background border-primary/60 scale-95'
+                          }`}
+                        />
+                      ) : (
+                        <div
+                          className={`rounded-full transition-all duration-300 ${
+                            isNear
+                              ? 'w-2.5 h-2.5 bg-primary ring-2 ring-primary/20 scale-110'
+                              : 'w-1 h-1 bg-border/80 scale-90'
+                          }`}
+                        />
+                      )}
                     </div>
                   )
                 })}
