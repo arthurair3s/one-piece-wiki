@@ -624,3 +624,43 @@ O banco de leitura pode ser uma réplica do PostgreSQL, um banco separado, ou at
 A separação entre `commands/` e `queries/` não é apenas organizacional — ela é a garantia técnica de que, quando chegar o momento, cada lado pode evoluir de forma independente. Nenhum handler de escrita sabe que existe um handler de leitura, e vice-versa. O bus é o único elo entre eles, e ele permanece idêntico nos dois cenários.
 
 Em resumo: **todo o código que você criar agora nesse padrão não precisará ser reescrito para suportar o Nível 3 — apenas a camada de handlers de leitura e a infraestrutura de banco será adicionada por cima do que já existe.**
+
+---
+
+## 🎨 Arquitetura de Frontend & Diretrizes de UX (Mapa Interativo)
+
+Para a exibição e manipulação espacial da Grand Line, adotamos um conjunto de padrões no Next.js (App Router) e React. Toda nova funcionalidade visual no mapa deve seguir estas regras e boas práticas de UX.
+
+---
+
+### 1. Canvas Espacial Móvel (Panning)
+* **Resolução Estática do Canvas**: Definida como `2200px` de largura por `1400px` de altura.
+* **Translação**: Controlada por estados de `offset` (`x` e `y`), aplicados via `transform: translate3d(x, y, 0)`.
+* **Delimitação (Clamping)**: A função `clampOffset` deve restringir o arraste do usuário, impedindo que o canvas mostre áreas de fundo cinza fora do oceano. Ela deve ser recalculada sempre que o tamanho da viewport mudar ou quando o usuário aplicar zoom.
+
+---
+
+### 2. Mecânica de Zoom (In/Out)
+* **Zoom no Canvas**: Controlado por um estado centralizado de `scale` (limites rígidos entre `0.7x` e `1.3x`).
+* **Intercepção de Evento Wheel**: Registrar um listener de evento nativo `wheel` com `{ passive: false }` no viewport da DOM para impedir a rolagem de página padrão (`e.preventDefault()`) e aplicar o zoom.
+* **Dependências de Lifecycle**: O listener do wheel deve depender dos estados de carregamento `[isNavigating, isLoadingData]` para garantir o registro correto apenas quando o elemento HTML de referência for montado na tela.
+* **HUD Flutuante de Zoom**: Exibir controles visuais simples (`＋` e `－`) acoplados acima do minimapa com transições de vidro translúcido (`backdrop-blur-md bg-background/80`).
+
+---
+
+### 3. Minimapa Dinâmico (Minimap)
+* **Escala de Proporção**: O minimapa segue exatamente o aspect ratio do mapa principal (largura de `220px` por `140px` de altura). O fator de escala (`SCALE`) é obtido por `mapWidth / MINIMAP_WIDTH`.
+* **Retângulo de Foco (Viewport Frame)**: Representa a área visível do visor e sua escala proporcional baseia-se em:
+  * Largura visível real = `viewportSize / scale`
+  * Indicador de largura no minimapa = `(viewportSize / scale) / SCALE`
+* **Navegação Interativa**: Clicar em qualquer ponto do minimapa deve acionar a função `onMinimapClick`, calculando a coordenada original e reposicionando a câmera do mapa principal de forma centralizada e com transição suave (`smoothTransition`).
+
+---
+
+### 4. Linha do Tempo & Regra Anti-Spoiler
+* **Ocultação de Futuro**: A timeline e o mapa nunca devem exibir arcos ou ilhas cujos arcos associados tenham ordem (`order`) maior que o arco ativamente selecionado.
+* **Marcos de Saga (Saga Pins)**:
+  * O primeiro arco de cada Saga representa a abertura de um novo ciclo e deve ser visualmente diferente (Pino em formato de losango rotacionado `rotate-45` com borda dupla e sombra).
+  * Arcos intermediários são renderizados como círculos discretos de trilha (`w-1 h-1`).
+  * A tag flutuante sobre o pino de saga deve mostrar claramente o nome da Saga associada (ex: `SAGA DO EAST BLUE • Romance Dawn`).
+
