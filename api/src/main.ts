@@ -9,6 +9,7 @@ import 'reflect-metadata';
 async function bootstrap() {
   const logger = new Logger('Bootstrap');
   const app = await NestFactory.create(AppModule);
+  app.enableCors();
 
   app.setGlobalPrefix('api');
 
