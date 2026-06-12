@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState, useMemo } from "react";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -64,10 +64,14 @@ export interface HeaderProps {
   arcs: Arc[];
   islands: Island[];
   searchQuery?: string;
+  activeSagaId?: number | null;
+  activeArcId?: number | null;
+  activeIslandId?: number | null;
   onSearchChange?: (val: string) => void;
   onSagaSelect?: (id: string | null) => void;
   onArcSelect?: (id: string | null) => void;
   onIslandSelect?: (id: string | null) => void;
+  onLogout?: () => void;
 }
 
 export function Header({
@@ -76,35 +80,91 @@ export function Header({
   arcs = [],
   islands = [],
   searchQuery = "",
+  activeSagaId = null,
+  activeArcId = null,
+  activeIslandId = null,
   onSearchChange,
   onSagaSelect,
   onArcSelect,
   onIslandSelect,
+  onLogout,
 }: HeaderProps) {
-  
+  const [showSuggestions, setShowSuggestions] = useState(false);
+
+  // Tratamento de mudança de seleção para Select components
   const handleSelectChange = (val: string | null, callback?: (id: string | null) => void) => {
     if (callback) {
       callback(val === "null" || val === null ? null : val);
     }
   };
 
+  // Nomes exibidos nos botões de trigger (corrige bug do ID bruto)
+  const sagaLabel = useMemo(() => {
+    if (activeSagaId === null) return "Sagas";
+    const found = sagas.find((s) => s.id === activeSagaId);
+    return found ? found.name : "Sagas";
+  }, [activeSagaId, sagas]);
+
+  const arcLabel = useMemo(() => {
+    if (activeArcId === null) return "Arcos";
+    const found = arcs.find((a) => a.id === activeArcId);
+    return found ? found.name : "Arcos";
+  }, [activeArcId, arcs]);
+
+  const islandLabel = useMemo(() => {
+    if (activeIslandId === null) return "Ilhas";
+    const found = islands.find((i) => i.id === activeIslandId);
+    return found ? found.name : "Ilhas";
+  }, [activeIslandId, islands]);
+
+  // Lista de sugestões de ilhas baseada na pesquisa ativa
+  const islandSuggestions = useMemo(() => {
+    const query = searchQuery.trim().toLowerCase();
+    if (!query) return [];
+    return islands.filter((island) => island.name.toLowerCase().includes(query));
+  }, [searchQuery, islands]);
+
   return (
     <header className="absolute top-4 left-4 right-4 md:top-6 md:left-6 md:right-6 max-w-5xl mx-auto w-[calc(100%-2rem)] md:w-[calc(100%-3rem)] rounded-xl border border-border/40 shadow-lg bg-background/80 backdrop-blur-md z-30 transition-all duration-300">
       <div className="flex flex-col md:flex-row items-center gap-3 px-3.5 py-3 md:px-4 md:py-3 w-full">
         
         {/* Linha Principal de Busca + Configurações (Mobile) ou Busca (Desktop) */}
-        <div className="flex items-center gap-2 w-full md:flex-1">
+        <div className="flex items-center gap-2 w-full md:flex-1 relative">
           {/* Campo de Pesquisa */}
           <div className="relative flex-1">
             <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <Input
               id="search"
               type="text"
-              placeholder="Pesquisa..."
+              placeholder="Pesquisar ilha..."
               value={searchQuery}
-              onChange={(e) => onSearchChange && onSearchChange(e.target.value)}
+              onChange={(e) => {
+                if (onSearchChange) onSearchChange(e.target.value);
+                setShowSuggestions(true);
+              }}
+              onFocus={() => setShowSuggestions(true)}
+              onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
               className="pl-10 h-9 rounded-lg border-border/50 bg-muted/20 focus-visible:ring-1 focus-visible:ring-primary"
             />
+
+            {/* Lista de Sugestões de Ilhas */}
+            {showSuggestions && islandSuggestions.length > 0 && (
+              <div className="absolute top-full left-0 right-0 mt-1.5 max-h-56 overflow-y-auto rounded-lg border border-border bg-background/95 backdrop-blur-md shadow-xl z-50 p-1 flex flex-col">
+                {islandSuggestions.map((island) => (
+                  <button
+                    key={island.id}
+                    onClick={() => {
+                      if (onIslandSelect) onIslandSelect(String(island.id));
+                      if (onSearchChange) onSearchChange("");
+                      setShowSuggestions(false);
+                    }}
+                    className="text-left px-3 py-2 text-sm rounded-md hover:bg-primary/10 hover:text-primary transition-colors cursor-pointer select-none font-medium text-foreground"
+                  >
+                    {island.name}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
           
           {/* Botão de Configurações no Mobile */}
@@ -138,7 +198,11 @@ export function Header({
                     Alternar Tema
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem id="menu-logout-mobile" className="text-destructive focus:text-destructive rounded-lg px-2.5 py-1.5 cursor-pointer">
+                  <DropdownMenuItem
+                    id="menu-logout-mobile"
+                    className="text-destructive focus:text-destructive rounded-lg px-2.5 py-1.5 cursor-pointer"
+                    onClick={onLogout}
+                  >
                     Sair
                   </DropdownMenuItem>
                 </DropdownMenuGroup>
@@ -149,9 +213,14 @@ export function Header({
 
         {/* Filtros: Grade de 3 colunas iguais no Mobile, flex no Desktop */}
         <div className="grid grid-cols-3 gap-2 w-full md:flex md:w-auto md:gap-2">
-          <Select onValueChange={(val: any) => handleSelectChange(val, onSagaSelect)}>
+          <Select
+            value={activeSagaId !== null ? String(activeSagaId) : "null"}
+            onValueChange={(val: any) => handleSelectChange(val, onSagaSelect)}
+          >
             <SelectTrigger id="filter-sagas" className="w-full md:w-[120px] h-9 text-xs">
-              <SelectValue placeholder="Sagas" />
+              <SelectValue placeholder="Sagas">
+                {sagaLabel}
+              </SelectValue>
             </SelectTrigger>
             <SelectContent className="rounded-xl" alignItemWithTrigger={false}>
               <SelectItem value="null">Nenhuma</SelectItem>
@@ -163,9 +232,14 @@ export function Header({
             </SelectContent>
           </Select>
 
-          <Select onValueChange={(val: any) => handleSelectChange(val, onArcSelect)}>
+          <Select
+            value={activeArcId !== null ? String(activeArcId) : "null"}
+            onValueChange={(val: any) => handleSelectChange(val, onArcSelect)}
+          >
             <SelectTrigger id="filter-arcos" className="w-full md:w-[120px] h-9 text-xs">
-              <SelectValue placeholder="Arcos" />
+              <SelectValue placeholder="Arcos">
+                {arcLabel}
+              </SelectValue>
             </SelectTrigger>
             <SelectContent className="rounded-xl" alignItemWithTrigger={false}>
               <SelectItem value="null">Nenhum</SelectItem>
@@ -177,9 +251,14 @@ export function Header({
             </SelectContent>
           </Select>
 
-          <Select onValueChange={(val: any) => handleSelectChange(val, onIslandSelect)}>
+          <Select
+            value={activeIslandId !== null ? String(activeIslandId) : "null"}
+            onValueChange={(val: any) => handleSelectChange(val, onIslandSelect)}
+          >
             <SelectTrigger id="filter-ilhas" className="w-full md:w-[120px] h-9 text-xs">
-              <SelectValue placeholder="Ilhas" />
+              <SelectValue placeholder="Ilhas">
+                {islandLabel}
+              </SelectValue>
             </SelectTrigger>
             <SelectContent className="rounded-xl" alignItemWithTrigger={false}>
               <SelectItem value="null">Nenhuma</SelectItem>
@@ -224,7 +303,11 @@ export function Header({
                   Alternar Tema
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem id="menu-logout" className="text-destructive focus:text-destructive rounded-xl px-3 py-2 cursor-pointer">
+                <DropdownMenuItem
+                  id="menu-logout"
+                  className="text-destructive focus:text-destructive rounded-xl px-3 py-2 cursor-pointer"
+                  onClick={onLogout}
+                >
                   Sair
                 </DropdownMenuItem>
               </DropdownMenuGroup>
