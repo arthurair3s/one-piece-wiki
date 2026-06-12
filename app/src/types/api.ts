@@ -18,27 +18,33 @@ export interface Arc {
   description?: string;
   order: number;
   sagaId: number;
-  createdAt: string;
-  updatedAt: string;
+  sagaName?: string;
+  islandsCount?: number;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
+// /wiki/map retorna apenas coordinates (objeto aninhado) e thumbnailUrl (camelCase)
 export interface Island {
   id: number;
   name: string;
-  description: string;
-  coordinate_x: number;
-  coordinate_y: number;
-  coordinate_z: number;
+  description?: string;
   coordinates?: {
     x: number;
     y: number;
     z: number;
   };
-  model_url: string;
+  // campos do modelo de escrita (usados nos endpoints CRUD /islands)
+  coordinate_x?: number;
+  coordinate_y?: number;
+  coordinate_z?: number;
+  model_url?: string;
+  thumbnailUrl?: string;
   thumbnail_url?: string;
-  is_active: boolean;
-  createdAt: string;
-  updatedAt: string;
+  arcCount?: number;
+  is_active?: boolean;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface Character {
@@ -74,15 +80,22 @@ export interface Event {
 
 export interface User {
   id: number;
-  name: string;
+  username: string;
   email: string;
+  profile?: string;
   profileId?: number;
-  createdAt: string;
-  updatedAt: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface AuthResponse {
-  access_token: string;
+  accessToken: string;
+  user: {
+    id: number;
+    username: string;
+    email: string;
+    profile: string;
+  };
 }
 
 export interface ApiError {
