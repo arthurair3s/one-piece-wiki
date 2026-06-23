@@ -70,6 +70,7 @@ export class GetIslandDetailsHandler
 
     const characters = arcCharacters.map((acv: any) => ({
       id: acv.characterVersion.id,
+      characterId: acv.characterVersion.character_id,
       name: acv.characterVersion.alias || acv.characterVersion.character?.name,
       epithet: acv.characterVersion.epithet,
       image: acv.characterVersion.image_url,
