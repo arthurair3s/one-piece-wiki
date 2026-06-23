@@ -12,6 +12,8 @@ import { Header } from '@/components/header'
 import { Footer } from '@/components/footer'
 import { IslandPlaceholder } from '@/components/island-placeholder'
 import { Minimap } from '@/components/minimap'
+import { IslandDetailsModal } from '@/components/island-details-modal'
+import { CharacterCarouselModal } from '@/components/character-carousel-modal'
 
 const MAP_WIDTH = 2200
 const MAP_HEIGHT = 1400
@@ -28,8 +30,20 @@ export default function HomePage() {
   const [activeArcId, setActiveArcId] = useState<number>(1)
   const [activeSagaId, setActiveSagaId] = useState<number | null>(null)
   const [activeIslandId, setActiveIslandId] = useState<number | null>(null)
+  const [activeModal, setActiveModal] = useState<'details' | 'characters' | null>(null)
 
   const { isOutOfSync, resolveSync } = useSync()
+
+  useEffect(() => {
+    if (activeIslandId !== null) {
+      const timer = setTimeout(() => {
+        setActiveModal('details')
+      }, 600)
+      return () => clearTimeout(timer)
+    } else {
+      setActiveModal(null)
+    }
+  }, [activeIslandId])
 
   const [sagas, setSagas] = useState<Saga[]>([])
   const [arcs, setArcs] = useState<Arc[]>([])
@@ -523,6 +537,25 @@ export default function HomePage() {
         arcs={arcs}
         onArcClick={setActiveArcId}
       />
+
+      {activeIslandId !== null && (
+        <>
+          <IslandDetailsModal
+            isOpen={activeModal === 'details'}
+            islandId={activeIslandId}
+            arcId={activeArcId}
+            onClose={() => setActiveIslandId(null)}
+            onNavigateToCharacters={() => setActiveModal('characters')}
+          />
+          <CharacterCarouselModal
+            isOpen={activeModal === 'characters'}
+            islandId={activeIslandId}
+            arcId={activeArcId}
+            onClose={() => setActiveIslandId(null)}
+            onBackToIsland={() => setActiveModal('details')}
+          />
+        </>
+      )}
     </div>
   )
 }

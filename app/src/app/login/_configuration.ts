@@ -12,19 +12,19 @@ export const LOGIN_CONFIG = {
     },
     password: {
       required: 'Senha é obrigatória',
-      minLength: 6,
+      minLength: 8,
       errorMessage: 'A senha deve ter pelo menos 6 caracteres'
     }
   },
   // Credenciais das seeds do banco de dados para acesso rápido nos testes
   demoUsers: [
     {
-      label: 'Administrador 🛡️',
+      label: 'Admin',
       email: 'admin@admin.com',
       password: 'admin123'
     },
     {
-      label: 'Jogador Padrão 🏴‍☠️',
+      label: 'User',
       email: 'luffy@onepiece.com',
       password: 'luffy123'
     }
