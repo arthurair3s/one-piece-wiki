@@ -1,6 +1,13 @@
 'use client'
 
-import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react'
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useCallback,
+  useRef
+} from 'react'
 import { usePathname } from 'next/navigation'
 import { getCookie } from '@/lib/cookies'
 import { getApiBaseUrl } from '@/services/api'
@@ -35,7 +42,7 @@ export function SyncProvider({ children }: { children: React.ReactNode }) {
       const API_BASE_URL = getApiBaseUrl()
       const response = await fetch(`${API_BASE_URL}/api/wiki/sagas`, {
         headers: {
-          'Authorization': `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json'
         }
       })
@@ -47,7 +54,10 @@ export function SyncProvider({ children }: { children: React.ReactNode }) {
 
       setLastSyncTime(new Date())
 
-      if (previousDataHash.current && previousDataHash.current !== currentHash) {
+      if (
+        previousDataHash.current &&
+        previousDataHash.current !== currentHash
+      ) {
         setIsOutOfSync(true)
       } else if (!previousDataHash.current) {
         previousDataHash.current = currentHash
@@ -57,7 +67,6 @@ export function SyncProvider({ children }: { children: React.ReactNode }) {
     }
   }, [])
 
-  // Polling periódico para detectar se o banco de leitura (Read DB) foi atualizado por eventos CDC.
   // Não executa em rotas públicas (login, register) para evitar requisições desnecessárias sem token.
   useEffect(() => {
     if (isPublicRoute) return
@@ -80,7 +89,9 @@ export function SyncProvider({ children }: { children: React.ReactNode }) {
   }, [])
 
   return (
-    <SyncContext.Provider value={{ isOutOfSync, lastSyncTime, triggerCheck, resolveSync }}>
+    <SyncContext.Provider
+      value={{ isOutOfSync, lastSyncTime, triggerCheck, resolveSync }}
+    >
       {children}
     </SyncContext.Provider>
   )
