@@ -56,3 +56,20 @@ export async function fetchFilteredMap(filters: MapFilters): Promise<Island[]> {
   const res = await apiClient<MapResponse>(endpoint)
   return res?.islands || []
 }
+
+// Busca os detalhes cronológicos de uma ilha (personagens e eventos vigentes em um arco)
+export async function fetchIslandDetails(islandId: number, arcId: number) {
+  return apiClient<any>(`/islands/${islandId}/details?arc_id=${arcId}`)
+}
+
+// Busca a lista de arcos temporais aos quais uma ilha pertence
+export async function fetchIslandArcs(islandId: number) {
+  return apiClient<any>(`/islands/${islandId}/arcs`)
+}
+
+// Busca as diferentes versões de um personagem pelo seu characterId
+export async function fetchCharacterVersions(characterId: number) {
+  return apiClient<any>(`/character-versions?character_id=${characterId}&limit=100`)
+}
+
+
