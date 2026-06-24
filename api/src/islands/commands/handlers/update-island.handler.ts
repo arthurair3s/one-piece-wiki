@@ -58,15 +58,10 @@ export class UpdateIslandHandler
       }, { transaction: t });
 
       if (arc_ids !== undefined) {
-        // remove vínculos antigos
-        await this.arcIslandModel.destroy({ 
-          where: { island_id: id },
-          transaction: t 
-        });
+        const targetArcIds = arc_ids.map(a => a.arc_id);
 
-        if (arc_ids.length > 0) {
-          // busca e valida se os arcos informados existem
-          const targetArcIds = arc_ids.map(a => a.arc_id);
+        // Busca e valida se os arcos informados existem
+        if (targetArcIds.length > 0) {
           const foundArcs = await this.arcModel.findAll({
             where: { id: { [Op.in]: targetArcIds } },
             transaction: t
@@ -76,15 +71,38 @@ export class UpdateIslandHandler
             const missingIds = targetArcIds.filter(id => !foundIds.includes(id));
             throw new NotFoundException(`Arcos com IDs [${missingIds.join(', ')}] não encontrados.`);
           }
+        }
 
-          const pivots = arc_ids.map((assoc) => {
-            return {
+        // Remove (soft-delete) apenas os vínculos antigos que NÃO estão na nova lista
+        await this.arcIslandModel.destroy({
+          where: {
+            island_id: id,
+            arc_id: { [Op.notIn]: targetArcIds }
+          },
+          transaction: t
+        });
+
+        // Para os arcos solicitados, verifica se já existem (ativos ou soft-deletados)
+        const existingPivots = await this.arcIslandModel.findAll({
+          where: { island_id: id },
+          paranoid: false,
+          transaction: t
+        });
+
+        for (const assoc of arc_ids) {
+          const existing = existingPivots.find(p => p.arc_id === assoc.arc_id);
+          if (existing) {
+            if (existing.deletedAt) {
+              await existing.restore({ transaction: t });
+            }
+            await existing.update({ order: assoc.order }, { transaction: t });
+          } else {
+            await this.arcIslandModel.create({
               arc_id: assoc.arc_id,
               island_id: id,
               order: assoc.order,
-            };
-          });
-          await this.arcIslandModel.bulkCreate(pivots, { transaction: t });
+            }, { transaction: t });
+          }
         }
       }
 
