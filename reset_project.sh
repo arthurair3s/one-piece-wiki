@@ -12,16 +12,18 @@ until [ "$(curl -s -o /dev/null -w '%{http_code}' http://localhost:8083/connecto
   sleep 2
 done
 
-# 3. Registra o conector do Debezium
-echo "Registrando conector Debezium para PostgreSQL..."
-curl -i -X POST -H "Content-Type: application/json" http://localhost:8083/connectors/ -d @connector.json
-
-# 4. Executa as migrations e seeds no banco de escrita
-echo "Executando migrations e seeds..."
+# 3. Executa as migrations e seeds no banco de escrita (Write DB)
+# IMPORTANTE: Rodamos isso ANTES de registrar o conector. 
+# Assim, o Debezium iniciará fazendo um Snapshot inicial consistente de todas as tabelas já povoadas.
+echo "Executando migrations e seeds no banco de escrita..."
 cd api
 npx sequelize-cli db:migrate
 npx sequelize-cli db:seed:all
 cd ..
+
+# 4. Registra o conector do Debezium
+echo "Registrando conector Debezium para PostgreSQL..."
+curl -i -X POST -H "Content-Type: application/json" http://localhost:8083/connectors/ -d @connector.json
 
 echo ""
 echo "✅ TUDO PRONTO! O Read DB foi criado e o Debezium já está espelhando os dados."
