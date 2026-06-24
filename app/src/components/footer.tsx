@@ -1,59 +1,55 @@
 'use client'
 
 import React from 'react'
-import type { Arc } from '@/types/api'
+import type { Arc, Island } from '@/types/api'
 
 export interface FooterProps {
   className?: string
-  activeArcId?: number
-  arcs?: Arc[]
-  onArcClick?: (id: number) => void
+  activeIslandId: number | null
+  visibleIslands: Island[]
+  arcs: Arc[]
+  onIslandSelect: (id: number) => void
+  sliderVal: number
+  onSliderChange: (val: number) => void
 }
 
 export function Footer({
   className = '',
-  activeArcId = 1,
+  activeIslandId,
+  visibleIslands = [],
   arcs = [],
-  onArcClick
+  onIslandSelect,
+  sliderVal,
+  onSliderChange
 }: FooterProps) {
-  const currentArcs = arcs || []
-
-  const activeIndex = currentArcs.findIndex(arc => arc.id === activeArcId)
-  const initialSliderVal = activeIndex >= 0 ? activeIndex : 0
-
-  const [sliderVal, setSliderVal] = React.useState<number>(initialSliderVal)
-
-  React.useEffect(() => {
-    const idx = currentArcs.findIndex(arc => arc.id === activeArcId)
-    if (idx >= 0) {
-      setSliderVal(idx)
-    }
-  }, [activeArcId, currentArcs])
+  const ISLAND_ARC_MAPPING: Record<number, number> = {
+    1: 1, // Vila Foosha -> Romance Dawn
+    2: 1, // Shells Town -> Romance Dawn
+    3: 2, // Orange Town -> Orange Town
+    4: 3, // Ilha Gecko -> Syrup Village
+    5: 4, // Baratie -> Baratie
+  }
 
   const handleSliderChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = parseFloat(e.target.value)
-    setSliderVal(val)
+    onSliderChange(val)
+  }
 
-    const closestIdx = Math.round(val)
-    const closestArc = currentArcs[closestIdx]
-    if (closestArc && closestArc.id !== activeArcId) {
-      onArcClick && onArcClick(closestArc.id)
+  const handleSliderRelease = () => {
+    const closestIdx = Math.round(sliderVal)
+    const closestIsland = visibleIslands[closestIdx]
+    if (closestIsland) {
+      onIslandSelect(closestIsland.id)
     }
   }
 
-  // Identifica quais arcos marcam o início de uma nova Saga (menor ID ou ordem de arco daquela Saga)
-  const sagaStartArcIds = React.useMemo(() => {
-    const map: Record<number, number> = {}
-    currentArcs.forEach((arc) => {
-      if (!map[arc.sagaId] || arc.id < map[arc.sagaId]) {
-        map[arc.sagaId] = arc.id
-      }
-    })
-    return new Set(Object.values(map))
-  }, [currentArcs])
-
   const progressPercent =
-    currentArcs.length > 1 ? (sliderVal / (currentArcs.length - 1)) * 100 : 0
+    visibleIslands.length > 1 ? (sliderVal / (visibleIslands.length - 1)) * 100 : 0
+
+  // Calculate info for the closest island to display in the floating tooltip
+  const closestIdx = Math.round(sliderVal)
+  const closestIsland = visibleIslands[closestIdx]
+  const closestArc = closestIsland ? arcs.find(a => a.id === ISLAND_ARC_MAPPING[closestIsland.id]) : null
 
   return (
     <footer
@@ -63,13 +59,15 @@ export function Footer({
         <div className="flex items-center gap-4 w-full h-11">
           <div className="flex items-center gap-1.5 shrink-0 select-none">
             <span className="text-[10px] font-bold text-primary uppercase tracking-wider">
-              TIMELINE:
+              JORNADA:
             </span>
           </div>
 
           <div className="flex-1 relative flex items-center h-full px-4">
+            {/* Base Track */}
             <div className="absolute left-4 right-4 h-[2px] bg-border/40 rounded-full pointer-events-none" />
 
+            {/* Active Progress Track */}
             <div
               className="absolute left-4 h-[2px] bg-primary/40 rounded-full pointer-events-none transition-all duration-75"
               style={{
@@ -77,14 +75,32 @@ export function Footer({
               }}
             />
 
+            {/* Slider Input Wrapper */}
             <div className="relative w-full flex items-center h-8">
+              {/* Floating Tooltip */}
+              {closestIsland && (
+                <div
+                  className="absolute bottom-9 whitespace-nowrap text-[10px] md:text-[11px] font-bold tracking-tight rounded-md px-2 py-0.5 md:py-1 bg-background/95 border border-primary/20 shadow-lg text-primary pointer-events-none -translate-x-1/2 z-30 transition-all"
+                  style={{
+                    left: `${progressPercent}%`,
+                    transform: `translateX(-50%) translateY(0)`,
+                  }}
+                >
+                  {closestArc && closestArc.sagaName
+                    ? `${closestArc.sagaName.toUpperCase()} • ${closestArc.name} • ${closestIsland.name}`
+                    : closestIsland.name}
+                </div>
+              )}
+
               <input
                 type="range"
                 min={0}
-                max={currentArcs.length - 1}
+                max={visibleIslands.length > 1 ? visibleIslands.length - 1 : 0}
                 step={0.01}
                 value={sliderVal}
                 onChange={handleSliderChange}
+                onMouseUp={handleSliderRelease}
+                onTouchEnd={handleSliderRelease}
                 className="appearance-none bg-transparent outline-none cursor-pointer w-full h-8 relative z-25
                   [&::-webkit-slider-runnable-track]:bg-transparent
                   [&::-webkit-slider-thumb]:appearance-none
@@ -109,55 +125,29 @@ export function Footer({
                   [&::-moz-range-thumb]:active:scale-95"
               />
 
+              {/* Ticks for Islands */}
               <div className="absolute left-4 right-4 top-0 bottom-0 pointer-events-none z-10">
-                {currentArcs.map((arc, index) => {
+                {visibleIslands.map((island, index) => {
                   const pct =
-                    currentArcs.length > 1
-                      ? (index / (currentArcs.length - 1)) * 100
+                    visibleIslands.length > 1
+                      ? (index / (visibleIslands.length - 1)) * 100
                       : 0
                   const distance = Math.abs(sliderVal - index)
                   const isNear = distance <= 0.35
 
-                  // Anti-spoiler: Oculta arcos posteriores ao selecionado
-                  if (index > activeIndex) return null;
-
-                  const isSagaStart = sagaStartArcIds.has(arc.id)
-
                   return (
                     <div
-                      key={arc.id}
+                      key={island.id}
                       className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 flex flex-col items-center animate-fade-in"
                       style={{ left: `${pct}%` }}
                     >
-                      <span
-                        className={`absolute bottom-5 whitespace-nowrap text-[10px] font-bold tracking-tight rounded-md px-1.5 py-0.5 bg-background/95 border border-border/40 shadow-sm transition-all duration-300 ${
+                      <div
+                        className={`rounded-full transition-all duration-300 ${
                           isNear
-                            ? 'opacity-100 translate-y-0 scale-100 text-primary border-primary/20'
-                            : 'opacity-0 translate-y-1 scale-75'
+                            ? 'w-3 h-3 bg-primary ring-4 ring-primary/15 scale-110'
+                            : 'w-2.5 h-2.5 bg-background border-2 border-border/80 scale-95'
                         }`}
-                      >
-                        {isSagaStart && arc.sagaName 
-                          ? `${arc.sagaName.toUpperCase()} • ${arc.name}` 
-                          : arc.name}
-                      </span>
-
-                      {isSagaStart ? (
-                        <div
-                          className={`rotate-45 transition-all duration-300 border-2 shadow-[0_1px_3px_rgba(0,0,0,0.15)] ${
-                            isNear
-                              ? 'w-3.5 h-3.5 bg-primary border-primary ring-4 ring-primary/10 scale-110'
-                              : 'w-2.5 h-2.5 bg-background border-primary/60 scale-95'
-                          }`}
-                        />
-                      ) : (
-                        <div
-                          className={`rounded-full transition-all duration-300 ${
-                            isNear
-                              ? 'w-2.5 h-2.5 bg-primary ring-2 ring-primary/20 scale-110'
-                              : 'w-1 h-1 bg-border/80 scale-90'
-                          }`}
-                        />
-                      )}
+                      />
                     </div>
                   )
                 })}

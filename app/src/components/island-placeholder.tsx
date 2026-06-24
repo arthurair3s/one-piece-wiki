@@ -34,10 +34,10 @@ export function IslandPlaceholder({
       className={`${sizes[size]} ${className} group cursor-pointer select-none`}
     >
       <span
-        className={`transition-all duration-300 bg-background/95 text-foreground px-2 py-0.5 rounded text-xs border shadow-md mb-1 z-10 pointer-events-none block text-center
+        className={`transition-all duration-300 bg-[#fbf9f4]/95 text-[#4f3f24] px-2 py-0.5 rounded text-xs border border-[#d2c29d] shadow-md mb-1 z-10 pointer-events-none block text-center font-bold
           ${selected 
-            ? "opacity-100 border-primary text-primary font-bold scale-105" 
-            : "opacity-0 group-hover:opacity-100 border-border"
+            ? "opacity-100 border-[#4f3f24] scale-105" 
+            : "opacity-80 group-hover:opacity-100"
           }`}
       >
         {name}
@@ -47,22 +47,16 @@ export function IslandPlaceholder({
         <div
           className={`absolute inset-0 rounded-[50%] border-2 transition-all duration-300
             ${selected
-              ? "bg-primary/20 border-primary shadow-[0_0_15px_rgba(var(--primary),0.5)] animate-pulse"
+              ? "bg-[#bca374] border-[#4f3f24] shadow-[0_0_20px_rgba(188,163,116,0.7)] animate-pulse"
               : highlighted
-                ? "bg-muted/50 border-dashed border-muted-foreground/30 group-hover:border-primary/50 group-hover:bg-primary/10"
-                : "bg-muted/20 border-dotted border-muted-foreground/10"
+                ? "bg-[#d2c29d] border-dashed border-[#8c7a56] group-hover:bg-[#bca374] group-hover:border-[#4f3f24] group-hover:shadow-[0_0_12px_rgba(188,163,116,0.4)]"
+                : "bg-[#e4dcce] border-dotted border-[#b4a995]"
             }`}
         />
       </div>
 
       <div
-        className={`w-4/5 h-2/5 mx-auto rounded-[50%] -mt-2 transition-all duration-300
-          ${selected
-            ? "bg-primary/20"
-            : highlighted
-              ? "bg-muted/30 group-hover:bg-primary/5"
-              : "bg-muted/10"
-          }`}
+        className={`w-4/5 h-2/5 mx-auto rounded-[50%] -mt-2 transition-all duration-300 bg-black/15 shadow-[0_4px_8px_rgba(0,0,0,0.15)]`}
       />
     </div>
   );
