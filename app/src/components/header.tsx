@@ -1,6 +1,8 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -89,6 +91,7 @@ export function Header({
   onIslandSelect,
   onLogout,
 }: HeaderProps) {
+  const router = useRouter();
   const [showSuggestions, setShowSuggestions] = useState(false);
 
   // Tratamento de mudança de seleção para Select components
@@ -182,10 +185,10 @@ export function Header({
                   <DropdownMenuSeparator />
                   {isAdmin && (
                     <>
-                      <DropdownMenuItem id="menu-manage-content-mobile" className="rounded-lg px-2.5 py-1.5 cursor-pointer">
+                      <DropdownMenuItem id="menu-manage-content-mobile" className="rounded-lg px-2.5 py-1.5 cursor-pointer" render={<Link href="/admin/content" />}>
                         Gerenciar Conteúdos
                       </DropdownMenuItem>
-                      <DropdownMenuItem id="menu-manage-users-mobile" className="rounded-lg px-2.5 py-1.5 cursor-pointer">
+                      <DropdownMenuItem id="menu-manage-users-mobile" className="rounded-lg px-2.5 py-1.5 cursor-pointer" render={<Link href="/admin/users" />}>
                         Gerenciar Usuários
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
@@ -287,10 +290,10 @@ export function Header({
                 <DropdownMenuSeparator />
                 {isAdmin && (
                   <>
-                    <DropdownMenuItem id="menu-manage-content" className="rounded-xl px-3 py-2 cursor-pointer">
+                    <DropdownMenuItem id="menu-manage-content" className="rounded-xl px-3 py-2 cursor-pointer" render={<Link href="/admin/content" />}>
                       Gerenciar Conteúdos
                     </DropdownMenuItem>
-                    <DropdownMenuItem id="menu-manage-users" className="rounded-xl px-3 py-2 cursor-pointer">
+                    <DropdownMenuItem id="menu-manage-users" className="rounded-xl px-3 py-2 cursor-pointer" render={<Link href="/admin/users" />}>
                       Gerenciar Usuários
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
