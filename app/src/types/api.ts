@@ -82,10 +82,24 @@ export interface User {
   id: number;
   username: string;
   email: string;
-  profile?: string;
+  profile?: string | { id: number; name: string; description?: string; createdAt?: string; updatedAt?: string; deletedAt?: string | null };
   profileId?: number;
   createdAt?: string;
   updatedAt?: string;
+}
+
+export interface Profile {
+  id: number;
+  name: string;
+  description?: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+// Resposta paginada
+export interface PaginatedResponse<T> {
+  count: number;
+  rows: T[];
 }
 
 export interface AuthResponse {
