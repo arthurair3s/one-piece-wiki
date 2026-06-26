@@ -38,6 +38,7 @@ export async function apiClient<T>(
     method,
     headers,
     body: body ? JSON.stringify(body) : undefined,
+    cache: 'no-store',
   });
 
   if (!response.ok) {
@@ -47,5 +48,10 @@ export async function apiClient<T>(
     );
   }
 
-  return response.json() as Promise<T>;
+  if (response.status === 204) {
+    return {} as T;
+  }
+
+  const text = await response.text();
+  return text ? JSON.parse(text) : ({} as T);
 }
