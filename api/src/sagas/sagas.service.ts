@@ -51,7 +51,7 @@ export class SagasService {
   // UPDATE
   async update(id: number, dto: UpdateSagaDto) {
     return this.commandBus.execute(
-      new UpdateSagaCommand(id, dto.name, dto.order),
+      new UpdateSagaCommand(id, dto.name, dto.order, dto.description),
     );
   }
 

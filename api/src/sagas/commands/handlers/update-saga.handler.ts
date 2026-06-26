@@ -13,7 +13,7 @@ export class UpdateSagaHandler implements ICommandHandler<UpdateSagaCommand> {
   ) {}
 
   async execute(command: UpdateSagaCommand): Promise<Saga> {
-    const { id, name, order } = command;
+    const { id, name, order, description } = command;
 
     // REGRA 1 — precisa existir
     const saga = await this.sagaModel.findByPk(id);
@@ -51,6 +51,7 @@ export class UpdateSagaHandler implements ICommandHandler<UpdateSagaCommand> {
     await saga.update({
       name: name ?? saga.name,
       order: order ?? saga.order,
+      description: description !== undefined ? description : saga.description,
     });
 
     return saga;
