@@ -3,5 +3,6 @@ export class UpdateSagaCommand {
     public readonly id: number,
     public readonly name?: string,
     public readonly order?: number,
+    public readonly description?: string,
   ) {}
 }

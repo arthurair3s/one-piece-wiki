@@ -8,6 +8,11 @@ export class UpdateSagaDto {
   @MaxLength(100)
   name?: string;
 
+  @ApiPropertyOptional({ example: 'Uma das melhores sagas.', description: 'Descrição enciclopédica da saga' })
+  @IsOptional()
+  @IsString()
+  description?: string;
+
   @ApiPropertyOptional({ example: 2, description: 'Ordem cronológica da saga no sistema' })
   @IsOptional()
   @IsInt()
