@@ -59,22 +59,28 @@ export default function RegisterPage() {
       setTimeout(() => {
         router.push(REGISTER_CONFIG.redirectUrl);
       }, 1500);
-    } catch (err: any) {
-      setErrorMsg(err.message || "Erro ao realizar o cadastro. Tente novamente.");
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Erro ao realizar o cadastro. Tente novamente.";
+      setErrorMsg(message);
     } finally {
       setIsLoading(false);
     }
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center px-4">
-      <Card className="w-full max-w-sm">
-        <CardHeader className="text-center">
-          <div className="text-4xl mb-2">🏴‍☠️</div>
+    <div className="flex min-h-screen items-center justify-center px-4 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-slate-900 via-slate-950 to-black relative overflow-hidden">
+      {/* Decorative Grid Pattern */}
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,#0f172a_1px,transparent_1px),linear-gradient(to_bottom,#0f172a_1px,transparent_1px)] bg-[size:24px_24px] opacity-30 pointer-events-none" />
+      {/* Soft Glow */}
+      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] rounded-full bg-primary/5 blur-[80px] pointer-events-none" />
+
+      <Card className="w-full max-w-sm bg-card/75 border border-border/40 backdrop-blur-md shadow-2xl rounded-2xl animate-in fade-in slide-in-from-bottom-4 duration-500 ease-out relative z-10">
+        <CardHeader className="text-center pb-4">
+          <div className="text-4xl mb-2 animate-bounce duration-1000">🏴‍☠️</div>
           <CardTitle className="text-2xl font-bold tracking-tight">
             Registro
           </CardTitle>
-          <CardDescription>
+          <CardDescription className="text-xs text-muted-foreground/80">
             Crie sua conta para acessar o Grand Line.
           </CardDescription>
         </CardHeader>
@@ -102,6 +108,7 @@ export default function RegisterPage() {
                 disabled={isLoading}
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
+                className="bg-muted/10 border-border/40 focus-visible:ring-primary"
               />
             </div>
 
@@ -115,6 +122,7 @@ export default function RegisterPage() {
                 disabled={isLoading}
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
+                className="bg-muted/10 border-border/40 focus-visible:ring-primary"
               />
             </div>
 
@@ -128,6 +136,7 @@ export default function RegisterPage() {
                 disabled={isLoading}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                className="bg-muted/10 border-border/40 focus-visible:ring-primary"
               />
             </div>
 
@@ -141,10 +150,11 @@ export default function RegisterPage() {
                 disabled={isLoading}
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
+                className="bg-muted/10 border-border/40 focus-visible:ring-primary"
               />
             </div>
 
-            <Button type="submit" className="w-full mt-2" disabled={isLoading}>
+            <Button type="submit" className="w-full mt-2 transition-all duration-300 hover:opacity-90 active:scale-[0.98]" disabled={isLoading}>
               {isLoading ? "Registrando..." : "Registrar"}
             </Button>
 

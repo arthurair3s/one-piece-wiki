@@ -7,7 +7,7 @@ export interface IslandPreview {
   islandId: number;
   coordX: number;
   coordY: number;
-  rotationY: number; // radians (for internal use / map rendering)
+  rotationY: number; // radianos (para uso interno / renderização do mapa)
   scale: number;
 }
 
@@ -17,7 +17,7 @@ export interface IslandConfigModalProps {
   islandName: string;
   coordX: number;
   coordY: number;
-  rotationY: number;   // radians (converted from DB degrees in page.tsx)
+  rotationY: number;   // radianos (convertidos de graus do banco em page.tsx)
   scale: number;
   onClose: () => void;
   onSaved: () => void;
@@ -25,7 +25,7 @@ export interface IslandConfigModalProps {
   onPreviewChange: (preview: IslandPreview | null) => void;
 }
 
-const ROTATION_STEP = Math.PI / 8; // 22.5°
+const ROTATION_STEP = Math.PI / 8; // passo de 22.5 graus
 const COORD_NUDGE   = 1.0;
 const SCALE_STEP    = 0.1;
 const MIN_SCALE     = 0.2;
@@ -55,8 +55,9 @@ export function IslandConfigModal({
   const [error,     setError]     = useState<string | null>(null);
   const [saved,     setSaved]     = useState(false);
 
-  // sync when modal opens for a different island
+  // sincroniza o estado local ao abrir o modal para uma ilha diferente
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setCoordX(initialX);
     setCoordY(initialY);
     setRotationY(initialRot);
@@ -65,7 +66,7 @@ export function IslandConfigModal({
     setSaved(false);
   }, [islandId, initialX, initialY, initialRot, initialScale]);
 
-  // broadcast live preview to the map every time any value changes
+  // transmite a pré-visualização em tempo real para o mapa ao alterar qualquer valor
   useEffect(() => {
     if (!isOpen || !islandId) {
       onPreviewChange(null);
@@ -74,7 +75,7 @@ export function IslandConfigModal({
     onPreviewChange({ islandId, coordX, coordY, rotationY, scale });
   }, [isOpen, islandId, coordX, coordY, rotationY, scale, onPreviewChange]);
 
-  // clear preview when unmounted/closed
+  // limpa a pré-visualização ao desmontar ou fechar o modal
   useEffect(() => {
     return () => onPreviewChange(null);
   }, [onPreviewChange]);
@@ -84,7 +85,7 @@ export function IslandConfigModal({
     setSaving(true);
     setError(null);
     try {
-      // db stores rotation_y in degrees — convert from radians before saving
+      // converte radianos para graus antes de persistir no banco de dados
       await updateIsland(islandId, {
         coordinate_x: parseFloat(coordX.toFixed(4)),
         coordinate_y: parseFloat(coordY.toFixed(4)),
@@ -93,28 +94,29 @@ export function IslandConfigModal({
       });
       setSaved(true);
       setTimeout(() => setSaved(false), 2000);
-      onSaved(); // triggers loadData → re-fetches from DB
-    } catch (e: any) {
-      setError(e.message || "Erro ao salvar.");
+      onSaved();
+    } catch (e: unknown) {
+      const message = e instanceof Error ? e.message : "Erro ao salvar.";
+      setError(message);
     } finally {
       setSaving(false);
     }
   }, [islandId, coordX, coordY, rotationY, scale, onSaved]);
 
   const handleCancel = useCallback(() => {
-    onPreviewChange(null); // revert map to DB values
+    onPreviewChange(null);
     onClose();
   }, [onClose, onPreviewChange]);
 
   if (!isOpen || !islandId) return null;
 
-  const panel    = "bg-black/45 backdrop-blur-md border border-white/15 rounded-xl shadow-2xl";
-  const label    = "text-[9px] font-bold uppercase tracking-widest text-white/50 mb-1 block";
-  const valueBadge = "text-[10px] font-mono text-amber-300 ml-1.5";
+  const panel    = "bg-background/80 backdrop-blur-md border border-border/40 rounded-xl shadow-2xl";
+  const label    = "text-[9px] font-bold uppercase tracking-wider text-muted-foreground mb-1 block";
+  const valueBadge = "text-[10px] font-mono text-primary ml-1.5";
   const iconBtn  = (extra = "") =>
-    `w-8 h-8 rounded-lg border border-white/20 bg-white/10 hover:bg-white/25 text-white flex items-center justify-center active:scale-90 transition-all text-sm select-none cursor-pointer font-bold ${extra}`;
+    `w-8 h-8 rounded-lg border border-border/50 bg-background/50 hover:bg-muted text-foreground flex items-center justify-center active:scale-90 transition-all text-sm select-none cursor-pointer font-bold ${extra}`;
   const nudgeBtn = iconBtn("w-7 h-7 text-xs");
-  const slider   = "flex-1 accent-amber-400 cursor-pointer h-1 rounded-full";
+  const slider   = "flex-1 accent-primary cursor-pointer h-1 rounded-full bg-border/40";
 
   return (
     <div className="fixed top-1/2 right-4 -translate-y-1/2 z-[70] flex flex-col gap-2 w-[270px] pointer-events-auto">
@@ -122,15 +124,15 @@ export function IslandConfigModal({
       {/* Header */}
       <div className={`${panel} flex items-center justify-between px-3 py-2`}>
         <div className="flex items-center gap-2">
-          <span className="text-xs text-amber-400 font-bold">⚙</span>
+          <span className="text-xs text-primary font-bold">⚙</span>
           <div>
-            <p className="text-[10px] font-bold text-white leading-none">{islandName}</p>
-            <p className="text-[9px] text-white/40 mt-0.5">Pré-visualização ativa</p>
+            <p className="text-[10px] font-bold text-foreground leading-none">{islandName}</p>
+            <p className="text-[9px] text-muted-foreground/80 mt-0.5">Pré-visualização ativa</p>
           </div>
         </div>
         <button
           onClick={handleCancel}
-          className="w-6 h-6 rounded-md border border-white/15 bg-white/10 hover:bg-white/25 text-white/60 hover:text-white flex items-center justify-center text-xs cursor-pointer transition-all"
+          className="w-6 h-6 rounded-md border border-border/50 bg-background/50 hover:bg-muted text-muted-foreground hover:text-foreground flex items-center justify-center text-xs cursor-pointer transition-all"
           title="Cancelar e reverter"
         >
           ✕
@@ -185,8 +187,8 @@ export function IslandConfigModal({
           <div className="flex gap-4">
             <button className={nudgeBtn} title="Esquerda"
               onClick={() => setCoordX(x => clamp(+(x - COORD_NUDGE).toFixed(1), 0, 100))}>◀</button>
-            <div className="w-7 h-7 rounded-full border border-white/10 bg-white/5 flex items-center justify-center">
-              <span className="text-[8px] text-white/30">✛</span>
+            <div className="w-7 h-7 rounded-full border border-border/50 bg-background/50 flex items-center justify-center">
+              <span className="text-[8px] text-muted-foreground/50">✛</span>
             </div>
             <button className={nudgeBtn} title="Direita"
               onClick={() => setCoordX(x => clamp(+(x + COORD_NUDGE).toFixed(1), 0, 100))}>▶</button>
@@ -197,16 +199,16 @@ export function IslandConfigModal({
         {/* Precision sliders */}
         <div className="flex flex-col gap-1.5 mt-0.5">
           <div className="flex items-center gap-1.5">
-            <span className="text-[9px] font-mono text-white/40 w-3">X</span>
+            <span className="text-[9px] font-mono text-muted-foreground w-3">X</span>
             <input type="range" className={slider} min={0} max={100} step={0.5}
               value={coordX} onChange={e => setCoordX(Number(e.target.value))} />
-            <span className="text-[9px] font-mono text-amber-300 w-9 text-right">{coordX.toFixed(1)}%</span>
+            <span className="text-[9px] font-mono text-primary w-9 text-right">{coordX.toFixed(1)}%</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <span className="text-[9px] font-mono text-white/40 w-3">Y</span>
+            <span className="text-[9px] font-mono text-muted-foreground w-3">Y</span>
             <input type="range" className={slider} min={0} max={100} step={0.5}
               value={coordY} onChange={e => setCoordY(Number(e.target.value))} />
-            <span className="text-[9px] font-mono text-amber-300 w-9 text-right">{coordY.toFixed(1)}%</span>
+            <span className="text-[9px] font-mono text-primary w-9 text-right">{coordY.toFixed(1)}%</span>
           </div>
         </div>
       </div>
@@ -218,7 +220,7 @@ export function IslandConfigModal({
           <button
             onClick={handleCancel}
             disabled={saving}
-            className="flex-1 py-1.5 rounded-lg border border-white/20 bg-white/10 hover:bg-white/20 text-white/70 hover:text-white text-[11px] font-semibold cursor-pointer transition-all disabled:opacity-40"
+            className="flex-1 py-1.5 rounded-lg border border-border/50 bg-background/50 hover:bg-muted text-muted-foreground hover:text-foreground text-[11px] font-semibold cursor-pointer transition-all disabled:opacity-40"
           >
             Cancelar
           </button>
@@ -227,8 +229,8 @@ export function IslandConfigModal({
             disabled={saving}
             className={`flex-1 py-1.5 rounded-lg border text-[11px] font-semibold cursor-pointer transition-all disabled:opacity-40
               ${saved
-                ? "border-green-400/60 bg-green-500/20 text-green-300"
-                : "border-amber-400/60 bg-amber-500/20 hover:bg-amber-500/35 text-amber-200"
+                ? "border-green-500/40 bg-green-500/10 text-green-500"
+                : "border-primary/40 bg-primary/10 hover:bg-primary/20 text-primary"
               }`}
           >
             {saving ? "Salvando…" : saved ? "✓ Salvo!" : "✓ Salvar"}

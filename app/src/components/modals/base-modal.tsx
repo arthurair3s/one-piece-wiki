@@ -30,7 +30,7 @@ export function BaseModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/60 backdrop-blur-[2px] transition-all duration-300 animate-[fadeIn_0.2s_ease-out]">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/70 backdrop-blur-sm transition-all duration-300 animate-[fadeIn_0.2s_ease-out]">
       {/* alinha o componente esquerdo externo e o card principal */}
       <div className="w-full max-w-4xl flex flex-col md:flex-row items-stretch md:items-center justify-center gap-6 relative">
         
@@ -42,12 +42,12 @@ export function BaseModal({
         )}
 
         {/* card principal do modal */}
-        <div className="flex-1 bg-card text-card-foreground border-2 border-border rounded-[2rem] shadow-xl p-6 md:p-10 flex flex-col justify-between min-h-[450px] md:h-[60vh] relative overflow-hidden">
+        <div className="flex-1 bg-card/75 text-card-foreground border border-border/50 rounded-2xl backdrop-blur-md shadow-2xl p-6 md:p-10 flex flex-col justify-between min-h-[450px] md:h-[60vh] relative overflow-hidden animate-in fade-in zoom-in-95 duration-200">
           
           {/* botão de fechar */}
           <button
             onClick={onClose}
-            className="absolute top-4 right-6 text-muted-foreground hover:text-foreground transition-colors text-lg font-bold p-1 cursor-pointer focus:outline-none z-20"
+            className="absolute top-4 right-4 w-7 h-7 rounded-lg border border-border/50 bg-background/50 text-muted-foreground hover:text-foreground hover:bg-muted flex items-center justify-center text-xs cursor-pointer transition-colors z-20"
             aria-label="Fechar"
           >
             ✕
@@ -67,7 +67,7 @@ export function BaseModal({
                 {showBackButton && onBack ? (
                   <button
                     onClick={onBack}
-                    className="border border-border hover:border-primary hover:text-primary rounded-lg w-8 h-8 flex items-center justify-center text-xs font-bold cursor-pointer transition-colors bg-background shrink-0"
+                    className="border border-border/40 hover:border-primary hover:text-primary rounded-lg w-8 h-8 flex items-center justify-center text-xs font-bold cursor-pointer transition-colors bg-background/50 hover:bg-muted shrink-0"
                     title="Voltar"
                   >
                     ←
