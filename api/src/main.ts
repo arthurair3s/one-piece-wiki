@@ -39,23 +39,28 @@ async function bootstrap() {
   });
 
   // Configura e conecta o microservice Kafka para consumir os tópicos CDC do Debezium
-  const kafkaBrokers = (process.env.KAFKA_BROKERS ?? 'kafka:29092').split(',');
-  app.connectMicroservice<MicroserviceOptions>({
-    transport: Transport.KAFKA,
-    options: {
-      client: {
-        brokers: kafkaBrokers,
+  // Apenas se o BYPASS_CDC não estiver ativo
+  if (process.env.BYPASS_CDC !== 'true') {
+    const kafkaBrokers = (process.env.KAFKA_BROKERS ?? 'kafka:29092').split(',');
+    app.connectMicroservice<MicroserviceOptions>({
+      transport: Transport.KAFKA,
+      options: {
+        client: {
+          brokers: kafkaBrokers,
+        },
+        consumer: {
+          groupId: 'nestjs-cdc-consumer-v3',
+        },
+        subscribe: {
+          fromBeginning: true,
+        },
       },
-      consumer: {
-        groupId: 'nestjs-cdc-consumer-v3',
-      },
-      subscribe: {
-        fromBeginning: true,
-      },
-    },
-  });
+    });
 
-  await app.startAllMicroservices();
+    await app.startAllMicroservices();
+  } else {
+    logger.log('Bypass de CDC ativo. Pulando inicialização do microservice Kafka.');
+  }
 
   const port = process.env.PORT ?? 3000;
   await app.listen(port);
