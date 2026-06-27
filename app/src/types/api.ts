@@ -77,6 +77,7 @@ export interface Event {
   id: number;
   title: string;
   description?: string;
+  type: string;
   order: number;
   islandId: number;
   arcId: number;
