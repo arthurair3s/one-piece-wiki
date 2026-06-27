@@ -40,6 +40,7 @@ import { WikiModule } from './wiki/wiki.module';
         username: configService.get<string>('DB_USERNAME'),
         password: configService.get<string>('DB_PASSWORD'),
         database: configService.get<string>('DB_DATABASE'),
+        schema: configService.get<string>('DB_SCHEMA', 'public'),
         autoLoadModels: true,
         synchronize: false,
       })
@@ -55,6 +56,7 @@ import { WikiModule } from './wiki/wiki.module';
         username: configService.get<string>('DB_USERNAME'),
         password: configService.get<string>('DB_PASSWORD'),
         database: configService.get<string>('DB_DATABASE_READ'),
+        schema: configService.get<string>('DB_SCHEMA_READ', 'public'),
         autoLoadModels: true,
         synchronize: true, // cria tabelas do Read DB automaticamente
       }),
