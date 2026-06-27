@@ -32,18 +32,43 @@ async def fetch_wiki_island_description(island_name: str, fallback_desc: str) ->
         async with httpx.AsyncClient(timeout=10.0) as client:
             response = await client.get(WIKI_API_URL, params=params)
             response.raise_for_status()
-            data = response.json()
-            if "parse" in data:
+            
+            # verifica se a resposta e um json valido
+            content_type = response.headers.get("content-type", "")
+            if "application/json" not in content_type:
+                logger.warning(f"Resposta nao e JSON ao buscar ilha {island_name}: {content_type}")
+                return fallback_desc
+                
+            try:
+                data = response.json()
+            except Exception as je:
+                logger.error(f"Erro ao decodificar json da ilha {island_name}: {je}")
+                return fallback_desc
+                
+            if isinstance(data, dict) and "parse" in data:
                 html_content = data["parse"]["text"]["*"]
                 soup = BeautifulSoup(html_content, "html.parser")
                 
-                # Decompose infoboxes, tables, figures, scripts, styles
+                # remove tabelas, figuras, scripts e estilos
                 for el in soup.find_all(["table", "figure", "script", "style"]):
                     el.decompose()
-                for el in soup.find_all(class_=lambda x: x and ("infobox" in x or "navbox" in x or "aside" in x)):
+                
+                # remove caixas de informacao e navegacao
+                def has_unwanted_class(classes):
+                    if not classes:
+                        return False
+                    if isinstance(classes, str):
+                        classes = [classes]
+                    for c in classes:
+                        c_lower = c.lower()
+                        if "infobox" in c_lower or "navbox" in c_lower or "aside" in c_lower:
+                            return True
+                    return False
+                    
+                for el in soup.find_all(class_=has_unwanted_class):
                     el.decompose()
                 
-                # Get paragraphs
+                # obtem os paragrafos de texto
                 paragraphs = []
                 for p in soup.find_all("p"):
                     p_text = p.get_text().strip()
@@ -78,8 +103,8 @@ ARC_SEEDS = {
             {
                 "name": "Vila Foosha",
                 "description": "A pacífica ilha de Dawn Island, terra natal de Monkey D. Luffy. Caracterizada por um relevo coberto por florestas densas, costas rochosas e um clima ameno, ela abriga a pacata Vila Foosha, um pequeno porto de pescadores, e o Monte Colubo, esconderijo dos bandidos da montanha comandados por Dadan. Dawn Island também serviu de ancoradouro temporário para os Piratas do Ruivo e foi o local histórico onde Luffy acidentalmente consumiu a Gomu Gomu no Mi.",
-                "coordinate_x": 85.0,
-                "coordinate_y": 52.0,
+                "coordinate_x": 89.3,
+                "coordinate_y": 35.9,
                 "coordinate_z": 0.0,
                 "model_url": "models/foosha.gltf",
                 "thumbnail_url": "https://images.grandline.com/thumbnails/foosha.png",
@@ -88,8 +113,8 @@ ARC_SEEDS = {
             {
                 "name": "Shells Town",
                 "description": "Uma importante ilha portuária de relevo urbano suave no East Blue, cercada por baías protegidas e dominada pela grande Base de Operações da 153ª Divisão da Marinha. Shells Town abriga a famosa Taberna local gerenciada por Rika e sua mãe. A ilha foi o cenário histórico da libertação e queda da tirania do corrupto Capitão Morgan Mão-de-Machado, e o local onde Roronoa Zoro juntou-se a Monkey D. Luffy como o primeiro tripulante dos Piratas do Chapéu de Palha.",
-                "coordinate_x": 42.0,
-                "coordinate_y": 25.0,
+                "coordinate_x": 65.2,
+                "coordinate_y": 9.1,
                 "coordinate_z": 0.0,
                 "model_url": "models/shells-town.gltf",
                 "thumbnail_url": "https://images.grandline.com/thumbnails/shells-town.png",
@@ -188,10 +213,10 @@ ARC_SEEDS = {
             {
                 "name": "Orange Town",
                 "description": "Uma ilha costeira plana e pitoresca, conhecida por seus bosques frutíferos e pomares abundantes de laranjas. Orange Town abriga o porto central, a Prefeitura e o pet shop que o cão incrivelmente leal Chouchou protege bravamente. A cidade foi ocupada e devastada pela tripulação dos Piratas do Buggy, tornando-se o cenário de batalhas memoráveis onde Luffy, Zoro e Nami uniram suas forças pela primeira vez para libertar os moradores da opressão.",
-                "coordinate_x": 15.0,
-                "coordinate_y": 70.0,
+                "coordinate_x": 44.9,
+                "coordinate_y": 39.6,
                 "coordinate_z": 0.0,
-                "model_url": "models/orange-town.gltf",
+                "model_url": "",
                 "thumbnail_url": "https://images.grandline.com/thumbnails/orange-town.png",
                 "is_active": True
             }
@@ -291,10 +316,10 @@ ARC_SEEDS = {
             {
                 "name": "Ilha Gecko",
                 "description": "Uma pacífica ilha dominada por colinas verdejantes e encostas inclinadas de terra batida, isolada do oceano por penhascos íngremes ideais para defesa. Nela situa-se a Vila Syrup, a imponente Mansão da herdeira Kaya e as encostas norte e sul. Sendo a terra natal de Usopp, foi o palco onde o bando impediu a nefasta conspiração do mordomo Klahadore (Capitão Kuro) e recebeu de presente a caravela Going Merry para iniciar suas navegações pelo mar.",
-                "coordinate_x": 30.0,
-                "coordinate_y": 55.0,
+                "coordinate_x": 16.0,
+                "coordinate_y": 37.5,
                 "coordinate_z": 0.0,
-                "model_url": "models/syrup.gltf",
+                "model_url": "",
                 "thumbnail_url": "https://images.grandline.com/thumbnails/syrup.png",
                 "is_active": True
             }
@@ -411,10 +436,10 @@ ARC_SEEDS = {
             {
                 "name": "Baratie",
                 "description": "O famoso restaurante flutuante do East Blue, construído em um navio de grande porte no formato de um peixe e ancorado no meio do oceano. Fundado pelo ex-capitão pirata Zeff Perna Vermelha, conta com convés de combate retráteis e uma cozinha lendária. O Baratie foi o palco do duelo histórico entre Roronoa Zoro e Mihawk Olhos de Gavião, além de servir como o local de recrutamento do cozinheiro Sanji após Luffy derrotar a armada do Almirante Pirata Don Krieg.",
-                "coordinate_x": 50.0,
-                "coordinate_y": 75.0,
+                "coordinate_x": 4.3,
+                "coordinate_y": 81.0,
                 "coordinate_z": 0.0,
-                "model_url": "models/baratie.gltf",
+                "model_url": "",
                 "thumbnail_url": "https://images.grandline.com/thumbnails/baratie.png",
                 "is_active": True
             }
@@ -580,16 +605,28 @@ async def run_coleta(scope_type: str, scope_value: str) -> dict:
         async with httpx.AsyncClient(timeout=10.0) as client:
             response = await client.get(WIKI_API_URL, params=params)
             response.raise_for_status()
-            data = response.json()
             
-            pages = data.get("query", {}).get("pages", {})
-            page_id = list(pages.keys())[0]
+            # verifica se a resposta e um json valido
+            content_type = response.headers.get("content-type", "")
+            if "application/json" not in content_type:
+                raise Exception(f"Resposta nao e JSON: {content_type}")
+                
+            try:
+                data = response.json()
+            except Exception as je:
+                raise Exception(f"Erro ao decodificar JSON: {je}")
+            
+            pages = data.get("query", {}).get("pages", {}) if isinstance(data, dict) else {}
+            page_ids = list(pages.keys())
+            if not page_ids:
+                raise Exception("Nenhuma pagina retornada no JSON da query")
+            page_id = page_ids[0]
             
             if page_id == "-1":
-                logger.warning(f"Página '{title_query}' não encontrada na Wiki Fandom.")
+                logger.warning(f"Pagina '{title_query}' nao encontrada na Wiki Fandom.")
                 confidence = 0.85
             else:
-                logger.info(f"Página '{title_query}' encontrada na Wiki Fandom. Extraindo conteúdo.")
+                logger.info(f"Pagina '{title_query}' encontrada na Wiki Fandom. Extraindo conteudo.")
                 confidence = 0.95
                 
     except Exception as e:
