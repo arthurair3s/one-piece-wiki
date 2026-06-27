@@ -6,11 +6,11 @@ export interface BaseModalProps {
   isOpen: boolean;
   onClose: () => void;
   title?: string;
-  headerCustom?: React.ReactNode;   // Cabeçalho customizado (ex: barra de pesquisa)
+  headerCustom?: React.ReactNode;   // cabeçalho customizado
   showBackButton?: boolean;
   onBack?: () => void;
-  leftAddon?: React.ReactNode;      // Componente adicional (ex: Visualizador 3D)
-  leftAddonOutside?: boolean;      // Se true, exibe fora do card principal (à esquerda)
+  leftAddon?: React.ReactNode;      // componente adicional à esquerda (ex: visualizador 3d)
+  leftAddonOutside?: boolean;      // indica se o componente à esquerda é exibido fora do card
   children: React.ReactNode;
   footer?: React.ReactNode;
 }
@@ -23,7 +23,7 @@ export function BaseModal({
   showBackButton = false,
   onBack,
   leftAddon,
-  leftAddonOutside = true,         // Por padrão, exibido fora (à esquerda) conforme croqui
+  leftAddonOutside = true,         // exibido fora (à esquerda) por padrão
   children,
   footer,
 }: BaseModalProps) {
@@ -31,20 +31,20 @@ export function BaseModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/60 backdrop-blur-[2px] transition-all duration-300 animate-[fadeIn_0.2s_ease-out]">
-      {/* Container Flex que alinha o Addon Externo e o Card Principal */}
+      {/* alinha o componente esquerdo externo e o card principal */}
       <div className="w-full max-w-4xl flex flex-col md:flex-row items-stretch md:items-center justify-center gap-6 relative">
         
-        {/* ADDON ESQUERDO (EXTERNO) */}
+        {/* componente esquerdo externo */}
         {leftAddon && leftAddonOutside && (
           <div className="w-full md:w-[35%] shrink-0 h-[280px] md:h-[60vh] flex flex-col justify-end">
             {leftAddon}
           </div>
         )}
 
-        {/* CARD PRINCIPAL DO MODAL */}
+        {/* card principal do modal */}
         <div className="flex-1 bg-card text-card-foreground border-2 border-border rounded-[2rem] shadow-xl p-6 md:p-10 flex flex-col justify-between min-h-[450px] md:h-[60vh] relative overflow-hidden">
           
-          {/* Botão de Fechar no Canto Superior Direito */}
+          {/* botão de fechar */}
           <button
             onClick={onClose}
             className="absolute top-4 right-6 text-muted-foreground hover:text-foreground transition-colors text-lg font-bold p-1 cursor-pointer focus:outline-none z-20"
@@ -53,16 +53,15 @@ export function BaseModal({
             ✕
           </button>
 
-          {/* ADDON ESQUERDO (INTERNO) */}
+          {/* componente esquerdo interno */}
           {leftAddon && !leftAddonOutside && (
             <div className="w-full md:w-[35%] shrink-0 mb-4 md:mb-0 md:mr-6">
               {leftAddon}
             </div>
           )}
 
-          {/* CONTEÚDO PRINCIPAL DO MODAL */}
-          <div className="flex-1 flex flex-col h-full">
-            {/* Cabeçalho do Modal */}
+          {/* conteúdo principal */}
+          <div className="flex-1 flex flex-col min-h-0">
             {(title || showBackButton || headerCustom) && (
               <header className="flex items-center justify-between gap-4 mb-4 select-none">
                 {showBackButton && onBack ? (
@@ -93,8 +92,7 @@ export function BaseModal({
               </header>
             )}
 
-            {/* Corpo do Modal */}
-            <div className="flex-1 overflow-y-auto pr-1">
+            <div className="flex-1 overflow-y-auto pr-1 min-h-0">
               {children}
             </div>
           </div>

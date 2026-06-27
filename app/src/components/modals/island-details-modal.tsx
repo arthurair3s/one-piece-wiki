@@ -2,13 +2,15 @@
 
 import React, { useState, useEffect } from "react";
 import { fetchIslandDetails, fetchIslandArcs } from "@/app/_service";
-import { BaseModal } from "@/components/base-modal";
-import { TopographicViewer } from "./topographic-viewer";
+import { BaseModal } from "@/components/modals/base-modal";
+import { TopographicViewer } from "@/components/viewers/topographic-viewer";
+import { Island3DViewer } from "@/components/viewers/island-3d-viewer";
 
 export interface IslandDetailsModalProps {
   isOpen: boolean;
   islandId: number | null;
   arcId: number;
+  modelUrl?: string | null;
   onClose: () => void;
   onNavigateToCharacters: () => void;
 }
@@ -17,6 +19,7 @@ export function IslandDetailsModal({
   isOpen,
   islandId,
   arcId,
+  modelUrl,
   onClose,
   onNavigateToCharacters,
 }: IslandDetailsModalProps) {
@@ -67,7 +70,14 @@ export function IslandDetailsModal({
         Modelo 3D da Ilha
       </span>
       <div className="flex-1 min-h-[220px] md:min-h-0">
-        <TopographicViewer name={islandData.name} />
+        {modelUrl ? (
+          <Island3DViewer
+            modelUrl={modelUrl}
+            fallback={<TopographicViewer name={islandData.name} />}
+          />
+        ) : (
+          <TopographicViewer name={islandData.name} />
+        )}
       </div>
     </div>
   ) : null;
@@ -82,10 +92,10 @@ export function IslandDetailsModal({
       leftAddon={leftAddon}
       leftAddonOutside={visualizerOutside}
       footer={
-        <div className="flex items-center justify-end">
+        <div className="flex items-center justify-end w-full pt-2">
           <button
             onClick={onNavigateToCharacters}
-            className="px-4 py-1.5 border border-border hover:border-primary hover:text-primary rounded-lg text-xs md:text-sm font-semibold cursor-pointer transition-colors bg-background hover:bg-muted/10 font-sans"
+            className="px-5 py-2 border border-border hover:border-primary hover:text-primary rounded-lg text-xs md:text-sm font-semibold cursor-pointer transition-colors bg-background hover:bg-muted/10 font-sans"
           >
             Personagens &gt;
           </button>

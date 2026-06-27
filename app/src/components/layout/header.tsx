@@ -19,8 +19,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import type { Saga, Arc, Island } from "@/types/api";
-import { SearchIcon, SettingsIcon } from "@/components/icons";
-import { SearchSuggestions } from "./header/search-suggestions";
+import { SearchIcon, SettingsIcon } from "@/components/ui/icons";
+import { SearchSuggestions } from "./search-suggestions";
 
 export interface HeaderProps {
   isAdmin?: boolean;

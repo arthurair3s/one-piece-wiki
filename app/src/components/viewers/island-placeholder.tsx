@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { Island3DViewer } from "./island-3d-viewer";
 
 export interface IslandPlaceholderProps {
   size?: "sm" | "md" | "lg";
@@ -10,6 +11,7 @@ export interface IslandPlaceholderProps {
   highlighted?: boolean;
   selected?: boolean;
   onClick?: () => void;
+  modelUrl?: string;
 }
 
 export function IslandPlaceholder({
@@ -20,12 +22,25 @@ export function IslandPlaceholder({
   highlighted = true,
   selected = false,
   onClick,
+  modelUrl,
 }: IslandPlaceholderProps) {
   const sizes = {
     sm: "w-48 h-24",
     md: "w-64 h-32",
     lg: "w-80 h-40",
   };
+
+  const renderFallback = () => (
+    <div
+      className={`absolute inset-0 rounded-[50%] border-2 transition-all duration-300
+        ${selected
+          ? "bg-[#bca374] border-[#4f3f24] shadow-[0_0_20px_rgba(188,163,116,0.7)] animate-pulse"
+          : highlighted
+            ? "bg-[#d2c29d] border-dashed border-[#8c7a56] group-hover:bg-[#bca374] group-hover:border-[#4f3f24] group-hover:shadow-[0_0_12px_rgba(188,163,116,0.4)]"
+            : "bg-[#e4dcce] border-dotted border-[#b4a995]"
+        }`}
+    />
+  );
 
   return (
     <div
@@ -44,15 +59,13 @@ export function IslandPlaceholder({
       </span>
 
       <div className="relative w-full h-3/5">
-        <div
-          className={`absolute inset-0 rounded-[50%] border-2 transition-all duration-300
-            ${selected
-              ? "bg-[#bca374] border-[#4f3f24] shadow-[0_0_20px_rgba(188,163,116,0.7)] animate-pulse"
-              : highlighted
-                ? "bg-[#d2c29d] border-dashed border-[#8c7a56] group-hover:bg-[#bca374] group-hover:border-[#4f3f24] group-hover:shadow-[0_0_12px_rgba(188,163,116,0.4)]"
-                : "bg-[#e4dcce] border-dotted border-[#b4a995]"
-            }`}
-        />
+        {modelUrl ? (
+          <div className="absolute inset-0 -top-6 -bottom-4">
+            <Island3DViewer modelUrl={modelUrl} fallback={renderFallback()} />
+          </div>
+        ) : (
+          renderFallback()
+        )}
       </div>
 
       <div

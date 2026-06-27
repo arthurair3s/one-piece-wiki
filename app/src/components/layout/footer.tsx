@@ -23,11 +23,11 @@ export function Footer({
   onSliderChange
 }: FooterProps) {
   const ISLAND_ARC_MAPPING: Record<number, number> = {
-    1: 1, // Vila Foosha -> Romance Dawn
-    2: 1, // Shells Town -> Romance Dawn
-    3: 2, // Orange Town -> Orange Town
-    4: 3, // Ilha Gecko -> Syrup Village
-    5: 4, // Baratie -> Baratie
+    1: 1, // vila foosha -> romance dawn
+    2: 1, // shells town -> romance dawn
+    3: 2, // orange town -> orange town
+    4: 3, // ilha gecko -> syrup village
+    5: 4, // baratie -> baratie
   }
 
   const handleSliderChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -46,7 +46,7 @@ export function Footer({
   const progressPercent =
     visibleIslands.length > 1 ? (sliderVal / (visibleIslands.length - 1)) * 100 : 0
 
-  // Calculate info for the closest island to display in the floating tooltip
+  // calcula as informações da ilha mais próxima para o tooltip
   const closestIdx = Math.round(sliderVal)
   const closestIsland = visibleIslands[closestIdx]
   const closestArc = closestIsland ? arcs.find(a => a.id === ISLAND_ARC_MAPPING[closestIsland.id]) : null
@@ -64,10 +64,10 @@ export function Footer({
           </div>
 
           <div className="flex-1 relative flex items-center h-full px-4">
-            {/* Base Track */}
+            {/* trilha base */}
             <div className="absolute left-4 right-4 h-[2px] bg-border/40 rounded-full pointer-events-none" />
 
-            {/* Active Progress Track */}
+            {/* trilha de progresso ativa */}
             <div
               className="absolute left-4 h-[2px] bg-primary/40 rounded-full pointer-events-none transition-all duration-75"
               style={{
@@ -75,9 +75,9 @@ export function Footer({
               }}
             />
 
-            {/* Slider Input Wrapper */}
+            {/* controle deslizante */}
             <div className="relative w-full flex items-center h-8">
-              {/* Floating Tooltip */}
+              {/* tooltip flutuante */}
               {closestIsland && (
                 <div
                   className="absolute bottom-9 whitespace-nowrap text-[10px] md:text-[11px] font-bold tracking-tight rounded-md px-2 py-0.5 md:py-1 bg-background/95 border border-primary/20 shadow-lg text-primary pointer-events-none -translate-x-1/2 z-30 transition-all"
@@ -125,7 +125,7 @@ export function Footer({
                   [&::-moz-range-thumb]:active:scale-95"
               />
 
-              {/* Ticks for Islands */}
+              {/* marcadores das ilhas */}
               <div className="absolute left-4 right-4 top-0 bottom-0 pointer-events-none z-10">
                 {visibleIslands.map((island, index) => {
                   const pct =

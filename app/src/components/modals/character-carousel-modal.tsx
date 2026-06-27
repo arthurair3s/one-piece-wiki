@@ -2,9 +2,9 @@
 
 import React, { useState, useEffect } from "react";
 import { fetchIslandDetails, fetchIslandArcs, fetchCharacterVersions } from "@/app/_service";
-import { BaseModal } from "@/components/base-modal";
-import { CharactersTab } from "./character-carousel/characters-tab";
-import { VersionsTab } from "./character-carousel/versions-tab";
+import { BaseModal } from "@/components/modals/base-modal";
+import { CharactersTab } from "@/components/character-carousel/characters-tab";
+import { VersionsTab } from "@/components/character-carousel/versions-tab";
 
 export interface CharacterCarouselModalProps {
   isOpen: boolean;
