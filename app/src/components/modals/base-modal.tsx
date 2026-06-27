@@ -32,17 +32,17 @@ export function BaseModal({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/70 backdrop-blur-sm transition-all duration-300 animate-[fadeIn_0.2s_ease-out]">
       {/* alinha o componente esquerdo externo e o card principal */}
-      <div className="w-full max-w-4xl flex flex-col md:flex-row items-stretch md:items-center justify-center gap-6 relative">
+      <div className="w-full max-w-6xl flex flex-col md:flex-row items-stretch md:items-center justify-center gap-6 relative">
         
         {/* componente esquerdo externo */}
         {leftAddon && leftAddonOutside && (
-          <div className="w-full md:w-[35%] shrink-0 h-[280px] md:h-[60vh] flex flex-col justify-end">
+          <div className="w-full md:w-[35%] shrink-0 h-[280px] md:h-[80vh] flex flex-col justify-end">
             {leftAddon}
           </div>
         )}
 
         {/* card principal do modal */}
-        <div className="flex-1 bg-card/75 text-card-foreground border border-border/50 rounded-2xl backdrop-blur-md shadow-2xl p-6 md:p-10 flex flex-col justify-between min-h-[450px] md:h-[60vh] relative overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+        <div className="flex-1 bg-card/75 text-card-foreground border border-border/50 rounded-2xl backdrop-blur-md shadow-2xl p-6 md:p-10 flex flex-col justify-between min-h-[580px] md:h-[80vh] relative overflow-hidden animate-in fade-in zoom-in-95 duration-200">
           
           {/* botão de fechar */}
           <button

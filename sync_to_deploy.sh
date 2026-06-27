@@ -54,7 +54,7 @@ cd - > /dev/null || exit
 # 5. Envia alterações do Frontend (APP) para o GitHub
 echo "🚀 Enviando atualizações do Frontend..."
 cd "$APP_DEST" || exit
-git add .
+git add .a
 if ! git diff-index --quiet HEAD --; then
     git commit -m "$COMMIT_MSG"
     git push origin main || git push origin master

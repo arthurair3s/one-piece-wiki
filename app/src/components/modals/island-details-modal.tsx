@@ -1,10 +1,55 @@
 "use client";
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable react-hooks/set-state-in-effect */
 import React, { useState, useEffect } from "react";
 import { fetchIslandDetails, fetchIslandArcs } from "@/app/_service";
 import { BaseModal } from "@/components/modals/base-modal";
 import { TopographicViewer } from "@/components/viewers/topographic-viewer";
 import { Island3DViewer } from "@/components/viewers/island-3d-viewer";
+
+const ISLAND_EXTRAS: Record<number, { geography: string; locations: string; history: string }> = {
+  1: {
+    geography: "Localizada na Ilha Dawn no East Blue. Possui relevo suave com colinas verdejantes, moinhos de vento, clima temperado e praias calmas adequadas para navegação de pequeno porte.",
+    locations: "Porto de Foosha, Taverna da Makino, Casa do Prefeito, Monte Colubo (arredores).",
+    history: "O berço de Monkey D. Luffy. Foi aqui que ele conheceu Shanks e os Piratas do Ruivo, comeu a Gomu Gomu no Mi, e treinou com Ace e Sabo sob os cuidados de Dadan."
+  },
+  2: {
+    geography: "Uma ilha fortificada com terreno predominantemente plano e uma enorme base da Marinha de arquitetura imponente que centraliza o poder e a administração local.",
+    locations: "Base da Marinha (153ª Divisão), Praça de Execução, Taverna de Rika, Ruas residenciais.",
+    history: "Controlada pelo tirânico Capitão Morgan 'Mão de Machado'. Luffy e Koby chegam à ilha e libertam Roronoa Zoro, que se junta à tripulação após derrotarem Morgan."
+  },
+  3: {
+    geography: "Uma pequena ilha portuária com vilas pitorescas cercadas por colinas arborizadas. O clima é subtropical e agradável, ideal para o comércio.",
+    locations: "Centro de Orange Town, Pet Shop do Chou Chou, Porto de Fuga, Torre do Relógio.",
+    history: "Invadida pelos Piratas do Buggy, o Palhaço. Luffy, Zoro e Nami unem forças para derrotar Buggy e libertar os cidadãos, salvando o cãozinho Chou Chou."
+  },
+  4: {
+    geography: "Parte do arquipélago Gecko. Uma ilha com falésias acidentadas nas bordas, colinas gramadas, e a pacata Vila Syrup situada estrategicamente no topo.",
+    locations: "Vila Syrup, Mansão de Kaya, Costa Norte (praia com encostas), Costa Sul.",
+    history: "O lar do atirador Usopp. O bando do Chapéu de Palha desmascara o mordomo Klahadore (Capitão Kuro) e seus piratas do Gato Preto, ganhando o Going Merry de Kaya."
+  },
+  5: {
+    geography: "Um restaurante flutuante sem território terrestre. É um navio customizado em forma de peixe gigante ancorado permanentemente nas águas do East Blue.",
+    locations: "Cozinha do Baratie, Salão Principal de Refeições, Deck de Batalha (Sabashira), Barco de Apoio.",
+    history: "Fundado por Zeff 'Pé Vermelho'. O local do recrutamento de Sanji, a invasão da armada de Don Krieg e o lendário duelo de Zoro contra Dracule Mihawk."
+  }
+};
+
+const getIslandExtras = (id: number | null, name: string) => {
+  if (id && ISLAND_EXTRAS[id]) {
+    return ISLAND_EXTRAS[id];
+  }
+  return {
+    geography: `A geografia de ${name} compreende o relevo e clima característicos das rotas marítimas da Grand Line durante este período histórico.`,
+    locations: `Porto Principal de ${name}, Centro Comercial, Taberna Local, Áreas Silvestres.`,
+    history: `Grandes eventos do arco temporal atual se desenrolaram em ${name}, moldando o destino de seus habitantes.`
+  };
+};
+
+const ChevronDown = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+);
 
 export interface IslandDetailsModalProps {
   isOpen: boolean;
@@ -26,6 +71,9 @@ export function IslandDetailsModal({
   const [islandData, setIslandData] = useState<any>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  const [expandedSection, setExpandedSection] = useState<"geography" | "locations" | "history" | null>(null);
+
+  const extraData = getIslandExtras(islandId, islandData?.name || "");
 
   const visualizerOutside = true;
 
@@ -120,13 +168,70 @@ export function IslandDetailsModal({
           </button>
         </div>
       ) : islandData ? (
-        <div className="w-full h-full flex flex-col justify-between min-h-full">
-          <div className="flex-1 flex items-center justify-center px-4 py-6 md:px-8">
-            <p className="text-sm md:text-base text-muted-foreground leading-relaxed text-center font-sans max-w-xl">
-              {islandData.description || "Nenhum dado catalogado para esta ilha."}
-            </p>
+          <div className="w-full h-full flex flex-col justify-between min-h-full font-sans">
+            <div className="flex-1 flex flex-col gap-5 px-1 py-2 overflow-y-auto">
+              <p className="text-sm md:text-base text-muted-foreground leading-relaxed">
+                {islandData.description || "Nenhum dado catalogado para esta ilha."}
+              </p>
+
+              {/* Accordions */}
+              <div className="flex flex-col border-t border-border/40 mt-2">
+                {/* Geografia */}
+                <div className="border-b border-border/40">
+                  <button
+                    onClick={() => setExpandedSection(expandedSection === "geography" ? null : "geography")}
+                    className="w-full py-3 flex items-center justify-between font-serif font-bold text-sm md:text-base text-foreground hover:text-primary transition-colors text-left"
+                  >
+                    <span>Geografia</span>
+                    <span className={`transform transition-transform duration-200 ${expandedSection === "geography" ? "rotate-180 text-primary" : "text-muted-foreground"}`}>
+                      <ChevronDown />
+                    </span>
+                  </button>
+                  <div className={`overflow-hidden transition-all duration-300 ${expandedSection === "geography" ? "max-h-[300px] pb-3 opacity-100" : "max-h-0 opacity-0 pointer-events-none"}`}>
+                    <p className="text-xs md:text-sm text-muted-foreground leading-relaxed">
+                      {extraData.geography}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Locais */}
+                <div className="border-b border-border/40">
+                  <button
+                    onClick={() => setExpandedSection(expandedSection === "locations" ? null : "locations")}
+                    className="w-full py-3 flex items-center justify-between font-serif font-bold text-sm md:text-base text-foreground hover:text-primary transition-colors text-left"
+                  >
+                    <span>Locais de Interesse</span>
+                    <span className={`transform transition-transform duration-200 ${expandedSection === "locations" ? "rotate-180 text-primary" : "text-muted-foreground"}`}>
+                      <ChevronDown />
+                    </span>
+                  </button>
+                  <div className={`overflow-hidden transition-all duration-300 ${expandedSection === "locations" ? "max-h-[300px] pb-3 opacity-100" : "max-h-0 opacity-0 pointer-events-none"}`}>
+                    <p className="text-xs md:text-sm text-muted-foreground leading-relaxed">
+                      {extraData.locations}
+                    </p>
+                  </div>
+                </div>
+
+                {/* História */}
+                <div className="border-b border-border/40">
+                  <button
+                    onClick={() => setExpandedSection(expandedSection === "history" ? null : "history")}
+                    className="w-full py-3 flex items-center justify-between font-serif font-bold text-sm md:text-base text-foreground hover:text-primary transition-colors text-left"
+                  >
+                    <span>História e Acontecimentos</span>
+                    <span className={`transform transition-transform duration-200 ${expandedSection === "history" ? "rotate-180 text-primary" : "text-muted-foreground"}`}>
+                      <ChevronDown />
+                    </span>
+                  </button>
+                  <div className={`overflow-hidden transition-all duration-300 ${expandedSection === "history" ? "max-h-[300px] pb-3 opacity-100" : "max-h-0 opacity-0 pointer-events-none"}`}>
+                    <p className="text-xs md:text-sm text-muted-foreground leading-relaxed">
+                      {extraData.history}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
-        </div>
       ) : (
         <div className="w-full h-full flex items-center justify-center text-muted-foreground text-xs py-10 font-sans">
           Nenhum dado encontrado para a ilha selecionada.
