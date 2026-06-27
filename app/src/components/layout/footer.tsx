@@ -5,7 +5,6 @@ import type { Arc, Island } from '@/types/api'
 
 export interface FooterProps {
   className?: string
-  activeIslandId: number | null
   visibleIslands: Island[]
   arcs: Arc[]
   onIslandSelect: (id: number) => void
@@ -15,7 +14,6 @@ export interface FooterProps {
 
 export function Footer({
   className = '',
-  activeIslandId,
   visibleIslands = [],
   arcs = [],
   onIslandSelect,
@@ -64,10 +62,8 @@ export function Footer({
           </div>
 
           <div className="flex-1 relative flex items-center h-full px-4">
-            {/* trilha base */}
             <div className="absolute left-4 right-4 h-[2px] bg-border/40 rounded-full pointer-events-none" />
 
-            {/* trilha de progresso ativa */}
             <div
               className="absolute left-4 h-[2px] bg-primary/40 rounded-full pointer-events-none transition-all duration-75"
               style={{
@@ -75,9 +71,7 @@ export function Footer({
               }}
             />
 
-            {/* controle deslizante */}
             <div className="relative w-full flex items-center h-8">
-              {/* tooltip flutuante */}
               {closestIsland && (
                 <div
                   className="absolute bottom-9 whitespace-nowrap text-[10px] md:text-[11px] font-bold tracking-tight rounded-md px-2 py-0.5 md:py-1 bg-background/95 border border-primary/20 shadow-lg text-primary pointer-events-none -translate-x-1/2 z-30 transition-all"
@@ -125,7 +119,6 @@ export function Footer({
                   [&::-moz-range-thumb]:active:scale-95"
               />
 
-              {/* marcadores das ilhas */}
               <div className="absolute left-4 right-4 top-0 bottom-0 pointer-events-none z-10">
                 {visibleIslands.map((island, index) => {
                   const pct =
@@ -144,8 +137,8 @@ export function Footer({
                       <div
                         className={`rounded-full transition-all duration-300 ${
                           isNear
-                            ? 'w-3 h-3 bg-primary ring-4 ring-primary/15 scale-110'
-                            : 'w-2.5 h-2.5 bg-background border-2 border-border/80 scale-95'
+                            ? 'w-3 h-3 bg-primary ring-4 ring-primary/30 scale-110'
+                            : 'w-2.5 h-2.5 bg-foreground/20 border-2 border-foreground/60 scale-95'
                         }`}
                       />
                     </div>

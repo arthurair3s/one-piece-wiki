@@ -9,7 +9,6 @@ export interface MinimapProps {
   offset: { x: number; y: number }
   viewportSize: { width: number; height: number }
   mapWidth: number
-  mapHeight: number
   scale: number
   onMinimapClick: (mapX: number, mapY: number) => void
 }
@@ -20,7 +19,6 @@ export function Minimap({
   offset,
   viewportSize,
   mapWidth,
-  mapHeight,
   scale = 1,
   onMinimapClick,
 }: MinimapProps) {
@@ -63,7 +61,7 @@ export function Minimap({
     <div
       ref={containerRef}
       onClick={handleContainerClick}
-      className="absolute bottom-6 right-6 w-[220px] h-[140px] rounded-xl border border-border/40 shadow-2xl bg-background/80 backdrop-blur-md z-20 cursor-crosshair overflow-hidden transition-all duration-300 hover:border-primary/50 select-none group"
+      className="absolute bottom-6 right-6 w-[220px] h-[140px] rounded-xl border border-border/70 shadow-2xl bg-background/80 backdrop-blur-md z-20 cursor-crosshair overflow-hidden transition-all duration-300 hover:border-primary/50 select-none group"
     >
       <div className="absolute inset-0 opacity-[0.02] bg-[linear-gradient(to_right,#808080_1px,transparent_1px),linear-gradient(to_bottom,#808080_1px,transparent_1px)] bg-[size:10px_10px]" />
 
@@ -97,7 +95,7 @@ export function Minimap({
                 className={`transition-all duration-300 
                   ${isSelected 
                     ? "fill-primary stroke-background stroke-2" 
-                    : "fill-muted-foreground/40 stroke-border/50 group-hover:fill-muted-foreground/75"
+                    : "fill-foreground/35 stroke-border/50 group-hover:fill-foreground/60"
                   }`}
               />
             </g>
@@ -106,7 +104,7 @@ export function Minimap({
       </svg>
 
       <div
-        className="absolute border border-primary/50 bg-primary/5 rounded pointer-events-none transition-all duration-200"
+        className="absolute border-2 border-primary bg-primary/10 rounded pointer-events-none transition-all duration-200"
         style={{
           left: `${viewportFrame.x}px`,
           top: `${viewportFrame.y}px`,

@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Input } from "@/components/ui/input";
 import {
@@ -55,8 +54,29 @@ export function Header({
   onIslandSelect,
   onLogout,
 }: HeaderProps) {
-  const router = useRouter();
   const [showSuggestions, setShowSuggestions] = useState(false);
+
+  // inicializa e controla o tema escuro/claro com persistência
+  React.useEffect(() => {
+    const savedTheme = localStorage.getItem("theme");
+    const systemPrefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+    if (savedTheme === "dark" || (!savedTheme && systemPrefersDark)) {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+    }
+  }, []);
+
+  const toggleTheme = () => {
+    const isDark = document.documentElement.classList.contains("dark");
+    if (isDark) {
+      document.documentElement.classList.remove("dark");
+      localStorage.setItem("theme", "light");
+    } else {
+      document.documentElement.classList.add("dark");
+      localStorage.setItem("theme", "dark");
+    }
+  };
 
   const handleSelectChange = (val: string | null, callback?: (id: string | null) => void) => {
     if (callback) {
@@ -89,7 +109,7 @@ export function Header({
   }, [searchQuery, islands]);
 
   return (
-    <header className="absolute top-4 left-4 right-4 md:top-6 md:left-6 md:right-6 max-w-5xl mx-auto w-[calc(100%-2rem)] md:w-[calc(100%-3rem)] rounded-xl border border-border/40 shadow-lg bg-background/80 backdrop-blur-md z-30 transition-all duration-300">
+    <header className="absolute top-4 left-4 right-4 md:top-6 md:left-6 md:right-6 max-w-5xl mx-auto w-[calc(100%-2rem)] md:w-[calc(100%-3rem)] rounded-xl border border-border/70 shadow-lg bg-background/80 backdrop-blur-md z-30 transition-all duration-300">
       <div className="flex flex-col md:flex-row items-center gap-3 px-3.5 py-3 md:px-4 md:py-3 w-full">
         
         <div className="flex items-center gap-2 w-full md:flex-1 relative">
@@ -144,7 +164,7 @@ export function Header({
                   <DropdownMenuItem id="menu-edit-profile-mobile" className="rounded-lg px-2.5 py-1.5 cursor-pointer">
                     Editar Perfil
                   </DropdownMenuItem>
-                  <DropdownMenuItem id="menu-toggle-theme-mobile" className="rounded-lg px-2.5 py-1.5 cursor-pointer">
+                  <DropdownMenuItem id="menu-toggle-theme-mobile" className="rounded-lg px-2.5 py-1.5 cursor-pointer" onClick={toggleTheme}>
                     Alternar Tema
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
@@ -164,7 +184,7 @@ export function Header({
         <div className="grid grid-cols-3 gap-2 w-full md:flex md:w-auto md:gap-2">
           <Select
             value={activeSagaId !== null ? String(activeSagaId) : "null"}
-            onValueChange={(val: any) => handleSelectChange(val, onSagaSelect)}
+            onValueChange={(val: string | null) => handleSelectChange(val, onSagaSelect)}
           >
             <SelectTrigger id="filter-sagas" className="w-full md:w-[120px] h-9 text-xs">
               <SelectValue placeholder="Sagas">
@@ -183,7 +203,7 @@ export function Header({
 
           <Select
             value={activeArcId !== null ? String(activeArcId) : "null"}
-            onValueChange={(val: any) => handleSelectChange(val, onArcSelect)}
+            onValueChange={(val: string | null) => handleSelectChange(val, onArcSelect)}
           >
             <SelectTrigger id="filter-arcos" className="w-full md:w-[120px] h-9 text-xs">
               <SelectValue placeholder="Arcos">
@@ -202,7 +222,7 @@ export function Header({
 
           <Select
             value={activeIslandId !== null ? String(activeIslandId) : "null"}
-            onValueChange={(val: any) => handleSelectChange(val, onIslandSelect)}
+            onValueChange={(val: string | null) => handleSelectChange(val, onIslandSelect)}
           >
             <SelectTrigger id="filter-ilhas" className="w-full md:w-[120px] h-9 text-xs">
               <SelectValue placeholder="Ilhas">
@@ -247,7 +267,7 @@ export function Header({
                 <DropdownMenuItem id="menu-edit-profile" className="rounded-xl px-3 py-2 cursor-pointer">
                   Editar Perfil
                 </DropdownMenuItem>
-                <DropdownMenuItem id="menu-toggle-theme" className="rounded-xl px-3 py-2 cursor-pointer">
+                <DropdownMenuItem id="menu-toggle-theme" className="rounded-xl px-3 py-2 cursor-pointer" onClick={toggleTheme}>
                   Alternar Tema
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useMemo, useCallback, useRef } from 'react'
-import { useMapCamera, MAP_WIDTH, MAP_HEIGHT } from '@/hooks/use-map-camera'
+import { useMapCamera, MAP_WIDTH } from '@/hooks/use-map-camera'
 import { useDashboardData } from '@/hooks/use-dashboard-data'
 
 import { Header } from '@/components/layout/header'
@@ -12,7 +12,7 @@ import { IslandDetailsModal } from '@/components/modals/island-details-modal'
 import { CharacterCarouselModal } from '@/components/modals/character-carousel-modal'
 import { IslandConfigModal, type IslandPreview } from '@/components/modals/island-config-modal'
 
-// default positions used as fallback when the island has no DB coordinates
+// posições padrão usadas como fallback quando a ilha não possui coordenadas no banco de dados
 const ROUTE_NODES = [
   { id: 1, name: "Vila Foosha", arcId: 1, x: 89.3, y: 35.9 },
   { id: 2, name: "Shells Town", arcId: 1, x: 65.2, y: 9.1 },
@@ -29,7 +29,7 @@ export default function HomePage() {
   const [activeModal, setActiveModal]   = useState<'details' | 'characters' | 'config' | null>(null)
   const [sliderVal, setSliderVal]       = useState(0)
 
-  // live preview override — applied to the map before saving
+  // sobreposição para visualização em tempo real — aplicada ao mapa antes de salvar
   const [configPreview, setConfigPreview] = useState<IslandPreview | null>(null)
 
   const isDragging = useRef(false)
@@ -72,7 +72,7 @@ export default function HomePage() {
     })
   }, [islands, configPreview])
 
-  // dynamic route nodes: read from mergedIslands so position preview updates the boat path too
+  // nós de rotas dinâmicas: lidos a partir de mergedIslands para atualizar também a rota do barco
   const currentNodes = useMemo(() => {
     return ROUTE_NODES.map(node => {
       const dbIsland = mergedIslands.find(isl => isl.id === node.id)
@@ -177,7 +177,7 @@ export default function HomePage() {
     )
   }
 
-  // props for the config modal — read from raw DB island (not merged) so initial values are always the persisted ones
+  // propriedades para o modal de configuração: lidas diretamente da ilha bruta do banco (não mesclada) para manter valores persistidos
   const activeIslandDb    = islands.find(isl => isl.id === activeIslandId)
   const activeNodeDefaults = currentNodes.find(n => n.id === activeIslandId)
 
@@ -187,6 +187,7 @@ export default function HomePage() {
         <GrandLineMap3D
           camera={camera}
           smooth={smoothTransition}
+          // eslint-disable-next-line react-hooks/refs
           isDragging={isDragging.current}
           visibleNodes={visibleNodes}
           islands={mergedIslands}
@@ -206,9 +207,9 @@ export default function HomePage() {
       </div>
 
       {/* Map title overlay */}
-      <div className="absolute bottom-16 left-6 z-20 pointer-events-none select-none">
-        <p className="text-sm font-semibold tracking-wider text-white/60 uppercase">Navegação Livre</p>
-        <h2 className="text-xl font-bold text-white/70">Mapa da Grand Line</h2>
+      <div className="absolute bottom-[172px] left-6 z-20 pointer-events-none select-none rounded-xl border border-border/60 bg-background/80 backdrop-blur-md px-4 py-2.5 shadow-lg max-w-[200px]">
+        <span className="text-[8px] font-bold text-primary-foreground bg-primary px-1.5 py-0.5 rounded uppercase tracking-wider mb-1.5 inline-block">Navegação Livre</span>
+        <h2 className="text-sm font-bold text-foreground">Mapa da Grand Line</h2>
       </div>
 
       <Header
@@ -233,10 +234,10 @@ export default function HomePage() {
       {/* Zoom controls */}
       <div className="absolute bottom-[172px] right-6 flex flex-col gap-2 z-20">
         <button onClick={zoomIn}
-          className="w-9 h-9 rounded-lg border border-white/30 bg-white/20 backdrop-blur-md text-white flex items-center justify-center shadow-lg transition-all hover:bg-white/30 active:scale-95 text-base font-bold select-none cursor-pointer"
+          className="inline-flex shrink-0 items-center justify-center rounded-lg border border-border/60 bg-background/80 hover:bg-muted text-foreground size-9 transition-all outline-none select-none shadow-lg active:scale-95 cursor-pointer backdrop-blur-md"
           title="Aumentar Zoom">＋</button>
         <button onClick={zoomOut}
-          className="w-9 h-9 rounded-lg border border-white/30 bg-white/20 backdrop-blur-md text-white flex items-center justify-center shadow-lg transition-all hover:bg-white/30 active:scale-95 text-base font-bold select-none cursor-pointer"
+          className="inline-flex shrink-0 items-center justify-center rounded-lg border border-border/60 bg-background/80 hover:bg-muted text-foreground size-9 transition-all outline-none select-none shadow-lg active:scale-95 cursor-pointer backdrop-blur-md"
           title="Diminuir Zoom">－</button>
       </div>
 
@@ -246,13 +247,11 @@ export default function HomePage() {
         offset={offset}
         viewportSize={viewportSize}
         mapWidth={MAP_WIDTH}
-        mapHeight={MAP_HEIGHT}
         scale={scale}
         onMinimapClick={handleMinimapNavigation}
       />
 
       <Footer
-        activeIslandId={activeIslandId}
         visibleIslands={allRouteIslands}
         arcs={arcs}
         onIslandSelect={(id) => {
@@ -284,7 +283,7 @@ export default function HomePage() {
             setActiveIslandId(null)
           }}
           onSaved={async () => {
-            // silent refresh — no loading spinner, wait for fresh data before clearing preview
+            // atualização silenciosa: recarrega sem indicador visual, aguardando novos dados antes de limpar o preview
             await loadData(true)
             setConfigPreview(null)
           }}
