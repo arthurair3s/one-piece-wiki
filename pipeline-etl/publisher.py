@@ -138,9 +138,14 @@ async def publish_island(client: httpx.AsyncClient, headers: dict, island_data: 
     else:
         payload = {
             "description": island_data["description"],
+            "coordinate_x": island_data["coordinate_x"],
+            "coordinate_y": island_data["coordinate_y"],
+            "coordinate_z": island_data["coordinate_z"],
+            "model_url": island_data["model_url"],
+            "thumbnail_url": island_data["thumbnail_url"],
             "arc_ids": [{"arc_id": arc_id, "order": 1}]
         }
-        logger.info(f"Assegurando vínculo da ilha '{island_data['name']}' com o arco ID {arc_id} e atualizando descrição...")
+        logger.info(f"Assegurando vínculo da ilha '{island_data['name']}' com o arco ID {arc_id} e atualizando dados...")
         try:
             res = await client.patch(f"{API_BASE_URL}/islands/{island_id}", json=payload, headers=headers)
             res.raise_for_status()

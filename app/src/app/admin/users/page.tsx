@@ -10,6 +10,7 @@ import {
   createUser,
   updateUser,
   deleteUser,
+  type UpdateUserPayload,
 } from './_service'
 import type { User, Profile } from '@/types/api'
 
@@ -32,7 +33,7 @@ import {
   TableRow,
 } from '@/components/ui/table'
 
-// Ícones
+
 
 function PlusIcon({ className }: { className?: string }) {
   return (
@@ -106,7 +107,7 @@ function XIcon({ className }: { className?: string }) {
   )
 }
 
-// Formulário de criação/edição
+
 
 interface UserFormState {
   username: string
@@ -144,6 +145,7 @@ function UserFormModal({
 
   useEffect(() => {
     if (editingUser) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setForm({
         username: editingUser.username,
         email: editingUser.email,
@@ -236,7 +238,7 @@ function UserFormModal({
             <Label htmlFor="form-profile">Nível de Acesso</Label>
             <Select
               value={form.profileId}
-              onValueChange={(val) => setForm((f) => ({ ...f, profileId: val }))}
+              onValueChange={(val) => setForm((f) => ({ ...f, profileId: val ?? '' }))}
             >
               <SelectTrigger id="form-profile" className="w-full">
                 <SelectValue placeholder="Selecione um perfil..." />
@@ -281,7 +283,7 @@ function UserFormModal({
   )
 }
 
-// Modal de confirmação de exclusão
+
 
 interface DeleteConfirmModalProps {
   isOpen: boolean
@@ -311,7 +313,7 @@ function DeleteConfirmModal({ isOpen, onClose, onConfirm, username, isDeleting }
         <div className="px-6 py-5 flex flex-col gap-5">
           <p className="text-sm text-muted-foreground leading-relaxed">
             Tem certeza que deseja excluir o usuário{' '}
-            <span className="font-semibold text-foreground">"{username}"</span>?
+            <span className="font-semibold text-foreground">&quot;{username}&quot;</span>?
             Esta ação não pode ser desfeita.
           </p>
           <div className="flex gap-2">
@@ -334,15 +336,15 @@ function DeleteConfirmModal({ isOpen, onClose, onConfirm, username, isDeleting }
   )
 }
 
-// Badge de perfil
 
-function getProfileName(profile?: string | { id: number; name: string; [key: string]: any }): string {
+
+function getProfileName(profile?: string | { id: number; name: string; [key: string]: unknown }): string {
   if (!profile) return '—'
   if (typeof profile === 'string') return profile
   return profile.name ?? '—'
 }
 
-function ProfileBadge({ profile }: { profile?: string | { id: number; name: string; [key: string]: any } }) {
+function ProfileBadge({ profile }: { profile?: string | { id: number; name: string; [key: string]: unknown } }) {
   const name = getProfileName(profile)
   const isAdmin = name === 'ADMIN'
   return (
@@ -359,7 +361,7 @@ function ProfileBadge({ profile }: { profile?: string | { id: number; name: stri
   )
 }
 
-// Esqueleto de carregamento
+
 
 function TableSkeleton() {
   return (
@@ -381,7 +383,7 @@ function TableSkeleton() {
   )
 }
 
-// Tradução de mensagens de erro da API para PT-BR
+
 function translateApiError(message?: string): string {
   if (!message) return 'Erro desconhecido.'
   const msg = Array.isArray(message) ? message.join(', ') : message
@@ -404,22 +406,17 @@ function translateApiError(message?: string): string {
   return msg
 }
 
-// Componente principal da página
 export default function AdminUsersPage() {
   const router = useRouter()
 
-  // Controle de acesso
-  const [isAdmin, setIsAdmin] = useState(false)
   const [authChecked, setAuthChecked] = useState(false)
 
-  // Estado dos dados
   const [users, setUsers] = useState<User[]>([])
   const [profiles, setProfiles] = useState<Profile[]>([])
   const [total, setTotal] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-  // Filtros e paginação
   const [usernameInput, setUsernameInput] = useState('')
   const [emailInput, setEmailInput] = useState('')
   const [activeUsername, setActiveUsername] = useState('')
@@ -428,7 +425,6 @@ export default function AdminUsersPage() {
   const limit = USERS_ADMIN_CONFIG.defaultLimit
   const totalPages = Math.max(1, Math.ceil(total / limit))
 
-  // Estado dos modais
   const [isFormOpen, setIsFormOpen] = useState(false)
   const [isDeleteOpen, setIsDeleteOpen] = useState(false)
   const [editingUser, setEditingUser] = useState<User | null>(null)
@@ -439,18 +435,17 @@ export default function AdminUsersPage() {
 
   const searchTimeout = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  // Verificação de autenticação
   useEffect(() => {
     const profile = getCookie('user_profile')
     if (profile !== 'ADMIN') {
       router.push(USERS_ADMIN_CONFIG.fallbackRoute)
       return
     }
-    setIsAdmin(true)
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setAuthChecked(true)
   }, [router])
 
-  // Carregamento de dados
+
   const loadData = useCallback(async (username: string, email: string, currentPage: number) => {
     setIsLoading(true)
     setError(null)
@@ -464,8 +459,9 @@ export default function AdminUsersPage() {
       if (profiles.length === 0 && Array.isArray(profilesResult)) {
         setProfiles(profilesResult)
       }
-    } catch (err: any) {
-      setError(translateApiError(err.message) || 'Erro ao carregar os dados.')
+    } catch (err) {
+      const errMsg = err instanceof Error ? err.message : String(err)
+      setError(translateApiError(errMsg) || 'Erro ao carregar os dados.')
     } finally {
       setIsLoading(false)
     }
@@ -473,10 +469,11 @@ export default function AdminUsersPage() {
 
   useEffect(() => {
     if (!authChecked) return
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     loadData(activeUsername, activeEmail, page)
   }, [authChecked, activeUsername, activeEmail, page, loadData])
 
-  // Debounce dos filtros
+
   const handleUsernameChange = (value: string) => {
     setUsernameInput(value)
     if (searchTimeout.current) clearTimeout(searchTimeout.current)
@@ -495,7 +492,7 @@ export default function AdminUsersPage() {
     }, 450)
   }
 
-  // Submit do formulário
+
   const handleFormSubmit = async (data: { username: string; email: string; password: string; profileId: string }) => {
     setFormError('')
     const cfg = USERS_ADMIN_CONFIG.validationRules
@@ -515,7 +512,7 @@ export default function AdminUsersPage() {
     setIsSubmitting(true)
     try {
       if (editingUser) {
-        const payload: Record<string, any> = {
+        const payload: UpdateUserPayload = {
           username: data.username,
           email: data.email,
           profile_id: Number(data.profileId),
@@ -533,15 +530,16 @@ export default function AdminUsersPage() {
       setIsFormOpen(false)
       setEditingUser(null)
       await loadData(activeUsername, activeEmail, page)
-    } catch (err: any) {
-      const msg = translateApiError(err.message)
+    } catch (err) {
+      const errMsg = err instanceof Error ? err.message : String(err)
+      const msg = translateApiError(errMsg)
       setFormError(msg || 'Erro ao salvar o usuário.')
     } finally {
       setIsSubmitting(false)
     }
   }
 
-  // Exclusão de usuário
+
   const handleDeleteConfirm = async () => {
     if (!deletingUser) return
     setIsDeleting(true)
@@ -549,14 +547,15 @@ export default function AdminUsersPage() {
       await deleteUser(deletingUser.id)
       setIsDeleteOpen(false)
       setDeletingUser(null)
-      // Se era a última linha da página, volta para a anterior
+      // se era a última linha da página, volta para a anterior
       const newTotal = total - 1
       const maxPage = Math.max(1, Math.ceil(newTotal / limit))
       const targetPage = Math.min(page, maxPage)
       setPage(targetPage)
       await loadData(activeUsername, activeEmail, targetPage)
-    } catch (err: any) {
-      setError(translateApiError(err.message) || 'Erro ao excluir o usuário.')
+    } catch (err) {
+      const errMsg = err instanceof Error ? err.message : String(err)
+      setError(translateApiError(errMsg) || 'Erro ao excluir o usuário.')
     } finally {
       setIsDeleting(false)
     }
@@ -571,7 +570,7 @@ export default function AdminUsersPage() {
     return new Date(dateStr).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' })
   }
 
-  // Render se não autenticado
+
   if (!authChecked) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">

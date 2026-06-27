@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React from "react";
 
 interface CharactersTabProps {
@@ -37,7 +38,7 @@ export function CharactersTab({
             {filteredCharacters.length > 1 && (
               <button
                 onClick={() => setCharCarouselIndex((prev) => (prev > 0 ? prev - 1 : filteredCharacters.length - 1))}
-                className="absolute left-2 z-30 w-8 h-8 rounded-full border border-border bg-background hover:border-primary hover:text-primary flex items-center justify-center font-bold text-xs cursor-pointer shadow transition-colors"
+                className="absolute left-2 z-30 w-8 h-8 rounded-full border border-border/50 bg-background/50 text-foreground hover:border-primary hover:text-primary flex items-center justify-center font-bold text-xs cursor-pointer shadow transition-all hover:bg-muted active:scale-90"
               >
                 &lt;
               </button>
@@ -68,8 +69,8 @@ export function CharactersTab({
                     onClick={() => {
                       if (!isFeatured) setCharCarouselIndex(idx);
                     }}
-                    className={`absolute w-[200px] h-[240px] md:h-[30vh] bg-card text-card-foreground border-2 ${
-                      isFeatured ? "border-primary shadow-lg" : "border-border shadow"
+                    className={`absolute w-[200px] h-[240px] md:h-[30vh] text-card-foreground border transition-all duration-300 ${
+                      isFeatured ? "border-primary bg-card/85 shadow-lg" : "border-border/40 bg-card/45 shadow"
                     } rounded-2xl p-4 flex flex-col items-center justify-between select-none cursor-pointer`}
                   >
                     <div className="w-full flex-1 flex flex-col items-center text-center overflow-hidden">
@@ -97,7 +98,7 @@ export function CharactersTab({
 
                       {char.epithet && (
                         <p className="text-[10px] text-muted-foreground italic truncate max-w-full">
-                          "{char.epithet}"
+                          &ldquo;{char.epithet}&rdquo;
                         </p>
                       )}
 
@@ -131,7 +132,7 @@ export function CharactersTab({
                           setActiveTab("versions");
                           setVersionSearch("");
                         }}
-                        className="mt-2 text-[9px] text-primary hover:underline font-bold text-center block w-full py-1 border border-border/40 hover:border-primary/40 rounded-lg bg-background"
+                        className="mt-2 text-[9px] text-primary hover:underline font-bold text-center block w-full py-1.5 border border-border/40 hover:border-primary/40 rounded-lg bg-background/50 hover:bg-muted transition-colors"
                       >
                         Ver versões do personagem &gt;
                       </button>
@@ -145,7 +146,7 @@ export function CharactersTab({
             {filteredCharacters.length > 1 && (
               <button
                 onClick={() => setCharCarouselIndex((prev) => (prev < filteredCharacters.length - 1 ? prev + 1 : 0))}
-                className="absolute right-2 z-30 w-8 h-8 rounded-full border border-border bg-background hover:border-primary hover:text-primary flex items-center justify-center font-bold text-xs cursor-pointer shadow transition-colors"
+                className="absolute right-2 z-30 w-8 h-8 rounded-full border border-border/50 bg-background/50 text-foreground hover:border-primary hover:text-primary flex items-center justify-center font-bold text-xs cursor-pointer shadow transition-all hover:bg-muted active:scale-90"
               >
                 &gt;
               </button>

@@ -43,6 +43,8 @@ export interface Island {
   thumbnail_url?: string;
   arcCount?: number;
   is_active?: boolean;
+  rotation_y?: number;
+  scale?: number;
   createdAt?: string;
   updatedAt?: string;
 }

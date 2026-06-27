@@ -1,0 +1,13 @@
+{
+  "python.analysis.exclude": [
+    "**/node_modules",
+    "**/node_modules/**",
+    "**/dist",
+    "**/build",
+    "**/.git"
+  ],
+  "python.linting.ignorePatterns": [
+    "**/node_modules/**/*.py",
+    "node_modules/**/*.py"
+  ]
+}

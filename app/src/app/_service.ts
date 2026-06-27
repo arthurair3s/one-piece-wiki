@@ -19,7 +19,7 @@ export interface MapFilters {
   search?: string
 }
 
-// Busca inicial do dashboard: sagas, arcos e todas as ilhas registradas via /islands/map
+// busca inicial do dashboard (sagas, arcos e ilhas)
 export async function fetchDashboardData() {
   const [sagasRes, arcsRes, islandsRes] = await Promise.all([
     apiClient<SagasResponse>('/wiki/sagas').catch((err) => {
@@ -43,7 +43,7 @@ export async function fetchDashboardData() {
   }
 }
 
-// Chama o endpoint de mapa filtrado pelo CQRS Read Model quando o usuário aplica filtros no HUD
+// busca as ilhas filtradas de acordo com a busca ou seleção
 export async function fetchFilteredMap(filters: MapFilters): Promise<Island[]> {
   const params = new URLSearchParams()
   if (filters.sagaId) params.set('sagaId', String(filters.sagaId))
@@ -57,19 +57,30 @@ export async function fetchFilteredMap(filters: MapFilters): Promise<Island[]> {
   return res?.islands || []
 }
 
-// Busca os detalhes cronológicos de uma ilha (personagens e eventos vigentes em um arco)
+// busca os personagens e eventos vigentes na ilha durante o arco
 export async function fetchIslandDetails(islandId: number, arcId: number) {
   return apiClient<any>(`/islands/${islandId}/details?arc_id=${arcId}`)
 }
 
-// Busca a lista de arcos temporais aos quais uma ilha pertence
+// busca a lista de arcos temporais de uma ilha
 export async function fetchIslandArcs(islandId: number) {
   return apiClient<any>(`/islands/${islandId}/arcs`)
 }
 
-// Busca as diferentes versões de um personagem pelo seu characterId
+// busca as versões de um personagem pelo id
 export async function fetchCharacterVersions(characterId: number) {
   return apiClient<any>(`/character-versions?character_id=${characterId}&limit=100`)
 }
 
-
+// atualiza coordenadas, rotação e escala da ilha
+export async function updateIsland(
+  id: number,
+  data: {
+    coordinate_x?: number
+    coordinate_y?: number
+    rotation_y?: number
+    scale?: number
+  }
+) {
+  return apiClient<any>(`/islands/${id}`, { method: 'PATCH', body: data })
+}

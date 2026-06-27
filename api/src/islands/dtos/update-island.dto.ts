@@ -56,4 +56,16 @@ export class UpdateIslandDto {
   @IsOptional()
   @IsBoolean()
   is_active?: boolean;
+
+  @ApiPropertyOptional({ example: -180.0, description: 'Rotação da ilha no eixo Y (em graus)' })
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  rotation_y?: number;
+
+  @ApiPropertyOptional({ example: 1.0, description: 'Escala do modelo 3D da ilha (multiplicador)' })
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  scale?: number;
 }

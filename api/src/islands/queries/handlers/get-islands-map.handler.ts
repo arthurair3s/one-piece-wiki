@@ -24,6 +24,8 @@ export class GetIslandsMapHandler
         'coordinate_z',
         'model_url',
         'thumbnail_url',
+        'rotation_y',
+        'scale',
       ],
       order: [['name', 'ASC']],
     });
@@ -33,6 +35,8 @@ export class GetIslandsMapHandler
       name: i.name,
       model_url: i.model_url,
       thumbnail_url: i.thumbnail_url,
+      rotation_y: i.rotation_y,
+      scale: i.scale,
       coordinates: {
         x: i.coordinate_x,
         y: i.coordinate_y,

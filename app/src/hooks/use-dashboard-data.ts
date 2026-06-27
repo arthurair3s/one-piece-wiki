@@ -47,8 +47,8 @@ export function useDashboardData() {
     router.push(DASHBOARD_CONFIG.loginUrl);
   }, [router]);
 
-  const loadData = useCallback(async () => {
-    setIsLoadingData(true);
+  const loadData = useCallback(async (silent = false) => {
+    if (!silent) setIsLoadingData(true);
     setError(null);
     const startTime = performance.now();
 
@@ -78,7 +78,7 @@ export function useDashboardData() {
       }
       setError(err.message || "Erro ao carregar dados do backend");
     } finally {
-      setIsLoadingData(false);
+      if (!silent) setIsLoadingData(false);
     }
   }, [router]);
 

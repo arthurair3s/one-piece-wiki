@@ -45,7 +45,7 @@ export class GetWikiMapFilteredHandler implements IQueryHandler<GetWikiMapFilter
     const islands = await this.islandReadModel.findAll({
       where,
       attributes: [
-        'id', 'name', 'thumbnail_url', 'coordinate_x', 'coordinate_y', 'coordinate_z',
+        'id', 'name', 'thumbnail_url', 'model_url', 'coordinate_x', 'coordinate_y', 'coordinate_z',
         [
           Sequelize.literal(
             '(SELECT COUNT(*) FROM arc_islands WHERE arc_islands.island_id = "IslandRead".id AND arc_islands."deletedAt" IS NULL)',
@@ -60,6 +60,7 @@ export class GetWikiMapFilteredHandler implements IQueryHandler<GetWikiMapFilter
         id: i.id,
         name: i.name,
         thumbnailUrl: i.thumbnail_url,
+        model_url: i.model_url,
         coordinates: {
           x: i.coordinate_x,
           y: i.coordinate_y,
