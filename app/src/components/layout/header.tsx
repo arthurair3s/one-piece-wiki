@@ -53,7 +53,6 @@ export function Header({
   onArcSelect,
   onIslandSelect,
   onLogout,
-}: HeaderProps) {
   const [showSuggestions, setShowSuggestions] = useState(false);
 
   // inicializa e controla o tema escuro/claro com persistência
