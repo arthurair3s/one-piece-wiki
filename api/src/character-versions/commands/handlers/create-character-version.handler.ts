@@ -1,6 +1,6 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { InjectModel } from '@nestjs/sequelize';
-import { NotFoundException } from '@nestjs/common';
+import { NotFoundException, BadRequestException } from '@nestjs/common';
 import { Sequelize } from 'sequelize-typescript';
 import { CreateCharacterVersionCommand } from '../impl/create-character-version.command';
 import { CharacterVersion } from '../../models/character-version.model';
@@ -30,8 +30,9 @@ export class CreateCharacterVersionHandler implements ICommandHandler<CreateChar
       throw new NotFoundException(`Personagem com ID ${character_id} não encontrado`);
     }
 
-    return this.sequelize.transaction(async (t) => {
-      // cria a versão
+    try {
+      return await this.sequelize.transaction(async (t) => {
+        // cria a versão
       const version = await this.characterVersionModel.create({
         character_id,
         ...versionData,
@@ -48,7 +49,12 @@ export class CreateCharacterVersionHandler implements ICommandHandler<CreateChar
         await this.pivotModel.bulkCreate(pivots, { transaction: t });
       }
 
-      return version;
-    });
+      });
+    } catch (error: any) {
+      if (error.name === 'SequelizeUniqueConstraintError') {
+        throw new BadRequestException('Este personagem já possui outra versão vinculada a um dos arcos selecionados. Um personagem não pode aparecer duas vezes no mesmo arco.');
+      }
+      throw error;
+    }
   }
 }

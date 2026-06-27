@@ -8,6 +8,8 @@ import {
 import { DeleteArcCommand } from '../impl/delete-arc.command';
 import { Arc } from 'src/arcs/models/arc.model';
 import { Island } from 'src/islands/models/island.model';
+import { ArcCharacterVersion } from 'src/arcs/models/arc-character-version.model';
+import { Sequelize } from 'sequelize-typescript';
 
 @CommandHandler(DeleteArcCommand)
 export class DeleteArcHandler implements ICommandHandler<DeleteArcCommand> {
@@ -17,6 +19,11 @@ export class DeleteArcHandler implements ICommandHandler<DeleteArcCommand> {
 
     @InjectModel(Island)
     private readonly islandModel: typeof Island,
+
+    @InjectModel(ArcCharacterVersion)
+    private readonly arcCharacterVersionModel: typeof ArcCharacterVersion,
+
+    private readonly sequelize: Sequelize,
   ) {}
 
   async execute(command: DeleteArcCommand): Promise<void> {
@@ -39,7 +46,14 @@ export class DeleteArcHandler implements ICommandHandler<DeleteArcCommand> {
       );
     }
 
-    // delete
-    await arc.destroy();
+    // REGRA 3 — Limpar relações pivot (Cascata) antes de deletar o Arco
+    await this.sequelize.transaction(async (t) => {
+      await this.arcCharacterVersionModel.destroy({
+        where: { arc_id: id },
+        transaction: t,
+      });
+
+      await arc.destroy({ transaction: t });
+    });
   }
 }

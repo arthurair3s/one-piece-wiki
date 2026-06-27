@@ -60,13 +60,17 @@ export interface Character {
 
 export interface CharacterVersion {
   id: number;
-  characterId: number;
-  arcId: number;
+  character_id: number;
+  alias?: string;
   epithet?: string;
   bounty?: number;
   status: string;
+  image_url?: string;
+  description?: string;
   createdAt: string;
   updatedAt: string;
+  arcs?: Arc[];
+  events?: Event[];
 }
 
 export interface Event {
