@@ -1,6 +1,6 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { InjectModel } from '@nestjs/sequelize';
-import { NotFoundException } from '@nestjs/common';
+import { NotFoundException, BadRequestException } from '@nestjs/common';
 import { Sequelize } from 'sequelize-typescript';
 import { UpdateCharacterVersionCommand } from '../impl/update-character-version.command';
 import { CharacterVersion } from '../../models/character-version.model';
@@ -35,18 +35,34 @@ export class UpdateCharacterVersionHandler implements ICommandHandler<UpdateChar
       }
     }
 
-    return this.sequelize.transaction(async (t) => {
-      await version.update({ character_id, ...updateData }, { transaction: t });
+    try {
+      return await this.sequelize.transaction(async (t) => {
+        await version.update({ character_id, ...updateData }, { transaction: t });
 
       if (arc_ids !== undefined) {
-        // remove vínculos antigos
-        await this.pivotModel.destroy({ 
+        // Fetch existing arcs
+        const existingPivots = await this.pivotModel.findAll({
           where: { character_version_id: id },
-          transaction: t 
+          transaction: t
         });
+        const existingArcIds = existingPivots.map(p => p.arc_id);
 
-        if (arc_ids.length > 0) {
-          const pivots = arc_ids.map(arc_id => ({
+        // Calculate differences
+        const toAdd = arc_ids.filter(id => !existingArcIds.includes(id));
+        const toRemove = existingArcIds.filter(id => !arc_ids.includes(id));
+
+        if (toRemove.length > 0) {
+          await this.pivotModel.destroy({ 
+            where: { 
+              character_version_id: id,
+              arc_id: toRemove
+            },
+            transaction: t 
+          });
+        }
+
+        if (toAdd.length > 0) {
+          const pivots = toAdd.map(arc_id => ({
             arc_id,
             character_version_id: id,
             character_id: character_id ?? version.character_id,
@@ -56,7 +72,12 @@ export class UpdateCharacterVersionHandler implements ICommandHandler<UpdateChar
         }
       }
 
-      return version;
-    });
+      });
+    } catch (error: any) {
+      if (error.name === 'SequelizeUniqueConstraintError') {
+        throw new BadRequestException('Este personagem já possui outra versão vinculada a um dos arcos selecionados. Um personagem não pode aparecer duas vezes no mesmo arco.');
+      }
+      throw error;
+    }
   }
 }

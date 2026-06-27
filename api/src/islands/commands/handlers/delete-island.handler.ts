@@ -4,6 +4,8 @@ import { NotFoundException } from '@nestjs/common';
 
 import { DeleteIslandCommand } from '../impl/delete-island.command';
 import { Island } from '../../models/island.model';
+import { ArcIsland } from '../../../arcs/models/arc-island.model';
+import { Sequelize } from 'sequelize-typescript';
 
 @CommandHandler(DeleteIslandCommand)
 export class DeleteIslandHandler
@@ -12,6 +14,9 @@ export class DeleteIslandHandler
   constructor(
     @InjectModel(Island)
     private readonly islandModel: typeof Island,
+    @InjectModel(ArcIsland)
+    private readonly arcIslandModel: typeof ArcIsland,
+    private readonly sequelize: Sequelize,
   ) {}
 
   async execute(command: DeleteIslandCommand): Promise<void> {
@@ -24,6 +29,13 @@ export class DeleteIslandHandler
     }
 
     // REGRA 2 — soft delete técnico
-    await island.destroy();
+    await this.sequelize.transaction(async (t) => {
+      await this.arcIslandModel.destroy({
+        where: { island_id: id },
+        transaction: t,
+      });
+
+      await island.destroy({ transaction: t });
+    });
   }
 }

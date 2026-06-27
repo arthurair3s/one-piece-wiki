@@ -32,12 +32,12 @@ const CONTENT_MODULES = [
     active: false,
   },
   {
-    id: 'personagens',
+    id: 'characters',
     name: 'Personagens',
     description: 'Gerencie personagens e suas variações.',
-    href: '/admin/content/personagens',
+    href: '/admin/content/characters',
     icon: UsersIcon,
-    active: false,
+    active: true,
   },
 ]
 

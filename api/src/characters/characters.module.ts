@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { CqrsModule } from '@nestjs/cqrs';
 import { SequelizeModule } from '@nestjs/sequelize';
 import { Character } from './models/character.model';
+import { CharacterVersion } from '../character-versions/models/character-version.model';
 import { CharactersService } from './characters.service';
 import { CharactersController } from './characters.controller';
 import { CreateCharacterHandler } from './commands/handlers/create-character.handler';
@@ -12,7 +13,7 @@ import { GetCharactersHandler } from './queries/handlers/get-characters.handler'
 import { GetCharacterHandler } from './queries/handlers/get-character.handler';
 
 @Module({
-  imports: [CqrsModule, SequelizeModule.forFeature([Character])],
+  imports: [CqrsModule, SequelizeModule.forFeature([Character, CharacterVersion])],
   controllers: [CharactersController],
   providers: [
     CharactersService,

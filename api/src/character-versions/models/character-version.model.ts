@@ -13,6 +13,8 @@ import {
 import { Character } from '../../characters/models/character.model';
 import { Arc } from '../../arcs/models/arc.model';
 import { ArcCharacterVersion } from '../../arcs/models/arc-character-version.model';
+import { Event } from '../../events/models/event.model';
+import { EventParticipant } from '../../events/models/event-participant.model';
 
 @Table({ tableName: 'character_versions', timestamps: true, paranoid: true })
 export class CharacterVersion extends Model {
@@ -28,6 +30,9 @@ export class CharacterVersion extends Model {
 
   @BelongsToMany(() => Arc, () => ArcCharacterVersion)
   arcs!: Arc[];
+
+  @BelongsToMany(() => Event, () => EventParticipant)
+  events!: Event[];
 
   @AllowNull(true) @Column(DataType.STRING) alias!: string;
 
