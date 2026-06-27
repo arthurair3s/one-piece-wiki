@@ -20,10 +20,12 @@ interface IslandAttributes {
   model_url: string;
   thumbnail_url?: string;
   is_active: boolean;
+  rotation_y: number;
+  scale: number;
 }
 
 interface IslandCreationAttributes
-  extends Optional<IslandAttributes, 'id' | 'thumbnail_url' | 'is_active'> {}
+  extends Optional<IslandAttributes, 'id' | 'thumbnail_url' | 'is_active' | 'rotation_y' | 'scale'> {}
 
 @Table({
   tableName: 'islands',
@@ -63,6 +65,12 @@ export class Island extends Model<
 
   @Column({ defaultValue: true })
   is_active!: boolean;
+
+  @Column({ type: DataType.FLOAT, allowNull: false, defaultValue: -180.0 })
+  rotation_y!: number;
+
+  @Column({ type: DataType.FLOAT, allowNull: false, defaultValue: 1.0 })
+  scale!: number;
 
   // ilha pode pertencer a múltiplos arcos (entidade geográfica global)
   @BelongsToMany(() => Arc, () => ArcIsland)

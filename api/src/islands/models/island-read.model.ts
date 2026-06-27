@@ -45,6 +45,12 @@ export class IslandRead extends Model {
   @Column({ defaultValue: true })
   is_active!: boolean;
 
+  @Column({ type: DataType.FLOAT, allowNull: false, defaultValue: -180.0 })
+  rotation_y!: number;
+
+  @Column({ type: DataType.FLOAT, allowNull: false, defaultValue: 1.0 })
+  scale!: number;
+
   @BelongsToMany(() => ArcRead, { through: () => ArcIslandRead, constraints: false })
   arcs!: ArcRead[];
 }

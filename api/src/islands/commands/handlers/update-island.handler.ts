@@ -38,6 +38,8 @@ export class UpdateIslandHandler
       model_url,
       thumbnail_url,
       is_active,
+      rotation_y,
+      scale,
     } = command;
 
     const island = await this.islandModel.findByPk(id);
@@ -55,6 +57,8 @@ export class UpdateIslandHandler
         model_url: model_url ?? island.model_url,
         thumbnail_url: thumbnail_url ?? island.thumbnail_url,
         is_active: is_active ?? island.is_active,
+        rotation_y: rotation_y ?? island.rotation_y,
+        scale: scale ?? island.scale,
       }, { transaction: t });
 
       if (arc_ids !== undefined) {

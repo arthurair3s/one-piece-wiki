@@ -91,6 +91,8 @@ export class IslandsService {
         dto.model_url,
         dto.thumbnail_url,
         dto.is_active,
+        dto.rotation_y,
+        dto.scale,
       ),
     );
   }

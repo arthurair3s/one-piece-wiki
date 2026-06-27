@@ -12,5 +12,7 @@ export class UpdateIslandCommand {
     public readonly model_url?: string,
     public readonly thumbnail_url?: string,
     public readonly is_active?: boolean,
+    public readonly rotation_y?: number,
+    public readonly scale?: number,
   ) {}
 }
