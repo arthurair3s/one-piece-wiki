@@ -1,5 +1,6 @@
 "use client";
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState, useEffect } from "react";
 import { fetchIslandDetails, fetchIslandArcs, fetchCharacterVersions } from "@/app/_service";
 import { BaseModal } from "@/components/modals/base-modal";
@@ -63,6 +64,7 @@ export function CharacterCarouselModal({
 
   useEffect(() => {
     if (isOpen && islandId) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       loadIslandData();
       setActiveTab("characters");
       setCharCarouselIndex(0);
@@ -135,7 +137,7 @@ export function CharacterCarouselModal({
               setCharacterSearch(e.target.value);
               setCharCarouselIndex(0);
             }}
-            className="w-full max-w-[200px] px-3 py-1 border border-border rounded-lg text-xs bg-background focus:outline-none focus:border-primary text-center font-sans"
+            className="w-full max-w-[200px] pl-3 pr-3 h-8 text-xs rounded-lg border border-border/50 bg-muted/20 focus-visible:ring-1 focus-visible:ring-primary focus:outline-none text-center font-sans transition-colors"
           />
         ) : (
           <input
@@ -146,7 +148,7 @@ export function CharacterCarouselModal({
               setVersionSearch(e.target.value);
               setVersionCarouselIndex(0);
             }}
-            className="w-full max-w-[200px] px-3 py-1 border border-border rounded-lg text-xs bg-background focus:outline-none focus:border-primary text-center font-sans"
+            className="w-full max-w-[200px] pl-3 pr-3 h-8 text-xs rounded-lg border border-border/50 bg-muted/20 focus-visible:ring-1 focus-visible:ring-primary focus:outline-none text-center font-sans transition-colors"
           />
         )
       }

@@ -20,7 +20,7 @@ import { SearchIcon, PlusIcon, PencilIcon, TrashIcon, BookOpenIcon, ChevronLeftI
 import { SAGas_ADMIN_CONFIG as CONFIG } from './_configuration'
 import { getSagas, createSaga, updateSaga, deleteSaga } from './_service'
 
-// Tradução de mensagens de erro da API para PT-BR
+
 function translateApiError(message?: string): string {
   if (!message) return 'Erro desconhecido.'
   const msg = Array.isArray(message) ? message.join(', ') : message
@@ -46,16 +46,13 @@ function translateApiError(message?: string): string {
 export default function AdminSagasPage() {
   const router = useRouter()
 
-  // Controle de Acesso
   const [authChecked, setAuthChecked] = useState(false)
 
-  // Estado dos Dados
   const [sagas, setSagas] = useState<Saga[]>([])
   const [total, setTotal] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-  // Filtros e Paginação
   const [nameInput, setNameInput] = useState('')
   const [orderInput, setOrderInput] = useState('')
   const [activeName, setActiveName] = useState('')
@@ -64,7 +61,6 @@ export default function AdminSagasPage() {
   const limit = CONFIG.defaultLimit
   const totalPages = Math.max(1, Math.ceil(total / limit))
 
-  // Modais e Formulário
   const [isFormOpen, setIsFormOpen] = useState(false)
   const [isDeleteOpen, setIsDeleteOpen] = useState(false)
   const [editingSaga, setEditingSaga] = useState<Saga | null>(null)
@@ -74,7 +70,7 @@ export default function AdminSagasPage() {
   const [formError, setFormError] = useState('')
   const [deleteError, setDeleteError] = useState('')
   const [successMessage, setSuccessMessage] = useState('')
-  // Notificação de sucesso por 3 segundos
+  // notificação de sucesso temporária por 3 segundos
   const showSuccess = (msg: string) => {
     setSuccessMessage(msg)
     setTimeout(() => setSuccessMessage(''), 3000)
@@ -82,17 +78,17 @@ export default function AdminSagasPage() {
 
   const searchTimeout = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  // Verifica Autenticação
   useEffect(() => {
     const profile = getCookie('user_profile')
     if (profile !== 'ADMIN') {
       router.push(CONFIG.fallbackRoute)
       return
     }
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setAuthChecked(true)
   }, [router])
 
-  // Carrega Dados (com suporte a Short Polling para CQRS Eventual Consistency)
+  // carrega dados com suporte a short polling para consistência eventual do cdc/cqrs
   const loadData = useCallback(async (name: string, order: number | undefined, currentPage: number, expectedTotalItems?: number, isUpdate?: boolean) => {
     setIsLoading(true)
     setError(null)
@@ -101,7 +97,7 @@ export default function AdminSagasPage() {
       try {
         const result = await getSagas({ name: name || undefined, order, page: currentPage, limit })
         
-        // Verifica se é uma criação/remoção e o total ainda não atualizou no banco de leitura
+        // verifica se o total ainda não atualizou no banco de leitura cdc
         if (expectedTotalItems !== undefined && result.total !== expectedTotalItems && retries > 0) {
           console.log(`[CQRS] Polling: Expected ${expectedTotalItems}, got ${result.total}. Retrying... (${retries} left)`)
           await new Promise(res => setTimeout(res, delay))
@@ -109,7 +105,7 @@ export default function AdminSagasPage() {
         }
         
         return result
-      } catch (err: any) {
+      } catch (err) {
         if (retries > 0) {
           await new Promise(res => setTimeout(res, delay))
           return fetchWithRetry(retries - 1, delay)
@@ -120,14 +116,15 @@ export default function AdminSagasPage() {
 
     try {
       if (isUpdate) {
-        // Para updates, o total não muda, então aguardamos a replicação do CDC proativamente
+        // aguarda a replicação cdc proativamente para atualizações
         await new Promise(res => setTimeout(res, 800))
       }
       const result = await fetchWithRetry()
       setSagas(result.sagas)
       setTotal(result.total)
-    } catch (err: any) {
-      setError(translateApiError(err.message) || 'Erro ao carregar as sagas.')
+    } catch (err) {
+      const errMsg = err instanceof Error ? err.message : String(err)
+      setError(translateApiError(errMsg) || 'Erro ao carregar as sagas.')
     } finally {
       setIsLoading(false)
     }
@@ -135,10 +132,11 @@ export default function AdminSagasPage() {
 
   useEffect(() => {
     if (!authChecked) return
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     loadData(activeName, activeOrder, page)
   }, [authChecked, activeName, activeOrder, page, loadData])
 
-  // Debounce dos Filtros
+
   const handleNameChange = (value: string) => {
     setNameInput(value)
     if (searchTimeout.current) clearTimeout(searchTimeout.current)
@@ -158,12 +156,9 @@ export default function AdminSagasPage() {
     }, 450)
   }
 
-  // Ações de Modal
   const openCreate = () => { setEditingSaga(null); setFormError(''); setIsFormOpen(true) }
   const openEdit = (saga: Saga) => { setEditingSaga(saga); setFormError(''); setIsFormOpen(true) }
   const openDelete = (saga: Saga) => { setDeletingSaga(saga); setDeleteError(''); setIsDeleteOpen(true) }
-
-  // Submit Formulário
   const handleFormSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     setFormError('')
@@ -196,11 +191,12 @@ export default function AdminSagasPage() {
         setIsFormOpen(false)
         setEditingSaga(null)
         showSuccess('Saga criada com sucesso!')
-        // Avisa que esperamos que o total de itens aumente no Read DB
+        // informa o total incrementado esperado no banco de leitura cdc
         await loadData(activeName, activeOrder, page, total + 1)
       }
-    } catch (err: any) {
-      setFormError(translateApiError(err.message) || 'Erro ao salvar a saga.')
+    } catch (err) {
+      const errMsg = err instanceof Error ? err.message : String(err)
+      setFormError(translateApiError(errMsg) || 'Erro ao salvar a saga.')
     } finally {
       setIsSubmitting(false)
     }
@@ -216,21 +212,21 @@ export default function AdminSagasPage() {
       setDeletingSaga(null)
       showSuccess('Saga excluída com sucesso!')
       
-      // Retrocede página se era o último item dela
+      // retrocede a página se o último item foi removido
       const newTotal = total - 1
       const maxPage = Math.max(1, Math.ceil(newTotal / limit))
       const targetPage = Math.min(page, maxPage)
       
       if (targetPage !== page) {
         setPage(targetPage)
-        // O useEffect do page vai cuidar do fetch normal, mas chamamos 
-        // proativamente com polling para garantir que pegamos o estado CDC correto
+        // executa busca proativa com polling para garantir sincronização do cdc
         await loadData(activeName, activeOrder, targetPage, newTotal)
       } else {
         await loadData(activeName, activeOrder, targetPage, newTotal)
       }
-    } catch (err: any) {
-      setDeleteError(translateApiError(err.message) || 'Erro ao excluir a saga.')
+    } catch (err) {
+      const errMsg = err instanceof Error ? err.message : String(err)
+      setDeleteError(translateApiError(errMsg) || 'Erro ao excluir a saga.')
     } finally {
       setIsDeleting(false)
     }
