@@ -4,6 +4,7 @@ import { ISLAND_WORLD_RADIUS } from "./island-node-3d"
 export interface RouteNodeXZ {
   x: number // porcentagem (0-100)
   y: number // porcentagem (0-100, mapeia para o Z do mundo)
+  radius?: number // raio de colisão no mundo
 }
 
 // folga extra além do raio da ilha para evitar que a rota cruze a praia

@@ -1,11 +1,11 @@
 "use client"
 
-import { useEffect, useRef, useMemo } from "react"
+import { useEffect, useRef, useMemo, useState } from "react"
 import { Canvas, useThree } from "@react-three/fiber"
 import * as THREE from "three"
 
 import { OceanPlane } from "./ocean-plane"
-import { IslandNode3D } from "./island-node-3d"
+import { IslandNode3D, ISLAND_WORLD_RADIUS } from "./island-node-3d"
 import { BoatMarker3D } from "./boat-marker-3d"
 import type { Island } from "@/types/api"
 import { FOV_DEG, MAP_WIDTH, MAP_HEIGHT, type CameraState } from "@/hooks/use-map-camera"
@@ -93,12 +93,34 @@ function GrandLineScene({
   sliderVal,
   onIslandClick,
 }: GrandLineSceneProps) {
+  const [clickedTarget, setClickedTarget] = useState<THREE.Vector3 | null>(null)
+
+  // Reseta a navegação por clique se o usuário selecionar outra ilha do menu/jornada
+  useEffect(() => {
+    setClickedTarget(null)
+  }, [activeIslandId, sliderVal])
+
   const allNodesXZ = useMemo(() => {
-    return allNodes.map(n => ({
-      x: n.x,
-      y: n.y
-    }))
-  }, [allNodes])
+    return allNodes.map(n => {
+      // Busca a ilha no banco para calcular a escala visual exata do anel
+      const dbIsland = islands.find(i => i.id === n.id)
+      const baseSizeScales: Record<number, number> = { 1: 1.4, 2: 0.9, 3: 1.1, 4: 1.1, 5: 1.25 }
+      const baseSize = dbIsland ? (baseSizeScales[dbIsland.id] ?? 1.1) : 1.1
+      const dbScale = dbIsland?.scale ?? 1.0
+      const sizeScale = baseSize * dbScale
+
+      // O raio do anel visual é ISLAND_WORLD_RADIUS * sizeScale
+      // Adiciona uma margem de segurança de 25 unidades para que o casco do navio fique totalmente de fora do anel
+      const ringRadius = ISLAND_WORLD_RADIUS * sizeScale
+      const collisionRadius = ringRadius + 25
+
+      return {
+        x: n.x,
+        y: n.y,
+        radius: collisionRadius
+      }
+    })
+  }, [allNodes, islands])
   return (
     <>
       <CameraController target={camera.target} height={camera.height} smooth={smooth} />
@@ -114,7 +136,10 @@ function GrandLineScene({
 
       {/* oceano */}
       <group position={[MAP_WIDTH / 2, 0, MAP_HEIGHT / 2]}>
-        <OceanPlane />
+        <OceanPlane onClick={(e) => {
+          e.stopPropagation()
+          setClickedTarget(e.point.clone())
+        }} />
       </group>
 
       {/* Navio Going Merry */}
@@ -124,6 +149,7 @@ function GrandLineScene({
           progress={sliderVal / (allNodesXZ.length - 1)}
           mapWidth={MAP_WIDTH}
           mapHeight={MAP_HEIGHT}
+          clickedTarget={clickedTarget}
         />
       )}
 
