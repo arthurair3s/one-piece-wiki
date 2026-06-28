@@ -29,7 +29,10 @@ interface UseMapCameraProps {
 }
 
 export function useMapCamera({ activeIslandId, unlockedIslands }: UseMapCameraProps) {
-  const viewportRef = useRef<HTMLDivElement>(null)
+  const [viewportEl, setViewportEl] = useState<HTMLDivElement | null>(null)
+  const viewportRef = useCallback((node: HTMLDivElement | null) => {
+    setViewportEl(node)
+  }, [])
   const [viewportSize, setViewportSize] = useState({ width: 1440, height: 900 })
 
   const [camera, setCamera] = useState<CameraState>({
@@ -45,15 +48,14 @@ export function useMapCamera({ activeIslandId, unlockedIslands }: UseMapCameraPr
 
   // observador de redimensionamento da janela
   useEffect(() => {
-    const el = viewportRef.current
-    if (!el) return
+    if (!viewportEl) return
     const observer = new ResizeObserver(() => {
-      setViewportSize({ width: el.clientWidth, height: el.clientHeight })
+      setViewportSize({ width: viewportEl.clientWidth, height: viewportEl.clientHeight })
     })
-    observer.observe(el)
-    setViewportSize({ width: el.clientWidth, height: el.clientHeight })
+    observer.observe(viewportEl)
+    setViewportSize({ width: viewportEl.clientWidth, height: viewportEl.clientHeight })
     return () => observer.disconnect()
-  }, [])
+  }, [viewportEl])
 
   // limita o alvo da câmera para evitar que saia do mapa
   const clampTarget = useCallback((x: number, z: number) => ({
@@ -63,19 +65,20 @@ export function useMapCamera({ activeIslandId, unlockedIslands }: UseMapCameraPr
 
   // zoom através da roda do mouse
   useEffect(() => {
-    const el = viewportRef.current
-    if (!el) return
+    if (!viewportEl) return
     const onWheel = (e: WheelEvent) => {
       e.preventDefault()
-      const step = camera.height * 0.05
-      setCamera(prev => ({
-        ...prev,
-        height: Math.max(MIN_HEIGHT, Math.min(MAX_HEIGHT, prev.height + (e.deltaY > 0 ? step : -step))),
-      }))
+      setCamera(prev => {
+        const step = prev.height * 0.05
+        return {
+          ...prev,
+          height: Math.max(MIN_HEIGHT, Math.min(MAX_HEIGHT, prev.height + (e.deltaY > 0 ? step : -step))),
+        }
+      })
     }
-    el.addEventListener("wheel", onWheel, { passive: false })
-    return () => el.removeEventListener("wheel", onWheel)
-  }, [camera.height])
+    viewportEl.addEventListener("wheel", onWheel, { passive: false })
+    return () => viewportEl.removeEventListener("wheel", onWheel)
+  }, [viewportEl])
 
   // arrasto via mouse/toque
   const worldPerPixel = useCallback((height: number) => {

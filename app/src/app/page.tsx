@@ -161,17 +161,6 @@ export default function HomePage() {
     handleMouseUp()
   }, [handleMouseUp])
 
-  if (isNavigating || isLoadingData) {
-    return (
-      <div className="w-screen h-screen flex flex-col items-center justify-center bg-background gap-4">
-        <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-        <p className="text-sm text-muted-foreground animate-pulse font-medium">
-          Carregando dados do banco...
-        </p>
-      </div>
-    )
-  }
-
   if (error) {
     return (
       <div className="w-screen h-screen flex flex-col items-center justify-center bg-background gap-4 px-4 text-center">
@@ -194,6 +183,15 @@ export default function HomePage() {
 
   return (
     <div className="relative w-screen h-screen overflow-hidden bg-[#6db8d8]">
+      {(isNavigating || isLoadingData) && (
+        <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-background gap-4">
+          <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+          <p className="text-sm text-muted-foreground animate-pulse font-medium">
+            Carregando dados do banco...
+          </p>
+        </div>
+      )}
+
       <div ref={viewportRef} className="absolute inset-0">
         <GrandLineMap3D
           camera={camera}
