@@ -5,6 +5,8 @@ import {
   DataType,
   ForeignKey,
   BelongsTo,
+  PrimaryKey,
+  AutoIncrement,
 } from 'sequelize-typescript';
 
 import { Arc } from './arc.model';
@@ -20,7 +22,13 @@ import { CharacterVersion } from '../../character-versions/models/character-vers
   ]
 })
 export class ArcCharacterVersion extends Model {
+  @PrimaryKey
+  @AutoIncrement
+  @Column({ type: DataType.INTEGER })
+  id!: number;
+
   @ForeignKey(() => Arc)
+
   @Column({
     type: DataType.INTEGER,
     allowNull: false,

@@ -8,13 +8,14 @@ import {
 } from 'sequelize-typescript';
 import { EventRead } from './event-read.model';
 import { CharacterVersionRead } from '../../character-versions/models/character-version-read.model';
+import { CharacterRead } from '../../characters/models/character-read.model';
 
 @Table({
   tableName: 'event_participants',
   timestamps: true,
   paranoid: true,
   indexes: [
-    { unique: true, fields: ['event_id', 'character_version_id'], where: { deletedAt: null }, name: 'unique_event_participant_read' }
+    { unique: true, fields: ['event_id', 'character_id'], where: { deletedAt: null }, name: 'unique_event_participant_read' }
   ]
 })
 export class EventParticipantRead extends Model {
@@ -37,4 +38,11 @@ export class EventParticipantRead extends Model {
 
   @BelongsTo(() => CharacterVersionRead, { constraints: false })
   characterVersion!: CharacterVersionRead;
+
+  @ForeignKey(() => CharacterRead)
+  @Column({ type: DataType.INTEGER, allowNull: false })
+  character_id!: number;
+
+  @BelongsTo(() => CharacterRead, { constraints: false })
+  character!: CharacterRead;
 }

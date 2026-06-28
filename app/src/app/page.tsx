@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo, useCallback, useRef } from 'react'
+import { useState, useMemo, useCallback, useRef, useEffect } from 'react'
 import { useMapCamera, MAP_WIDTH } from '@/hooks/use-map-camera'
 import { useDashboardData } from '@/hooks/use-dashboard-data'
 
@@ -11,6 +11,7 @@ import { Minimap } from '@/components/layout/minimap'
 import { IslandDetailsModal } from '@/components/modals/island-details-modal'
 import { CharacterCarouselModal } from '@/components/modals/character-carousel-modal'
 import { IslandConfigModal, type IslandPreview } from '@/components/modals/island-config-modal'
+import { UserProfileModal } from '@/components/modals/user-profile-modal'
 
 // posições padrão usadas como fallback quando a ilha não possui coordenadas no banco de dados
 const ROUTE_NODES = [
@@ -26,7 +27,7 @@ export default function HomePage() {
   const [activeArcId, setActiveArcId]   = useState<number>(1)
   const [activeSagaId, setActiveSagaId] = useState<number | null>(null)
   const [activeIslandId, setActiveIslandId] = useState<number | null>(null)
-  const [activeModal, setActiveModal]   = useState<'details' | 'characters' | 'config' | null>(null)
+  const [activeModal, setActiveModal]   = useState<'details' | 'characters' | 'config' | 'profile' | null>(null)
   const [sliderVal, setSliderVal]       = useState(0)
 
   // sobreposição para visualização em tempo real — aplicada ao mapa antes de salvar
@@ -90,6 +91,16 @@ export default function HomePage() {
       .filter((isl): isl is NonNullable<typeof isl> => !!isl)
   }, [mergedIslands])
 
+  // Sincroniza o slider com a ilha selecionada ativa
+  useEffect(() => {
+    if (activeIslandId !== null) {
+      const idx = allRouteIslands.findIndex(isl => isl.id === activeIslandId)
+      if (idx !== -1) {
+        setSliderVal(idx)
+      }
+    }
+  }, [activeIslandId, allRouteIslands])
+
   const activeArc      = useMemo(() => arcs.find((a) => a.id === activeArcId), [arcs, activeArcId])
   const activeArcOrder = activeArc ? activeArc.order : 1
 
@@ -150,17 +161,6 @@ export default function HomePage() {
     handleMouseUp()
   }, [handleMouseUp])
 
-  if (isNavigating || isLoadingData) {
-    return (
-      <div className="w-screen h-screen flex flex-col items-center justify-center bg-background gap-4">
-        <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-        <p className="text-sm text-muted-foreground animate-pulse font-medium">
-          Carregando dados do banco...
-        </p>
-      </div>
-    )
-  }
-
   if (error) {
     return (
       <div className="w-screen h-screen flex flex-col items-center justify-center bg-background gap-4 px-4 text-center">
@@ -183,6 +183,15 @@ export default function HomePage() {
 
   return (
     <div className="relative w-screen h-screen overflow-hidden bg-[#6db8d8]">
+      {(isNavigating || isLoadingData) && (
+        <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-background gap-4">
+          <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+          <p className="text-sm text-muted-foreground animate-pulse font-medium">
+            Carregando dados do banco...
+          </p>
+        </div>
+      )}
+
       <div ref={viewportRef} className="absolute inset-0">
         <GrandLineMap3D
           camera={camera}
@@ -190,10 +199,12 @@ export default function HomePage() {
           // eslint-disable-next-line react-hooks/refs
           isDragging={isDragging.current}
           visibleNodes={visibleNodes}
+          allNodes={currentNodes}
           islands={mergedIslands}
           activeIslandId={activeIslandId}
           activeArcId={activeArcId}
           searchQuery={searchQuery}
+          sliderVal={sliderVal}
           onIslandClick={(id) => {
             setActiveIslandId(id)
             setActiveModal(isAdmin ? 'config' : 'details')
@@ -229,6 +240,7 @@ export default function HomePage() {
           setActiveModal(null)
         }}
         onLogout={handleLogout}
+        onEditProfile={() => setActiveModal('profile')}
       />
 
       {/* Zoom controls */}
@@ -311,6 +323,11 @@ export default function HomePage() {
           />
         </>
       )}
+
+      <UserProfileModal
+        isOpen={activeModal === 'profile'}
+        onClose={() => setActiveModal(null)}
+      />
     </div>
   )
 }

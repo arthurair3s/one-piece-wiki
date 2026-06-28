@@ -1,19 +1,52 @@
 "use client"
 
-import { useRef, useMemo } from "react"
+import { useRef, useMemo, Suspense } from "react"
 import { useFrame } from "@react-three/fiber"
+import { useGLTF } from "@react-three/drei"
 import * as THREE from "three"
 import type { RouteNodeXZ } from "./bypass-route"
 import { buildBypassRoute } from "./bypass-route"
+import { ISLAND_WORLD_RADIUS } from "./island-node-3d"
+
+useGLTF.setDecoderPath("https://www.gstatic.com/draco/versioned/decoders/1.5.5/")
 
 interface BoatMarker3DProps {
   nodes: RouteNodeXZ[]
-  progress: number // progresso da rota (0.0 a 1.0)
+  progress: number
   mapWidth: number
   mapHeight: number
+  clickedTarget: THREE.Vector3 | null
 }
 
-export function BoatMarker3D({ nodes, progress, mapWidth, mapHeight }: BoatMarker3DProps) {
+function GoingMerryModel() {
+  const { scene } = useGLTF("/models/going_merry.glb")
+
+  const clonedScene = useMemo(() => {
+    const clone = scene.clone()
+
+    const box = new THREE.Box3().setFromObject(clone)
+    const size = new THREE.Vector3()
+    box.getSize(size)
+    const rawFootprint = Math.max(size.x, size.z, 0.001)
+
+    // Escala e centralização vertical
+    const targetSize = 38
+    const autoScale = targetSize / rawFootprint
+    clone.scale.setScalar(autoScale)
+
+    const scaledBox = new THREE.Box3().setFromObject(clone)
+    clone.position.y -= scaledBox.min.y
+
+    // Rotação corretiva de 90 graus (modelo exportado no eixo X)
+    clone.rotation.y = Math.PI / 2
+
+    return clone
+  }, [scene])
+
+  return <primitive object={clonedScene} />
+}
+
+export function BoatMarker3D({ nodes, progress, mapWidth, mapHeight, clickedTarget }: BoatMarker3DProps) {
   const groupRef = useRef<THREE.Group>(null)
 
   const curve = useMemo(() => {
@@ -21,105 +54,101 @@ export function BoatMarker3D({ nodes, progress, mapWidth, mapHeight }: BoatMarke
     return buildBypassRoute(nodes, mapWidth, mapHeight)
   }, [nodes, mapWidth, mapHeight])
 
-  // progresso atualizado do barco
   const currentProgressRef = useRef(progress)
+  const currentPosRef = useRef<THREE.Vector3 | null>(null)
 
-  // vetores reutilizáveis alocados uma única vez para otimização
-  const pos = useMemo(() => new THREE.Vector3(), [])
   const tangent = useMemo(() => new THREE.Vector3(), [])
-  const up = useMemo(() => new THREE.Vector3(0, 1, 0), [])
-  const quat = useMemo(() => new THREE.Quaternion(), [])
-  const mat = useMemo(() => new THREE.Matrix4(), [])
+  const pathPos = useMemo(() => new THREE.Vector3(), [])
 
   useFrame((state, delta) => {
     if (!groupRef.current || !curve) return
     const t = state.clock.getElapsedTime()
 
-    // velocidade constante de movimento (fração da rota total por segundo)
-    const SPEED = 0.15
+    // 1. Atualiza progresso da rota
+    const SPEED = 0.06
     const target = progress
     let current = currentProgressRef.current
 
-    // desloca o barco suavemente com velocidade constante
     const diff = target - current
     if (Math.abs(diff) > 0.0001) {
       const step = SPEED * delta
-      if (Math.abs(diff) <= step) {
-        current = target
-      } else {
-        current += Math.sign(diff) * step
-      }
+      current += Math.abs(diff) <= step ? diff : Math.sign(diff) * step
       currentProgressRef.current = current
     }
 
-    // limita o progresso na faixa válida da curva
     const p = Math.max(0.001, Math.min(0.999, current))
+    curve.getPointAt(p, pathPos)
 
-    // obtém a posição ao longo da curva
-    curve.getPoint(p, pos)
-    pos.y = 8 + Math.sin(t * 1.1) * 2 // balanço suave na superfície do mar
+    if (!currentPosRef.current) {
+      currentPosRef.current = new THREE.Vector3().copy(pathPos)
+    }
 
-    groupRef.current.position.copy(pos)
+    // 2. Transição suave (lerp) para o alvo (clique no mar ou rota)
+    const finalTarget = clickedTarget ? clickedTarget : pathPos
+    const lerpSpeed = clickedTarget ? 0.005 : 0.03
+    currentPosRef.current.lerp(finalTarget, lerpSpeed)
 
-    // obtem a direcao de movimento tangente neste ponto
-    curve.getTangent(p, tangent)
-    tangent.y = 0 // mantem o barco plano sem inclinacao vertical
-    if (tangent.lengthSq() < 0.0001) return
-    tangent.normalize()
+    // 3. Colisão com as ilhas (impede de atravessar e desliza pela costa)
+    for (const node of nodes) {
+      const islandX = (node.x / 100) * mapWidth
+      const islandZ = (node.y / 100) * mapHeight
+      const minDistance = node.radius ?? (ISLAND_WORLD_RADIUS + 30)
 
-    // calcula a direcao de movimento (yaw no eixo y)
-    const targetYaw = Math.atan2(tangent.x, tangent.z)
+      const dx = currentPosRef.current.x - islandX
+      const dz = currentPosRef.current.z - islandZ
+      const dist = Math.sqrt(dx * dx + dz * dz)
+
+      if (dist < minDistance) {
+        const angle = Math.atan2(dx, dz)
+        currentPosRef.current.x = islandX + Math.sin(angle) * minDistance
+        currentPosRef.current.z = islandZ + Math.cos(angle) * minDistance
+      }
+    }
+
+    // 4. Posição final (com balanço das ondas)
+    const bobbingY = 4 + Math.sin(t * 1.1) * 1.2
+    groupRef.current.position.set(
+      currentPosRef.current.x,
+      bobbingY,
+      currentPosRef.current.z
+    )
+
+    // 5. Rotação (alinha a proa com o movimento)
+    let targetYaw = 0
+    const dirX = finalTarget.x - currentPosRef.current.x
+    const dirZ = finalTarget.z - currentPosRef.current.z
+    const dist = Math.sqrt(dirX * dirX + dirZ * dirZ)
+
+    if (dist > 1.5) {
+      targetYaw = Math.atan2(dirX, dirZ)
+    } else {
+      curve.getTangentAt(p, tangent)
+      targetYaw = Math.atan2(tangent.x, tangent.z)
+    }
+
     const directionQuat = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), targetYaw)
 
-    // calcula o balanco suave das ondas (roll em z e pitch em x)
+    // Balanço físico de ondas (roll e pitch)
     const swayX = Math.cos(t * 0.8) * 0.02
-    const swayZ = Math.sin(t * 0.8) * 0.05
+    const swayZ = Math.sin(t * 0.8) * 0.04
     const swayQuat = new THREE.Quaternion().setFromEuler(new THREE.Euler(swayX, 0, swayZ))
 
-    // combina a orientacao da rota com a inclinacao das ondas
     const targetQuat = new THREE.Quaternion().multiplyQuaternions(directionQuat, swayQuat)
-
-    // suaviza a rotacao completa do barco sem conflito de euler
-    groupRef.current.quaternion.slerp(targetQuat, 0.12)
+    groupRef.current.quaternion.slerp(targetQuat, 0.04)
   })
 
   return (
     <group ref={groupRef}>
-      {/* Hull */}
-      <mesh>
-        <boxGeometry args={[14, 5, 30]} />
-        <meshToonMaterial color="#8B4513" />
-      </mesh>
-      {/* Keel */}
-      <mesh position={[0, -3.5, 0]}>
-        <boxGeometry args={[10, 3, 26]} />
-        <meshToonMaterial color="#5c2e0a" />
-      </mesh>
-      {/* Deck cabin */}
-      <mesh position={[0, 5, -4]}>
-        <boxGeometry args={[10, 7, 12]} />
-        <meshToonMaterial color="#d2a06a" />
-      </mesh>
-      {/* Mast */}
-      <mesh position={[0, 20, 2]}>
-        <cylinderGeometry args={[1, 1.2, 30, 8]} />
-        <meshToonMaterial color="#7a3a0a" />
-      </mesh>
-      {/* Main sail */}
-      <mesh position={[0, 23, 8]}>
-        <planeGeometry args={[16, 18]} />
-        <meshToonMaterial color="#f5f0e0" side={THREE.DoubleSide} />
-      </mesh>
-      {/* Sail accent */}
-      <mesh position={[0, 23, 8.1]}>
-        <planeGeometry args={[8, 9]} />
-        <meshBasicMaterial color="#cc2222" transparent opacity={0.65} side={THREE.DoubleSide} />
-      </mesh>
-      {/* Wake */}
-      <mesh position={[0, -5, 18]} rotation={[-Math.PI / 2, 0, 0]} scale={[0.4, 1, 1]}>
-        <circleGeometry args={[20, 14]} />
-        <meshBasicMaterial color="#e8f6ff" transparent opacity={0.45} />
+      <Suspense fallback={null}>
+        <GoingMerryModel />
+      </Suspense>
+
+      <mesh position={[0, -2, 20]} rotation={[-Math.PI / 2, 0, 0]} scale={[0.4, 1, 1]}>
+        <circleGeometry args={[26, 14]} />
+        <meshBasicMaterial color="#e8f6ff" transparent opacity={0.35} />
       </mesh>
     </group>
   )
 }
+
+useGLTF.preload("/models/going_merry.glb")

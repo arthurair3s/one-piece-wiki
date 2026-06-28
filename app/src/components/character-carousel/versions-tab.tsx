@@ -45,7 +45,7 @@ export function VersionsTab({
             <p className="text-xs">Nenhuma versão localizada.</p>
           </div>
         ) : (
-          <div className="relative w-full h-[280px] md:h-[35vh] flex items-center justify-center overflow-hidden py-4 select-none">
+          <div className="relative w-full h-[390px] md:h-[48vh] flex items-center justify-center overflow-hidden py-4 select-none">
             {/* Botão Esquerda */}
             {filteredVersions.length > 1 && (
               <button
@@ -57,7 +57,7 @@ export function VersionsTab({
             )}
 
             {/* Container do Carrossel */}
-            <div className="relative w-full max-w-[280px] h-[250px] md:h-[32vh] flex items-center justify-center">
+            <div className="relative w-full max-w-[340px] h-[360px] md:h-[44vh] flex items-center justify-center">
               {filteredVersions.map((version: any, idx: number) => {
                 const offset = idx - currentVersionIndex;
                 const absOffset = Math.abs(offset);
@@ -65,7 +65,7 @@ export function VersionsTab({
                 if (absOffset > 2) return null;
 
                 const style = {
-                  transform: `translateX(${offset * 120}px) scale(${1 - absOffset * 0.15}) translateZ(${-absOffset * 100}px)`,
+                  transform: `translateX(${offset * 140}px) scale(${1 - absOffset * 0.15}) translateZ(${-absOffset * 100}px)`,
                   opacity: 1 - absOffset * 0.45,
                   filter: absOffset > 0 ? "blur(2px) grayscale(50%)" : "none",
                   zIndex: 10 - absOffset,
@@ -83,16 +83,17 @@ export function VersionsTab({
                     onClick={() => {
                       if (!isFeatured) setVersionCarouselIndex(idx);
                     }}
-                    className={`absolute w-[200px] h-[240px] md:h-[30vh] text-card-foreground border transition-all duration-300 ${
+                    className={`absolute w-[245px] h-[330px] md:h-[41vh] text-card-foreground border transition-all duration-300 ${
                       isFeatured ? "border-primary bg-card/85 shadow-lg" : "border-border/40 bg-card/45 shadow"
                     } rounded-2xl p-4 flex flex-col items-center justify-between select-none cursor-pointer`}
                   >
                     <div className="w-full flex-1 flex flex-col items-center text-center overflow-hidden">
-                      {/* Avatar Versão */}
-                      <div className="w-16 h-16 rounded-full overflow-hidden bg-muted border border-border shrink-0 flex items-center justify-center text-xl mb-2">
+                      {/* Imagem Retangular de Versão */}
+                      <div className="w-[90%] h-[140px] md:h-[18vh] rounded-xl overflow-hidden bg-muted border border-border shrink-0 flex items-center justify-center text-3xl mb-2 relative">
                         {version.image_url ? (
                           // eslint-disable-next-line @next/next/no-img-element
                           <img
+                            key={version.image_url}
                             src={version.image_url}
                             alt={cardTitle}
                             className="w-full h-full object-cover"
@@ -106,7 +107,7 @@ export function VersionsTab({
                         )}
                       </div>
 
-                      <h4 className="text-xs font-bold text-foreground truncate max-w-full">
+                      <h4 className="text-sm font-bold text-foreground truncate max-w-full">
                         {cardTitle}
                       </h4>
 
@@ -117,14 +118,14 @@ export function VersionsTab({
                       )}
 
                       {isFeatured && (
-                        <p className="text-[9px] text-muted-foreground leading-normal mt-2 overflow-y-auto max-h-[60px] scrollbar-thin px-1 text-center">
+                        <p className="text-[9px] text-muted-foreground leading-normal mt-1 overflow-y-auto max-h-[50px] scrollbar-none px-1 text-center">
                           {version.description || "Nenhuma descrição histórica disponível para esta versão."}
                         </p>
                       )}
                     </div>
 
                     {isFeatured && (
-                      <div className="w-full flex flex-col items-center gap-2 mt-2 pt-2 border-t border-border/60">
+                      <div className="w-full flex flex-col items-center gap-2 mt-2 pt-2 border-t border-border/60 shrink-0">
                         {version.bounty ? (
                           <span className="text-[9px] font-bold text-amber-500 bg-amber-500/5 border border-amber-500/10 px-2 py-0.5 rounded">
                             ฿ {Number(version.bounty).toLocaleString()}

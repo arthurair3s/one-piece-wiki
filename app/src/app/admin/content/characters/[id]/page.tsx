@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import { getCookie } from '@/lib/cookies'
-import type { Character, CharacterVersion, Arc } from '@/types/api'
+import type { Character, CharacterVersion, Arc, Event } from '@/types/api'
 
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -21,7 +21,7 @@ import { ChevronLeftIcon, PencilIcon, TrashIcon, PlusIcon, SaveIcon, UserIcon, E
 import {
   getCharacter, updateCharacter, deleteCharacter,
   getCharacterVersions, getCharacterVersion, createCharacterVersion, updateCharacterVersion, deleteCharacterVersion,
-  getArcs
+  getArcs, getEvents
 } from '../_service'
 
 const STATUS_OPTIONS = [
@@ -41,6 +41,7 @@ export default function AdminCharacterDetailsPage() {
   const [character, setCharacter] = useState<Character | null>(null)
   const [versions, setVersions] = useState<CharacterVersion[]>([])
   const [arcs, setArcs] = useState<Arc[]>([])
+  const [events, setEvents] = useState<Event[]>([])
 
   // Character form
   const [charName, setCharName] = useState('')
@@ -55,6 +56,7 @@ export default function AdminCharacterDetailsPage() {
   const [viewingVersion, setViewingVersion] = useState<CharacterVersion | null>(null)
 
   const [vArcs, setVArcs] = useState<number[]>([])
+  const [vEvents, setVEvents] = useState<number[]>([])
   const [vAlias, setVAlias] = useState('')
   const [vEpithet, setVEpithet] = useState('')
   const [vBounty, setVBounty] = useState('')
@@ -90,15 +92,18 @@ export default function AdminCharacterDetailsPage() {
 
   const loadData = useCallback(async (expectedVersionsCount?: number) => {
     try {
-      const [charRes, arcsRes] = await Promise.all([
+      const [charRes, arcsRes, eventsRes] = await Promise.all([
         getCharacter(characterId),
-        getArcs({ limit: 1000 })
+        getArcs({ limit: 1000 }),
+        getEvents({ limit: 1000 })
       ])
       setCharacter(charRes)
       setCharName(charRes.name)
       setCharSlug(charRes.slug)
       const parsedArcs = (arcsRes as any)?.data || arcsRes?.rows || (Array.isArray(arcsRes) ? arcsRes : [])
       setArcs(parsedArcs)
+      const parsedEvents = (eventsRes as any)?.data || eventsRes?.rows || (Array.isArray(eventsRes) ? eventsRes : [])
+      setEvents(parsedEvents)
 
       const fetchVersions = async (retries = 5, delay = 600): Promise<CharacterVersion[]> => {
         const versRes = await getCharacterVersions({ character_id: characterId, limit: 100 })
@@ -139,6 +144,7 @@ export default function AdminCharacterDetailsPage() {
   const openNewVersion = () => {
     setEditingVersion(null)
     setVArcs([])
+    setVEvents([])
     setVAlias('')
     setVEpithet('')
     setVBounty('')
@@ -154,6 +160,7 @@ export default function AdminCharacterDetailsPage() {
       const fullVersion = await getCharacterVersion(v.id)
       setEditingVersion(fullVersion)
       setVArcs(fullVersion.arcs?.map(a => a.id) || [])
+      setVEvents(fullVersion.events?.map(e => e.id) || [])
       setVAlias(fullVersion.alias || '')
       setVEpithet(fullVersion.epithet || '')
       setVBounty(fullVersion.bounty ? String(fullVersion.bounty) : '')
@@ -183,6 +190,7 @@ export default function AdminCharacterDetailsPage() {
     const payload = {
       character_id: characterId,
       arc_ids: vArcs,
+      event_ids: vEvents,
       alias: vAlias || undefined,
       epithet: vEpithet || undefined,
       bounty: vBounty ? Number(vBounty) : undefined,
@@ -446,6 +454,32 @@ export default function AdminCharacterDetailsPage() {
                   ))}
                   {(!arcs || arcs.length === 0) && (
                     <div className="text-muted-foreground text-sm col-span-2 py-2">Nenhum arco encontrado. Crie arcos primeiro.</div>
+                  )}
+                </div>
+              </div>
+
+              <div className="space-y-2 pt-2">
+                <label className="text-sm font-medium flex items-center gap-2">
+                  Eventos de Participação
+                  <span className="text-muted-foreground text-xs">(Opcional)</span>
+                </label>
+                <div className="border border-border/50 rounded-lg max-h-48 overflow-y-auto p-3 grid grid-cols-1 md:grid-cols-2 gap-2 bg-muted/10">
+                  {(events || []).map(ev => (
+                    <label key={ev.id} className="flex items-center gap-2 text-sm cursor-pointer hover:bg-muted/30 p-1.5 rounded transition-colors">
+                      <input
+                        type="checkbox"
+                        checked={vEvents.includes(ev.id)}
+                        onChange={(e) => {
+                          if (e.target.checked) setVEvents(prev => [...prev, ev.id])
+                          else setVEvents(prev => prev.filter(id => id !== ev.id))
+                        }}
+                        className="rounded border-input text-primary focus:ring-primary h-4 w-4"
+                      />
+                      <span className="truncate">{ev.title}</span>
+                    </label>
+                  ))}
+                  {(!events || events.length === 0) && (
+                    <div className="text-muted-foreground text-sm col-span-2 py-2">Nenhum evento encontrado. Crie eventos primeiro.</div>
                   )}
                 </div>
               </div>

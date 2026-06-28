@@ -1,4 +1,4 @@
-import { Controller, Post, Get, Body, Query, Param, Patch, Delete, ParseIntPipe, UseGuards } from '@nestjs/common';
+import { Controller, Post, Get, Body, Query, Param, Patch, Delete, ParseIntPipe, UseGuards, Request } from '@nestjs/common';
 import { JwtAuthGuard } from '@/auth/guards/jwt-auth.guard';
 import { PermissionsGuard } from '@/common/guards/permissions.guard';
 import { RequirePermissions } from '@/common/decorators/require-permissions.decorator';
@@ -18,6 +18,24 @@ import { ErrorResponseDto } from '@/common/dtos/error-response.dto';
 @ApiExtraModels(ErrorResponseDto)
 export class UsersController {
   constructor(private readonly usersService: UsersService) { }
+
+  @ApiOperation({ summary: 'Obter dados do usuário logado' })
+  @ApiResponse({ status: 200, description: 'Dados do usuário logado retornados com sucesso.' })
+  @Get('me')
+  getMe(@Request() req) {
+    return this.usersService.findOne(req.user.id);
+  }
+
+  @ApiOperation({ summary: 'Atualizar os próprios dados (perfil)' })
+  @ApiResponse({ status: 200, description: 'Perfil atualizado com sucesso.' })
+  @Patch('me')
+  updateMe(@Request() req, @Body() body: UpdateUserDto) {
+    const selfUpdateData: UpdateUserDto = {
+      username: body.username,
+      password: body.password,
+    };
+    return this.usersService.update(req.user.id, selfUpdateData);
+  }
 
   @ApiOperation({ summary: 'Criar um novo usuário no sistema' })
   @ApiResponse({ status: 201, description: 'Usuário criado com sucesso.' })

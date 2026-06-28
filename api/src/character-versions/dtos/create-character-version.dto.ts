@@ -13,6 +13,11 @@ export class CreateCharacterVersionDto {
   @IsOptional()
   arc_ids?: number[];
 
+  @ApiProperty({ example: [3, 4], description: 'IDs dos eventos em que esta versão participa (opcional)', isArray: true })
+  @IsInt({ each: true })
+  @IsOptional()
+  event_ids?: number[];
+
   @ApiPropertyOptional({ example: 'Sogeking', description: 'Nome utilizado no contexto' })
   @IsOptional()
   @IsString()

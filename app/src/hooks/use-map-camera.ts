@@ -29,7 +29,10 @@ interface UseMapCameraProps {
 }
 
 export function useMapCamera({ activeIslandId, unlockedIslands }: UseMapCameraProps) {
-  const viewportRef = useRef<HTMLDivElement>(null)
+  const [viewportEl, setViewportEl] = useState<HTMLDivElement | null>(null)
+  const viewportRef = useCallback((node: HTMLDivElement | null) => {
+    setViewportEl(node)
+  }, [])
   const [viewportSize, setViewportSize] = useState({ width: 1440, height: 900 })
 
   const [camera, setCamera] = useState<CameraState>({
@@ -41,18 +44,18 @@ export function useMapCamera({ activeIslandId, unlockedIslands }: UseMapCameraPr
   // estado de arrasto (salvo em refs para evitar re-renderizações)
   const isPanning = useRef(false)
   const lastPointer = useRef({ x: 0, y: 0 })
+  const lastTouchDistance = useRef<number | null>(null)
 
   // observador de redimensionamento da janela
   useEffect(() => {
-    const el = viewportRef.current
-    if (!el) return
+    if (!viewportEl) return
     const observer = new ResizeObserver(() => {
-      setViewportSize({ width: el.clientWidth, height: el.clientHeight })
+      setViewportSize({ width: viewportEl.clientWidth, height: viewportEl.clientHeight })
     })
-    observer.observe(el)
-    setViewportSize({ width: el.clientWidth, height: el.clientHeight })
+    observer.observe(viewportEl)
+    setViewportSize({ width: viewportEl.clientWidth, height: viewportEl.clientHeight })
     return () => observer.disconnect()
-  }, [])
+  }, [viewportEl])
 
   // limita o alvo da câmera para evitar que saia do mapa
   const clampTarget = useCallback((x: number, z: number) => ({
@@ -62,19 +65,20 @@ export function useMapCamera({ activeIslandId, unlockedIslands }: UseMapCameraPr
 
   // zoom através da roda do mouse
   useEffect(() => {
-    const el = viewportRef.current
-    if (!el) return
+    if (!viewportEl) return
     const onWheel = (e: WheelEvent) => {
       e.preventDefault()
-      const step = camera.height * 0.05
-      setCamera(prev => ({
-        ...prev,
-        height: Math.max(MIN_HEIGHT, Math.min(MAX_HEIGHT, prev.height + (e.deltaY > 0 ? step : -step))),
-      }))
+      setCamera(prev => {
+        const step = prev.height * 0.05
+        return {
+          ...prev,
+          height: Math.max(MIN_HEIGHT, Math.min(MAX_HEIGHT, prev.height + (e.deltaY > 0 ? step : -step))),
+        }
+      })
     }
-    el.addEventListener("wheel", onWheel, { passive: false })
-    return () => el.removeEventListener("wheel", onWheel)
-  }, [camera.height])
+    viewportEl.addEventListener("wheel", onWheel, { passive: false })
+    return () => viewportEl.removeEventListener("wheel", onWheel)
+  }, [viewportEl])
 
   // arrasto via mouse/toque
   const worldPerPixel = useCallback((height: number) => {
@@ -118,13 +122,38 @@ export function useMapCamera({ activeIslandId, unlockedIslands }: UseMapCameraPr
   const handleMouseUp = useCallback(() => handlePointerUp(), [handlePointerUp])
 
   const handleTouchStart = useCallback((e: React.TouchEvent) => {
-    if (e.touches.length !== 1) return
-    handlePointerDown(e.touches[0].clientX, e.touches[0].clientY)
+    if (e.touches.length === 1) {
+      handlePointerDown(e.touches[0].clientX, e.touches[0].clientY)
+      lastTouchDistance.current = null
+    } else if (e.touches.length === 2) {
+      isPanning.current = false // Interrompe o arrasto ao iniciar a pinça
+      const dist = Math.hypot(
+        e.touches[0].clientX - e.touches[1].clientX,
+        e.touches[0].clientY - e.touches[1].clientY
+      )
+      lastTouchDistance.current = dist
+    }
   }, [handlePointerDown])
 
   const handleTouchMove = useCallback((e: React.TouchEvent) => {
-    if (e.touches.length !== 1) return
-    handlePointerMove(e.touches[0].clientX, e.touches[0].clientY)
+    if (e.touches.length === 1) {
+      handlePointerMove(e.touches[0].clientX, e.touches[0].clientY)
+    } else if (e.touches.length === 2 && lastTouchDistance.current !== null) {
+      const dist = Math.hypot(
+        e.touches[0].clientX - e.touches[1].clientX,
+        e.touches[0].clientY - e.touches[1].clientY
+      )
+      const deltaDist = dist - lastTouchDistance.current
+      lastTouchDistance.current = dist
+
+      // Ajusta a altura da câmera proporcionalmente à mudança de distância
+      const zoomSensitivity = 1.2
+      const step = deltaDist * zoomSensitivity
+      setCamera(prev => ({
+        ...prev,
+        height: Math.max(MIN_HEIGHT, Math.min(MAX_HEIGHT, prev.height - step)),
+      }))
+    }
   }, [handlePointerMove])
 
   // navegação automática até a ilha selecionada

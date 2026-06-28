@@ -1,11 +1,12 @@
 "use client"
 
-import { useEffect, useRef } from "react"
+import { useEffect, useRef, useMemo, useState } from "react"
 import { Canvas, useThree } from "@react-three/fiber"
 import * as THREE from "three"
 
 import { OceanPlane } from "./ocean-plane"
-import { IslandNode3D } from "./island-node-3d"
+import { IslandNode3D, ISLAND_WORLD_RADIUS } from "./island-node-3d"
+import { BoatMarker3D } from "./boat-marker-3d"
 import type { Island } from "@/types/api"
 import { FOV_DEG, MAP_WIDTH, MAP_HEIGHT, type CameraState } from "@/hooks/use-map-camera"
 
@@ -71,10 +72,12 @@ interface GrandLineSceneProps {
   camera: CameraState
   smooth: boolean
   visibleNodes: RouteNode[]
+  allNodes: RouteNode[]
   islands: Island[]
   activeIslandId: number | null
   activeArcId: number
   searchQuery: string
+  sliderVal: number
   onIslandClick: (id: number) => void
 }
 
@@ -82,12 +85,40 @@ function GrandLineScene({
   camera,
   smooth,
   visibleNodes,
+  allNodes,
   islands,
   activeIslandId,
   activeArcId,
   searchQuery,
+  sliderVal,
   onIslandClick,
 }: GrandLineSceneProps) {
+  const [clickedTarget, setClickedTarget] = useState<THREE.Vector3 | null>(null)
+
+  // Reseta navegação livre ao interagir com menu/jornada
+  useEffect(() => {
+    setClickedTarget(null)
+  }, [activeIslandId, sliderVal])
+
+  const allNodesXZ = useMemo(() => {
+    return allNodes.map(n => {
+      const dbIsland = islands.find(i => i.id === n.id)
+      const baseSizeScales: Record<number, number> = { 1: 1.4, 2: 0.9, 3: 1.1, 4: 1.1, 5: 1.25 }
+      const baseSize = dbIsland ? (baseSizeScales[dbIsland.id] ?? 1.1) : 1.1
+      const dbScale = dbIsland?.scale ?? 1.0
+      const sizeScale = baseSize * dbScale
+
+      // Limite do anel visual + margem para o casco
+      const ringRadius = ISLAND_WORLD_RADIUS * sizeScale
+      const collisionRadius = ringRadius + 25
+
+      return {
+        x: n.x,
+        y: n.y,
+        radius: collisionRadius
+      }
+    })
+  }, [allNodes, islands])
   return (
     <>
       <CameraController target={camera.target} height={camera.height} smooth={smooth} />
@@ -103,8 +134,22 @@ function GrandLineScene({
 
       {/* oceano */}
       <group position={[MAP_WIDTH / 2, 0, MAP_HEIGHT / 2]}>
-        <OceanPlane />
+        <OceanPlane onClick={(e) => {
+          e.stopPropagation()
+          setClickedTarget(e.point.clone())
+        }} />
       </group>
+
+      {/* Navio Going Merry */}
+      {allNodesXZ.length >= 2 && (
+        <BoatMarker3D
+          nodes={allNodesXZ}
+          progress={sliderVal / (allNodesXZ.length - 1)}
+          mapWidth={MAP_WIDTH}
+          mapHeight={MAP_HEIGHT}
+          clickedTarget={clickedTarget}
+        />
+      )}
 
       {/* routepath3d removido para evitar artefatos de sombra */}
 
@@ -155,10 +200,12 @@ interface GrandLineMap3DProps {
   smooth: boolean
   isDragging: boolean
   visibleNodes: RouteNode[]
+  allNodes: RouteNode[]
   islands: Island[]
   activeIslandId: number | null
   activeArcId: number
   searchQuery: string
+  sliderVal: number
   onIslandClick: (id: number) => void
   onMouseDown: (e: React.MouseEvent) => void
   onMouseMove: (e: React.MouseEvent) => void
@@ -172,10 +219,12 @@ export function GrandLineMap3D({
   smooth,
   isDragging,
   visibleNodes,
+  allNodes,
   islands,
   activeIslandId,
   activeArcId,
   searchQuery,
+  sliderVal,
   onIslandClick,
   onMouseDown,
   onMouseMove,
@@ -186,6 +235,7 @@ export function GrandLineMap3D({
   return (
     <div
       className={`absolute inset-0 z-10 ${isDragging ? "cursor-grabbing" : "cursor-grab"}`}
+      style={{ touchAction: "none" }}
       onMouseDown={onMouseDown}
       onMouseMove={onMouseMove}
       onMouseUp={onMouseUp}
@@ -203,10 +253,12 @@ export function GrandLineMap3D({
           camera={camera}
           smooth={smooth}
           visibleNodes={visibleNodes}
+          allNodes={allNodes}
           islands={islands}
           activeIslandId={activeIslandId}
           activeArcId={activeArcId}
           searchQuery={searchQuery}
+          sliderVal={sliderVal}
           onIslandClick={onIslandClick}
         />
       </Canvas>

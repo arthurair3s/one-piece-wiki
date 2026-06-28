@@ -37,6 +37,7 @@ export interface HeaderProps {
   onArcSelect?: (id: string | null) => void;
   onIslandSelect?: (id: string | null) => void;
   onLogout?: () => void;
+  onEditProfile?: () => void;
 }
 
 export function Header({
@@ -53,6 +54,7 @@ export function Header({
   onArcSelect,
   onIslandSelect,
   onLogout,
+  onEditProfile,
 }: HeaderProps) {
   const [showSuggestions, setShowSuggestions] = useState(false);
 
@@ -161,7 +163,7 @@ export function Header({
                       <DropdownMenuSeparator />
                     </>
                   )}
-                  <DropdownMenuItem id="menu-edit-profile-mobile" className="rounded-lg px-2.5 py-1.5 cursor-pointer">
+                  <DropdownMenuItem id="menu-edit-profile-mobile" className="rounded-lg px-2.5 py-1.5 cursor-pointer" onClick={onEditProfile}>
                     Editar Perfil
                   </DropdownMenuItem>
                   <DropdownMenuItem id="menu-toggle-theme-mobile" className="rounded-lg px-2.5 py-1.5 cursor-pointer" onClick={toggleTheme}>
@@ -264,7 +266,7 @@ export function Header({
                     <DropdownMenuSeparator />
                   </>
                 )}
-                <DropdownMenuItem id="menu-edit-profile" className="rounded-xl px-3 py-2 cursor-pointer">
+                <DropdownMenuItem id="menu-edit-profile" className="rounded-xl px-3 py-2 cursor-pointer" onClick={onEditProfile}>
                   Editar Perfil
                 </DropdownMenuItem>
                 <DropdownMenuItem id="menu-toggle-theme" className="rounded-xl px-3 py-2 cursor-pointer" onClick={toggleTheme}>

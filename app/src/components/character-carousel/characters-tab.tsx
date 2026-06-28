@@ -33,7 +33,7 @@ export function CharactersTab({
             <p className="text-xs font-medium">Nenhum personagem localizado.</p>
           </div>
         ) : (
-          <div className="relative w-full h-[280px] md:h-[35vh] flex items-center justify-center overflow-hidden py-4 select-none">
+          <div className="relative w-full h-[390px] md:h-[48vh] flex items-center justify-center overflow-hidden py-4 select-none">
             {/* Botão Esquerda */}
             {filteredCharacters.length > 1 && (
               <button
@@ -45,7 +45,7 @@ export function CharactersTab({
             )}
 
             {/* Container do Carrossel */}
-            <div className="relative w-full max-w-[280px] h-[250px] md:h-[32vh] flex items-center justify-center">
+            <div className="relative w-full max-w-[340px] h-[360px] md:h-[44vh] flex items-center justify-center">
               {filteredCharacters.map((char: any, idx: number) => {
                 const offset = idx - currentCharIndex;
                 const absOffset = Math.abs(offset);
@@ -53,7 +53,7 @@ export function CharactersTab({
                 if (absOffset > 2) return null;
 
                 const style = {
-                  transform: `translateX(${offset * 120}px) scale(${1 - absOffset * 0.15}) translateZ(${-absOffset * 100}px)`,
+                  transform: `translateX(${offset * 140}px) scale(${1 - absOffset * 0.15}) translateZ(${-absOffset * 100}px)`,
                   opacity: 1 - absOffset * 0.45,
                   filter: absOffset > 0 ? "blur(2px) grayscale(50%)" : "none",
                   zIndex: 10 - absOffset,
@@ -69,16 +69,17 @@ export function CharactersTab({
                     onClick={() => {
                       if (!isFeatured) setCharCarouselIndex(idx);
                     }}
-                    className={`absolute w-[200px] h-[240px] md:h-[30vh] text-card-foreground border transition-all duration-300 ${
+                    className={`absolute w-[245px] h-[330px] md:h-[41vh] text-card-foreground border transition-all duration-300 ${
                       isFeatured ? "border-primary bg-card/85 shadow-lg" : "border-border/40 bg-card/45 shadow"
                     } rounded-2xl p-4 flex flex-col items-center justify-between select-none cursor-pointer`}
                   >
                     <div className="w-full flex-1 flex flex-col items-center text-center overflow-hidden">
-                      {/* Avatar */}
-                      <div className="w-16 h-16 rounded-full overflow-hidden bg-muted border border-border shrink-0 flex items-center justify-center text-xl mb-2">
+                      {/* Imagem Retangular do Personagem */}
+                      <div className="w-[90%] h-[140px] md:h-[18vh] rounded-xl overflow-hidden bg-muted border border-border shrink-0 flex items-center justify-center text-3xl mb-2 relative">
                         {char.image ? (
                           // eslint-disable-next-line @next/next/no-img-element
                           <img
+                            key={char.image}
                             src={char.image}
                             alt={char.name}
                             className="w-full h-full object-cover"
@@ -92,7 +93,7 @@ export function CharactersTab({
                         )}
                       </div>
 
-                      <h4 className="text-xs font-bold text-foreground truncate max-w-full">
+                      <h4 className="text-sm font-bold text-foreground truncate max-w-full">
                         {char.name}
                       </h4>
 
@@ -105,15 +106,15 @@ export function CharactersTab({
                       {isFeatured && (
                         <div className="flex flex-col items-center gap-1.5 mt-2">
                           {char.bounty ? (
-                            <span className="text-[8px] font-bold text-amber-500 bg-amber-500/5 border border-amber-500/10 px-1.5 py-0.5 rounded">
+                            <span className="text-[10px] font-bold text-amber-500 bg-amber-500/5 border border-amber-500/10 px-2 py-0.5 rounded">
                               ฿ {Number(char.bounty).toLocaleString()}
                             </span>
                           ) : (
-                            <span className="text-[8px] text-muted-foreground bg-muted/20 border border-border/30 px-1.5 py-0.5 rounded">
+                            <span className="text-[9px] text-muted-foreground bg-muted/20 border border-border/30 px-2 py-0.5 rounded">
                               Sem recompensa
                             </span>
                           )}
-                          <span className={`text-[8px] font-medium px-1 rounded uppercase border ${
+                          <span className={`text-[9px] font-medium px-2 py-0.5 rounded uppercase border ${
                             char.status === "ACTIVE" || char.status === "ativo"
                               ? "bg-green-500/5 text-green-500 border-green-500/10"
                               : "bg-red-500/5 text-red-500 border-red-500/10"
@@ -132,7 +133,7 @@ export function CharactersTab({
                           setActiveTab("versions");
                           setVersionSearch("");
                         }}
-                        className="mt-2 text-[9px] text-primary hover:underline font-bold text-center block w-full py-1.5 border border-border/40 hover:border-primary/40 rounded-lg bg-background/50 hover:bg-muted transition-colors"
+                        className="mt-2 text-[10px] text-primary hover:underline font-bold text-center block w-full py-1.5 border border-border/40 hover:border-primary/40 rounded-lg bg-background/50 hover:bg-muted transition-colors"
                       >
                         Ver versões do personagem &gt;
                       </button>

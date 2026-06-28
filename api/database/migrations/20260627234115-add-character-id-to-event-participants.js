@@ -14,6 +14,8 @@ module.exports = {
       onDelete: 'CASCADE'
     });
 
+    // We also need to remove the old unique constraint and add the new one.
+    // The old index name is 'unique_event_participant'
     await queryInterface.removeIndex('event_participants', 'unique_event_participant');
 
     await queryInterface.addIndex('event_participants', {
