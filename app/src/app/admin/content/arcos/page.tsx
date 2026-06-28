@@ -16,6 +16,8 @@ import {
   TableCell,
 } from '@/components/ui/table'
 import { SearchIcon, PlusIcon, PencilIcon, TrashIcon, MapIcon, ChevronLeftIcon, ChevronRightIcon, InfoIcon, EyeIcon, UserIcon } from 'lucide-react'
+import { DeleteConfirmModal } from '@/components/modals/delete-confirm-modal'
+import { AdminPageHeader } from '@/components/layout/admin-page-header'
 
 import { ARCS_ADMIN_CONFIG as CONFIG } from './_configuration'
 import { getArcs, getArcById, createArc, updateArc, deleteArc, getSagas, getIslands, getCharacterVersions } from './_service'
@@ -376,22 +378,11 @@ export default function AdminArcsPage() {
     <div className="min-h-screen bg-background pt-24 pb-12">
       <div className="max-w-6xl mx-auto px-4 sm:px-6">
         {/* Header */}
-        <div className="flex items-start gap-3 mb-8">
-          <button
-            onClick={() => router.push('/admin/content')}
-            className="w-8 h-8 flex items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors mt-1.5"
-            title="Voltar"
-          >
-            <ChevronLeftIcon className="w-4 h-4" />
-          </button>
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight flex items-center gap-3">
-              <MapIcon className="w-8 h-8 text-primary" />
-              {CONFIG.ui.title}
-            </h1>
-            <p className="text-muted-foreground mt-2">{CONFIG.ui.description}</p>
-          </div>
-        </div>
+        <AdminPageHeader
+          title={CONFIG.ui.title}
+          description={CONFIG.ui.description}
+          icon={MapIcon}
+        />
 
         {successMessage && (
           <div className="mb-6 p-4 rounded-lg border border-green-500/20 bg-green-500/10 text-green-500 flex items-center gap-2">
@@ -718,38 +709,19 @@ export default function AdminArcsPage() {
       )}
 
       {/* Delete Confirmation Modal */}
-      {isDeleteOpen && deletingArc && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-sm">
-          <div className="bg-card border border-border/50 rounded-2xl shadow-xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in-95 duration-200">
-            <div className="p-6">
-              <div className="w-12 h-12 rounded-full bg-red-500/10 flex items-center justify-center mb-4">
-                <TrashIcon className="w-6 h-6 text-red-500" />
-              </div>
-              <h2 className="text-xl font-bold mb-2">Remover Arco</h2>
-              <p className="text-muted-foreground mb-6">
-                Tem certeza que deseja remover o arco <strong>{deletingArc.name}</strong>?
-              </p>
-              {deleteError && (
-                <div className="mb-6 p-3 rounded-lg bg-red-500/10 text-red-500 text-sm border border-red-500/20">
-                  {deleteError}
-                </div>
-              )}
-              <div className="flex gap-3">
-                <Button variant="outline" className="flex-1" onClick={() => setIsDeleteOpen(false)} disabled={isDeleting}>
-                  Cancelar
-                </Button>
-                <Button variant="destructive" className="flex-1" onClick={handleDeleteConfirm} disabled={isDeleting}>
-                  {isDeleting ? (
-                    <div className="w-4 h-4 border-2 border-primary-foreground border-t-transparent rounded-full animate-spin" />
-                  ) : (
-                    'Sim, remover'
-                  )}
-                </Button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      <DeleteConfirmModal
+        isOpen={isDeleteOpen}
+        onClose={() => setIsDeleteOpen(false)}
+        onConfirm={handleDeleteConfirm}
+        title="Remover Arco"
+        description={
+          <>
+            Tem certeza que deseja remover o arco <strong>{deletingArc?.name}</strong>?
+          </>
+        }
+        isLoading={isDeleting}
+        errorMessage={deleteError}
+      />
 
       {/* Details Modal */}
       {isDetailsOpen && (

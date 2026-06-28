@@ -16,6 +16,7 @@ import {
   TableCell,
 } from '@/components/ui/table'
 import { SearchIcon, PlusIcon, PencilIcon, TrashIcon, UsersIcon, ChevronLeftIcon, ChevronRightIcon } from 'lucide-react'
+import { AdminPageHeader } from '@/components/layout/admin-page-header'
 
 import { CHARACTERS_ADMIN_CONFIG as CONFIG } from './_configuration'
 import { getCharacters, createCharacter, deleteCharacter } from './_service'
@@ -179,24 +180,11 @@ export default function AdminCharactersPage() {
   return (
     <div className="min-h-screen bg-background pt-24 pb-12">
       <div className="max-w-6xl mx-auto px-4 sm:px-6">
-        <div className="flex items-start gap-3 mb-8">
-          <button
-            onClick={() => router.push('/admin/content')}
-            className="w-8 h-8 flex items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors mt-1.5"
-            title="Voltar"
-          >
-            <ChevronLeftIcon className="w-4 h-4" />
-          </button>
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight flex items-center gap-3">
-              <UsersIcon className="w-8 h-8 text-primary" />
-              Personagens
-            </h1>
-            <p className="text-muted-foreground mt-2">
-              Gerencie os personagens base. As versões de cada um (alias, recompensa, status) são editadas em seus detalhes.
-            </p>
-          </div>
-        </div>
+        <AdminPageHeader
+          title="Personagens"
+          description="Gerencie os personagens base. As versões de cada um (alias, recompensa, status) são editadas em seus detalhes."
+          icon={UsersIcon}
+        />
 
         {successMessage && (
           <div className="mb-6 p-4 rounded-lg border border-green-500/20 bg-green-500/10 text-green-500 flex items-center gap-2">
