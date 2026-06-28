@@ -27,6 +27,7 @@ import {
   EyeIcon,
   GlobeIcon
 } from 'lucide-react'
+import { DeleteConfirmModal } from '@/components/modals/delete-confirm-modal'
 
 import { ISLANDS_ADMIN_CONFIG as CONFIG } from './_configuration'
 import {
@@ -732,39 +733,20 @@ export default function AdminIslandsPage() {
       )}
 
       {/* Delete Confirmation Modal */}
-      {isDeleteOpen && deletingIsland && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-sm">
-          <div className="bg-card border border-border/50 rounded-2xl shadow-xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in-95 duration-200">
-            <div className="p-6">
-              <div className="w-12 h-12 rounded-full bg-red-500/10 flex items-center justify-center mb-4">
-                <TrashIcon className="w-6 h-6 text-red-500" />
-              </div>
-              <h2 className="text-xl font-bold mb-2">Remover Ilha</h2>
-              <p className="text-muted-foreground mb-6">
-                Tem certeza que deseja remover a ilha <strong>{deletingIsland.name}</strong>?
-                Isso removerá apenas a ilha e seus vínculos temporais nos arcos. Os Arcos em si não serão deletados.
-              </p>
-              {deleteError && (
-                <div className="mb-6 p-3 rounded-lg bg-red-500/10 text-red-500 text-sm border border-red-500/20">
-                  {deleteError}
-                </div>
-              )}
-              <div className="flex gap-3">
-                <Button variant="outline" className="flex-1" onClick={() => setIsDeleteOpen(false)} disabled={isDeleting}>
-                  Cancelar
-                </Button>
-                <Button variant="destructive" className="flex-1" onClick={handleDeleteConfirm} disabled={isDeleting}>
-                  {isDeleting ? (
-                    <div className="w-4 h-4 border-2 border-primary-foreground border-t-transparent rounded-full animate-spin" />
-                  ) : (
-                    'Sim, remover'
-                  )}
-                </Button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      <DeleteConfirmModal
+        isOpen={isDeleteOpen}
+        onClose={() => setIsDeleteOpen(false)}
+        onConfirm={handleDeleteConfirm}
+        title="Remover Ilha"
+        description={
+          <>
+            Tem certeza que deseja remover a ilha <strong>{deletingIsland?.name}</strong>?
+            Isso removerá apenas a ilha e seus vínculos temporais nos arcos. Os Arcos em si não serão deletados.
+          </>
+        }
+        isLoading={isDeleting}
+        errorMessage={deleteError}
+      />
 
       {/* Details Modal */}
       {isDetailsOpen && (

@@ -16,6 +16,7 @@ import {
   TableCell,
 } from '@/components/ui/table'
 import { SearchIcon, PlusIcon, PencilIcon, TrashIcon, BookOpenIcon, ChevronLeftIcon, ChevronRightIcon } from 'lucide-react'
+import { DeleteConfirmModal } from '@/components/modals/delete-confirm-modal'
 
 import { SAGas_ADMIN_CONFIG as CONFIG } from './_configuration'
 import { getSagas, createSaga, updateSaga, deleteSaga } from './_service'
@@ -495,38 +496,19 @@ export default function AdminSagasPage() {
       )}
 
       {/* Modal Delete */}
-      {isDeleteOpen && deletingSaga && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-sm">
-          <div className="w-full max-w-sm bg-card border border-border/60 rounded-2xl shadow-xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
-            <div className="p-6">
-              <div className="w-12 h-12 rounded-full bg-destructive/10 flex items-center justify-center mb-4 mx-auto">
-                <TrashIcon className="w-6 h-6 text-destructive" />
-              </div>
-              <h2 className="text-xl font-bold tracking-tight text-center mb-2">
-                Excluir Saga?
-              </h2>
-              <p className="text-sm text-muted-foreground text-center mb-6">
-                Tem certeza que deseja excluir a saga <strong>{deletingSaga.name}</strong>? Esta ação não pode ser desfeita.
-              </p>
-
-              {deleteError && (
-                <div className="mb-6 p-3 rounded-xl bg-destructive/10 border border-destructive/20 text-destructive text-sm flex items-start gap-2">
-                  <div className="mt-0.5">⚠️</div>
-                  <p className="leading-relaxed">{deleteError}</p>
-                </div>
-              )}
-            </div>
-            <div className="p-4 px-6 bg-muted/30 border-t border-border/40 flex items-center justify-end gap-3">
-              <Button variant="ghost" onClick={() => setIsDeleteOpen(false)} disabled={isDeleting}>
-                Cancelar
-              </Button>
-              <Button variant="destructive" onClick={handleDeleteConfirm} disabled={isDeleting}>
-                {isDeleting ? 'Excluindo...' : 'Excluir Saga'}
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
+      <DeleteConfirmModal
+        isOpen={isDeleteOpen}
+        onClose={() => setIsDeleteOpen(false)}
+        onConfirm={handleDeleteConfirm}
+        title="Excluir Saga?"
+        description={
+          <>
+            Tem certeza que deseja excluir a saga <strong>{deletingSaga?.name}</strong>? Esta ação não pode ser desfeita.
+          </>
+        }
+        isLoading={isDeleting}
+        errorMessage={deleteError}
+      />
     </div>
   )
 }
