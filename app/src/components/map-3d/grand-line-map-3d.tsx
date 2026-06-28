@@ -95,22 +95,20 @@ function GrandLineScene({
 }: GrandLineSceneProps) {
   const [clickedTarget, setClickedTarget] = useState<THREE.Vector3 | null>(null)
 
-  // Reseta a navegação por clique se o usuário selecionar outra ilha do menu/jornada
+  // Reseta navegação livre ao interagir com menu/jornada
   useEffect(() => {
     setClickedTarget(null)
   }, [activeIslandId, sliderVal])
 
   const allNodesXZ = useMemo(() => {
     return allNodes.map(n => {
-      // Busca a ilha no banco para calcular a escala visual exata do anel
       const dbIsland = islands.find(i => i.id === n.id)
       const baseSizeScales: Record<number, number> = { 1: 1.4, 2: 0.9, 3: 1.1, 4: 1.1, 5: 1.25 }
       const baseSize = dbIsland ? (baseSizeScales[dbIsland.id] ?? 1.1) : 1.1
       const dbScale = dbIsland?.scale ?? 1.0
       const sizeScale = baseSize * dbScale
 
-      // O raio do anel visual é ISLAND_WORLD_RADIUS * sizeScale
-      // Adiciona uma margem de segurança de 25 unidades para que o casco do navio fique totalmente de fora do anel
+      // Limite do anel visual + margem para o casco
       const ringRadius = ISLAND_WORLD_RADIUS * sizeScale
       const collisionRadius = ringRadius + 25
 
