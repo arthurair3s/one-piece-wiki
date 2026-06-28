@@ -30,8 +30,8 @@ function GoingMerryModel() {
     box.getSize(size)
     const rawFootprint = Math.max(size.x, size.z, 0.001)
 
-    // Escala para aprox. 26 unidades no mundo (tamanho ideal para o mapa)
-    const targetSize = 26
+    // Escala para aprox. 38 unidades no mundo (tamanho ideal para o mapa)
+    const targetSize = 38
     const autoScale = targetSize / rawFootprint
     clone.scale.setScalar(autoScale)
 
@@ -39,9 +39,9 @@ function GoingMerryModel() {
     const scaledBox = new THREE.Box3().setFromObject(clone)
     clone.position.y -= scaledBox.min.y
 
-    // Rotaciona o modelo em 180 graus (Math.PI) para que a frente (proa) aponte
-    // para a direção correta do vetor tangente (+Z de movimento)
-    clone.rotation.y = Math.PI
+    // Rotaciona o modelo em 90 graus (Math.PI / 2) para alinhar a frente (proa)
+    // caso o modelo original tenha sido exportado de lado (eixo X)
+    clone.rotation.y = Math.PI / 2
 
     return clone
   }, [scene])
@@ -57,24 +57,34 @@ export function BoatMarker3D({ nodes, progress, mapWidth, mapHeight }: BoatMarke
     return buildBypassRoute(nodes, mapWidth, mapHeight)
   }, [nodes, mapWidth, mapHeight])
 
-  // progresso atualizado do barco
+  // progresso atualizado do barco ao longo da rota
   const currentProgressRef = useRef(progress)
+
+  // Referência para armazenar a posição atual do barco em coordenadas do mundo 3D
+  const currentPosRef = useRef<THREE.Vector3 | null>(null)
+
+  // Controle de estado para rastrear interação com o mouse
+  const lastPointer = useRef(new THREE.Vector2())
+  const isMouseActive = useRef(false)
+  const lastActiveTime = useRef(0)
+  const lastTargetProgress = useRef(progress)
 
   // vetores reutilizáveis alocados uma única vez para otimização
   const pos = useMemo(() => new THREE.Vector3(), [])
   const tangent = useMemo(() => new THREE.Vector3(), [])
-  const quat = useMemo(() => new THREE.Quaternion(), [])
+  const planeY = useMemo(() => new THREE.Plane(new THREE.Vector3(0, 1, 0), -4), [])
+  const mousePos = useMemo(() => new THREE.Vector3(), [])
+  const pathPos = useMemo(() => new THREE.Vector3(), [])
 
   useFrame((state, delta) => {
     if (!groupRef.current || !curve) return
     const t = state.clock.getElapsedTime()
 
-    // velocidade constante de movimento (fração da rota total por segundo)
+    // 1. Atualiza a posição alvo ao longo do caminho da rota
     const SPEED = 0.15
     const target = progress
     let current = currentProgressRef.current
 
-    // desloca o barco suavemente com velocidade constante
     const diff = target - current
     if (Math.abs(diff) > 0.0001) {
       const step = SPEED * delta
@@ -86,35 +96,85 @@ export function BoatMarker3D({ nodes, progress, mapWidth, mapHeight }: BoatMarke
       currentProgressRef.current = current
     }
 
-    // limita o progresso na faixa válida da curva
     const p = Math.max(0.001, Math.min(0.999, current))
+    curve.getPointAt(p, pathPos)
 
-    // obtém a posição ao longo da curva
-    curve.getPoint(p, pos)
-    pos.y = 4 + Math.sin(t * 1.1) * 1.2 // balanço suave na superfície do mar (um pouco mais baixo para o modelo 3D)
+    // Inicializa a posição atual se for o primeiro frame
+    if (!currentPosRef.current) {
+      currentPosRef.current = new THREE.Vector3().copy(pathPos)
+    }
 
-    groupRef.current.position.copy(pos)
+    // 2. Intercepta o ponteiro do mouse com o plano do oceano
+    state.raycaster.ray.intersectPlane(planeY, mousePos)
 
-    // obtem a direcao de movimento tangente neste ponto
-    curve.getTangent(p, tangent)
-    tangent.y = 0 // mantem o barco plano sem inclinacao vertical
-    if (tangent.lengthSq() < 0.0001) return
-    tangent.normalize()
+    // Detecta se o mouse está se movendo de forma ativa
+    const currentPointer = state.pointer
+    const pointerDiff = currentPointer.distanceTo(lastPointer.current)
 
-    // calcula a direcao de movimento (yaw no eixo y)
-    const targetYaw = Math.atan2(tangent.x, tangent.z)
+    // Se houve mudança significativa na posição do ponteiro
+    if (pointerDiff > 0.01) {
+      isMouseActive.current = true
+      lastActiveTime.current = t
+      lastPointer.current.copy(currentPointer)
+    }
+
+    // Desativa modo mouse se o usuário interagir com o slider ou trocar de ilha
+    if (Math.abs(progress - lastTargetProgress.current) > 0.001) {
+      isMouseActive.current = false
+      lastTargetProgress.current = progress
+    }
+
+    // Desativa modo mouse após 3 segundos de inatividade
+    if (t - lastActiveTime.current > 3.0) {
+      isMouseActive.current = false
+    }
+
+    // Define qual é a posição alvo final deste frame
+    const finalTarget = isMouseActive.current ? mousePos : pathPos
+
+    // 3. Move o barco suavemente (lerp)
+    // Velocidade bem lenta ao seguir o mouse (0.012), velocidade padrão na rota (0.06)
+    const lerpSpeed = isMouseActive.current ? 0.012 : 0.06
+    currentPosRef.current.lerp(finalTarget, lerpSpeed)
+
+    // Define a coordenada Y (balanço suave no mar)
+    const bobbingY = 4 + Math.sin(t * 1.1) * 1.2
+    groupRef.current.position.set(
+      currentPosRef.current.x,
+      bobbingY,
+      currentPosRef.current.z
+    )
+
+    // 4. Calcula e suaviza a rotação de direção do barco
+    let targetYaw = 0
+    if (isMouseActive.current) {
+      // Aponta na direção do movimento em relação ao alvo do mouse
+      const dirX = finalTarget.x - currentPosRef.current.x
+      const dirZ = finalTarget.z - currentPosRef.current.z
+      if (Math.sqrt(dirX * dirX + dirZ * dirZ) > 1.0) {
+        targetYaw = Math.atan2(dirX, dirZ)
+      } else {
+        // Se estiver muito perto, mantém a direção da tangente da rota
+        curve.getTangentAt(p, tangent)
+        targetYaw = Math.atan2(tangent.x, tangent.z)
+      }
+    } else {
+      // Aponta na direção da tangente da rota
+      curve.getTangentAt(p, tangent)
+      targetYaw = Math.atan2(tangent.x, tangent.z)
+    }
+
     const directionQuat = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), targetYaw)
 
-    // calcula o balanco suave das ondas (roll em z e pitch em x)
+    // Balanço suave das ondas (roll em z e pitch em x)
     const swayX = Math.cos(t * 0.8) * 0.02
     const swayZ = Math.sin(t * 0.8) * 0.04
     const swayQuat = new THREE.Quaternion().setFromEuler(new THREE.Euler(swayX, 0, swayZ))
 
-    // combina a orientacao da rota com a inclinacao das ondas
     const targetQuat = new THREE.Quaternion().multiplyQuaternions(directionQuat, swayQuat)
 
-    // suaviza a rotacao completa do barco sem conflito de euler
-    groupRef.current.quaternion.slerp(targetQuat, 0.12)
+    // Suaviza a rotação
+    groupRef.current.quaternion.slerp(targetQuat, 0.08)
   })
 
   return (
@@ -124,8 +184,8 @@ export function BoatMarker3D({ nodes, progress, mapWidth, mapHeight }: BoatMarke
       </Suspense>
 
       {/* Rastro de espuma (Wake) atrás do navio */}
-      <mesh position={[0, -2, 14]} rotation={[-Math.PI / 2, 0, 0]} scale={[0.4, 1, 1]}>
-        <circleGeometry args={[18, 14]} />
+      <mesh position={[0, -2, 20]} rotation={[-Math.PI / 2, 0, 0]} scale={[0.4, 1, 1]}>
+        <circleGeometry args={[26, 14]} />
         <meshBasicMaterial color="#e8f6ff" transparent opacity={0.35} />
       </mesh>
     </group>

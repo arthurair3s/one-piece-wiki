@@ -201,6 +201,7 @@ export default function HomePage() {
           // eslint-disable-next-line react-hooks/refs
           isDragging={isDragging.current}
           visibleNodes={visibleNodes}
+          allNodes={currentNodes}
           islands={mergedIslands}
           activeIslandId={activeIslandId}
           activeArcId={activeArcId}

@@ -72,6 +72,7 @@ interface GrandLineSceneProps {
   camera: CameraState
   smooth: boolean
   visibleNodes: RouteNode[]
+  allNodes: RouteNode[]
   islands: Island[]
   activeIslandId: number | null
   activeArcId: number
@@ -84,6 +85,7 @@ function GrandLineScene({
   camera,
   smooth,
   visibleNodes,
+  allNodes,
   islands,
   activeIslandId,
   activeArcId,
@@ -92,17 +94,11 @@ function GrandLineScene({
   onIslandClick,
 }: GrandLineSceneProps) {
   const allNodesXZ = useMemo(() => {
-    return [1, 2, 3, 4, 5]
-      .map(id => {
-        const isl = islands.find(i => i.id === id)
-        if (!isl) return null
-        return {
-          x: isl.coordinate_x,
-          y: isl.coordinate_y
-        }
-      })
-      .filter((n): n is { x: number; y: number } => !!n)
-  }, [islands])
+    return allNodes.map(n => ({
+      x: n.x,
+      y: n.y
+    }))
+  }, [allNodes])
   return (
     <>
       <CameraController target={camera.target} height={camera.height} smooth={smooth} />
@@ -180,6 +176,7 @@ interface GrandLineMap3DProps {
   smooth: boolean
   isDragging: boolean
   visibleNodes: RouteNode[]
+  allNodes: RouteNode[]
   islands: Island[]
   activeIslandId: number | null
   activeArcId: number
@@ -198,6 +195,7 @@ export function GrandLineMap3D({
   smooth,
   isDragging,
   visibleNodes,
+  allNodes,
   islands,
   activeIslandId,
   activeArcId,
@@ -231,6 +229,7 @@ export function GrandLineMap3D({
           camera={camera}
           smooth={smooth}
           visibleNodes={visibleNodes}
+          allNodes={allNodes}
           islands={islands}
           activeIslandId={activeIslandId}
           activeArcId={activeArcId}
