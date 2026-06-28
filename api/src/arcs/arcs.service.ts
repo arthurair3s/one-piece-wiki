@@ -27,6 +27,8 @@ export class ArcsService {
         dto.description,
         dto.saga_id,
         dto.order,
+        dto.islands,
+        dto.character_versions,
       ),
     );
   }
@@ -57,6 +59,8 @@ export class ArcsService {
         dto.description,
         dto.saga_id,
         dto.order,
+        dto.islands,
+        dto.character_versions,
       ),
     );
   }

@@ -204,6 +204,15 @@ export class IslandsController {
       }
     }
   })
+  @ApiOperation({ summary: 'Obter uma ilha específica pelo ID' })
+  @ApiParam({ name: 'id', description: 'ID da ilha', type: 'integer' })
+  @ApiResponse({ status: 200, description: 'Dados da ilha retornados com sucesso.' })
+  @RequirePermissions('islands.view')
+  @Get(':id')
+  findOne(@Param('id', ParseIntPipe) id: number) {
+    return this.islandsService.findOne(id);
+  }
+
   @RequirePermissions('islands.update')
   @Patch(':id')
   update(

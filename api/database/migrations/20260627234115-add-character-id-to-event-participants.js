@@ -2,7 +2,7 @@
 
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
-  async up (queryInterface, Sequelize) {
+  async up(queryInterface, Sequelize) {
     await queryInterface.addColumn('event_participants', 'character_id', {
       type: Sequelize.INTEGER,
       allowNull: false,
@@ -26,7 +26,7 @@ module.exports = {
     });
   },
 
-  async down (queryInterface, Sequelize) {
+  async down(queryInterface, Sequelize) {
     await queryInterface.removeIndex('event_participants', 'unique_event_participant');
 
     await queryInterface.addIndex('event_participants', {

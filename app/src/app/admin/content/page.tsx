@@ -21,7 +21,7 @@ const CONTENT_MODULES = [
     description: 'Gerencie os arcos de história pertencentes a cada saga.',
     href: '/admin/content/arcos',
     icon: MapIcon,
-    active: false,
+    active: true,
   },
   {
     id: 'ilhas',
@@ -29,7 +29,7 @@ const CONTENT_MODULES = [
     description: 'Gerencie as ilhas e localizações geográficas.',
     href: '/admin/content/ilhas',
     icon: MapIcon, // Placeholder, can change later
-    active: false,
+    active: true,
   },
   {
     id: 'characters',

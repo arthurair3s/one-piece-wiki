@@ -14,6 +14,7 @@ import { GetIslandDetailsQuery } from './queries/impl/get-island-details.query';
 import { GetIslandsQuery } from './queries/impl/get-islands.query';
 import { GetIslandArcsQuery } from './queries/impl/get-island-arcs.query';
 import { GetIslandsMapQuery } from './queries/impl/get-islands-map.query';
+import { GetIslandByIdQuery } from './queries/impl/get-island-by-id.query';
 
 @Injectable()
 export class IslandsService {
@@ -56,6 +57,11 @@ export class IslandsService {
         query.is_active,
       ),
     );
+  }
+
+  // GET BY ID
+  async findOne(id: number) {
+    return this.queryBus.execute(new GetIslandByIdQuery(id));
   }
 
   // MAPA

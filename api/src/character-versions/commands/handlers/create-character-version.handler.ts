@@ -36,32 +36,33 @@ export class CreateCharacterVersionHandler implements ICommandHandler<CreateChar
     try {
       return await this.sequelize.transaction(async (t) => {
         // cria a versão
-      const version = await this.characterVersionModel.create({
-        character_id,
-        ...versionData,
-      } as any, { transaction: t });
-
-      // vincula aos arcos na pivot de forma manual e segura
-      if (arc_ids && arc_ids.length > 0) {
-        const pivots = arc_ids.map(arc_id => ({
-          arc_id,
-          character_version_id: version.id,
+        const version = await this.characterVersionModel.create({
           character_id,
-          order: 0,
-        }));
-        await this.pivotModel.bulkCreate(pivots, { transaction: t });
-      }
+          ...versionData,
+        } as any, { transaction: t });
 
-      // vincula aos eventos na pivot
-      if (event_ids && event_ids.length > 0) {
-        const eventPivots = event_ids.map(event_id => ({
-          event_id,
-          character_version_id: version.id,
-          character_id,
-        }));
-        await this.eventParticipantModel.bulkCreate(eventPivots, { transaction: t });
-      }
+        // vincula aos arcos na pivot de forma manual e segura
+        if (arc_ids && arc_ids.length > 0) {
+          const pivots = arc_ids.map(arc_id => ({
+            arc_id,
+            character_version_id: version.id,
+            character_id,
+            order: 0,
+          }));
+          await this.pivotModel.bulkCreate(pivots, { transaction: t });
+        }
 
+        // vincula aos eventos na pivot
+        if (event_ids && event_ids.length > 0) {
+          const eventPivots = event_ids.map(event_id => ({
+            event_id,
+            character_version_id: version.id,
+            character_id,
+          }));
+          await this.eventParticipantModel.bulkCreate(eventPivots, { transaction: t });
+        }
+
+        return version;
       });
     } catch (error: any) {
       if (error.name === 'SequelizeUniqueConstraintError') {

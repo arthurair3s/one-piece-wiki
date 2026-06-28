@@ -1,4 +1,4 @@
-import { IsOptional, IsString, MaxLength, IsInt, Min } from 'class-validator';
+import { IsOptional, IsString, MaxLength, IsInt, Min, IsArray } from 'class-validator';
 import { ApiPropertyOptional } from '@nestjs/swagger';
 
 export class UpdateArcDto {
@@ -23,4 +23,34 @@ export class UpdateArcDto {
   @IsInt()
   @Min(1)
   order?: number;
+
+  @ApiPropertyOptional({
+    type: 'array',
+    items: {
+      type: 'object',
+      properties: {
+        island_id: { type: 'number' },
+        order: { type: 'number' },
+      },
+    },
+    description: 'Lista de ilhas associadas com ordem',
+  })
+  @IsOptional()
+  @IsArray()
+  islands?: { island_id: number; order: number }[];
+
+  @ApiPropertyOptional({
+    type: 'array',
+    items: {
+      type: 'object',
+      properties: {
+        character_version_id: { type: 'number' },
+        order: { type: 'number' },
+      },
+    },
+    description: 'Lista de versões de personagens associadas com ordem',
+  })
+  @IsOptional()
+  @IsArray()
+  character_versions?: { character_version_id: number; order: number }[];
 }

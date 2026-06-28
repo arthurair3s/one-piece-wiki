@@ -7,6 +7,7 @@ import { Saga } from '../sagas/models/saga.model';
 import { Island } from '../islands/models/island.model';
 import { ArcIsland } from './models/arc-island.model';
 import { ArcCharacterVersion } from './models/arc-character-version.model';
+import { CharacterVersion } from '../character-versions/models/character-version.model';
 
 import { ArcsService } from './arcs.service';
 import { ArcsController } from './arcs.controller';
@@ -34,7 +35,7 @@ const QueryHandlers = [
 @Module({
   imports: [
     CqrsModule,
-    SequelizeModule.forFeature([Arc, Saga, Island, ArcIsland, ArcCharacterVersion]),
+    SequelizeModule.forFeature([Arc, Saga, Island, ArcIsland, ArcCharacterVersion, CharacterVersion]),
   ],
   controllers: [ArcsController],
   providers: [
