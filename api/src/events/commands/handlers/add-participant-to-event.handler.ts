@@ -36,7 +36,7 @@ export class AddParticipantToEventHandler
     }
 
     try {
-      return await this.eventParticipantModel.create({ event_id, character_version_id });
+      return await this.eventParticipantModel.create({ event_id, character_version_id, character_id: characterVersion.character_id });
     } catch (error) {
       if (error instanceof UniqueConstraintError) {
         throw new ConflictException('Este personagem já está vinculado a este evento.');

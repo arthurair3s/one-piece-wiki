@@ -1,5 +1,5 @@
 import { apiClient } from '@/services/api'
-import type { Character, CharacterVersion, PaginatedResponse, Arc } from '@/types/api'
+import type { Character, CharacterVersion, PaginatedResponse, Arc, Event } from '@/types/api'
 
 // Characters
 export async function getCharacters(params?: { name?: string; slug?: string; page?: number; limit?: number }) {
@@ -55,6 +55,7 @@ export async function getCharacterVersion(id: number) {
 export async function createCharacterVersion(data: {
   character_id: number;
   arc_ids: number[];
+  event_ids?: number[];
   alias?: string;
   epithet?: string;
   bounty?: number;
@@ -88,4 +89,13 @@ export async function getArcs(params?: { limit?: number }) {
   
   const qs = query.toString()
   return apiClient<PaginatedResponse<Arc>>(`/arcs${qs ? `?${qs}` : ''}`)
+}
+
+// Events (for the select)
+export async function getEvents(params?: { limit?: number }) {
+  const query = new URLSearchParams()
+  if (params?.limit) query.append('limit', String(params.limit))
+  
+  const qs = query.toString()
+  return apiClient<PaginatedResponse<Event>>(`/events${qs ? `?${qs}` : ''}`)
 }
