@@ -91,6 +91,7 @@ export default function AdminCharacterDetailsPage() {
   }, [router])
 
   const loadData = useCallback(async (expectedVersionsCount?: number) => {
+    if (isNaN(characterId)) return
     try {
       const [charRes, arcsRes, eventsRes] = await Promise.all([
         getCharacter(characterId),
@@ -124,9 +125,9 @@ export default function AdminCharacterDetailsPage() {
   }, [characterId])
 
   useEffect(() => {
-    if (!authChecked) return
+    if (!authChecked || isNaN(characterId)) return
     loadData()
-  }, [authChecked, loadData])
+  }, [authChecked, characterId, loadData])
 
   const handleCharUpdate = async (e: React.FormEvent) => {
     e.preventDefault()
