@@ -186,6 +186,7 @@ export function GrandLineMap3D({
   return (
     <div
       className={`absolute inset-0 z-10 ${isDragging ? "cursor-grabbing" : "cursor-grab"}`}
+      style={{ touchAction: "none" }}
       onMouseDown={onMouseDown}
       onMouseMove={onMouseMove}
       onMouseUp={onMouseUp}

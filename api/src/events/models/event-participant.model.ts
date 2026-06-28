@@ -4,6 +4,8 @@ import {
   Model,
   DataType,
   ForeignKey,
+  PrimaryKey,
+  AutoIncrement,
 } from 'sequelize-typescript';
 import { Event } from './event.model';
 import { CharacterVersion } from '../../character-versions/models/character-version.model';
@@ -17,7 +19,13 @@ import { CharacterVersion } from '../../character-versions/models/character-vers
   ]
 })
 export class EventParticipant extends Model {
+  @PrimaryKey
+  @AutoIncrement
+  @Column({ type: DataType.INTEGER })
+  id!: number;
+
   @ForeignKey(() => Event)
+
   @Column({ type: DataType.INTEGER, allowNull: false })
   event_id!: number;
 

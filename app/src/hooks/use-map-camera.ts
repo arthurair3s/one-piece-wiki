@@ -41,6 +41,7 @@ export function useMapCamera({ activeIslandId, unlockedIslands }: UseMapCameraPr
   // estado de arrasto (salvo em refs para evitar re-renderizações)
   const isPanning = useRef(false)
   const lastPointer = useRef({ x: 0, y: 0 })
+  const lastTouchDistance = useRef<number | null>(null)
 
   // observador de redimensionamento da janela
   useEffect(() => {
@@ -118,13 +119,38 @@ export function useMapCamera({ activeIslandId, unlockedIslands }: UseMapCameraPr
   const handleMouseUp = useCallback(() => handlePointerUp(), [handlePointerUp])
 
   const handleTouchStart = useCallback((e: React.TouchEvent) => {
-    if (e.touches.length !== 1) return
-    handlePointerDown(e.touches[0].clientX, e.touches[0].clientY)
+    if (e.touches.length === 1) {
+      handlePointerDown(e.touches[0].clientX, e.touches[0].clientY)
+      lastTouchDistance.current = null
+    } else if (e.touches.length === 2) {
+      isPanning.current = false // Interrompe o arrasto ao iniciar a pinça
+      const dist = Math.hypot(
+        e.touches[0].clientX - e.touches[1].clientX,
+        e.touches[0].clientY - e.touches[1].clientY
+      )
+      lastTouchDistance.current = dist
+    }
   }, [handlePointerDown])
 
   const handleTouchMove = useCallback((e: React.TouchEvent) => {
-    if (e.touches.length !== 1) return
-    handlePointerMove(e.touches[0].clientX, e.touches[0].clientY)
+    if (e.touches.length === 1) {
+      handlePointerMove(e.touches[0].clientX, e.touches[0].clientY)
+    } else if (e.touches.length === 2 && lastTouchDistance.current !== null) {
+      const dist = Math.hypot(
+        e.touches[0].clientX - e.touches[1].clientX,
+        e.touches[0].clientY - e.touches[1].clientY
+      )
+      const deltaDist = dist - lastTouchDistance.current
+      lastTouchDistance.current = dist
+
+      // Ajusta a altura da câmera proporcionalmente à mudança de distância
+      const zoomSensitivity = 1.2
+      const step = deltaDist * zoomSensitivity
+      setCamera(prev => ({
+        ...prev,
+        height: Math.max(MIN_HEIGHT, Math.min(MAX_HEIGHT, prev.height - step)),
+      }))
+    }
   }, [handlePointerMove])
 
   // navegação automática até a ilha selecionada
