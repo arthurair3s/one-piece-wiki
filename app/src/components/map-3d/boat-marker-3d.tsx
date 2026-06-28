@@ -1,16 +1,52 @@
 "use client"
 
-import { useRef, useMemo } from "react"
+import { useRef, useMemo, Suspense } from "react"
 import { useFrame } from "@react-three/fiber"
+import { useGLTF } from "@react-three/drei"
 import * as THREE from "three"
 import type { RouteNodeXZ } from "./bypass-route"
 import { buildBypassRoute } from "./bypass-route"
+
+// Configura o decodificador Draco
+useGLTF.setDecoderPath("https://www.gstatic.com/draco/versioned/decoders/1.5.5/")
 
 interface BoatMarker3DProps {
   nodes: RouteNodeXZ[]
   progress: number // progresso da rota (0.0 a 1.0)
   mapWidth: number
   mapHeight: number
+}
+
+function GoingMerryModel() {
+  const { scene } = useGLTF("/models/going_merry.glb")
+
+  // Clona e redimensiona o modelo 3D da Going Merry
+  const clonedScene = useMemo(() => {
+    const clone = scene.clone()
+
+    // Calcula dimensões originais do modelo
+    const box = new THREE.Box3().setFromObject(clone)
+    const size = new THREE.Vector3()
+    box.getSize(size)
+    const rawFootprint = Math.max(size.x, size.z, 0.001)
+
+    // Escala para aprox. 26 unidades no mundo (tamanho ideal para o mapa)
+    const targetSize = 26
+    const autoScale = targetSize / rawFootprint
+    clone.scale.setScalar(autoScale)
+
+    // Centraliza o modelo no eixo Y (alinha o fundo do casco com y=0)
+    const scaledBox = new THREE.Box3().setFromObject(clone)
+    clone.position.y -= scaledBox.min.y
+
+    // Rotaciona o modelo em 180 graus (Math.PI) para que a frente (proa) aponte
+    // para a direção correta do vetor tangente (+Z de movimento)
+    clone.rotation.y = Math.PI
+
+    return clone
+  }, [scene])
+
+  return <primitive object={clonedScene} />
 }
 
 export function BoatMarker3D({ nodes, progress, mapWidth, mapHeight }: BoatMarker3DProps) {
@@ -27,9 +63,7 @@ export function BoatMarker3D({ nodes, progress, mapWidth, mapHeight }: BoatMarke
   // vetores reutilizáveis alocados uma única vez para otimização
   const pos = useMemo(() => new THREE.Vector3(), [])
   const tangent = useMemo(() => new THREE.Vector3(), [])
-  const up = useMemo(() => new THREE.Vector3(0, 1, 0), [])
   const quat = useMemo(() => new THREE.Quaternion(), [])
-  const mat = useMemo(() => new THREE.Matrix4(), [])
 
   useFrame((state, delta) => {
     if (!groupRef.current || !curve) return
@@ -57,7 +91,7 @@ export function BoatMarker3D({ nodes, progress, mapWidth, mapHeight }: BoatMarke
 
     // obtém a posição ao longo da curva
     curve.getPoint(p, pos)
-    pos.y = 8 + Math.sin(t * 1.1) * 2 // balanço suave na superfície do mar
+    pos.y = 4 + Math.sin(t * 1.1) * 1.2 // balanço suave na superfície do mar (um pouco mais baixo para o modelo 3D)
 
     groupRef.current.position.copy(pos)
 
@@ -73,7 +107,7 @@ export function BoatMarker3D({ nodes, progress, mapWidth, mapHeight }: BoatMarke
 
     // calcula o balanco suave das ondas (roll em z e pitch em x)
     const swayX = Math.cos(t * 0.8) * 0.02
-    const swayZ = Math.sin(t * 0.8) * 0.05
+    const swayZ = Math.sin(t * 0.8) * 0.04
     const swayQuat = new THREE.Quaternion().setFromEuler(new THREE.Euler(swayX, 0, swayZ))
 
     // combina a orientacao da rota com a inclinacao das ondas
@@ -85,41 +119,18 @@ export function BoatMarker3D({ nodes, progress, mapWidth, mapHeight }: BoatMarke
 
   return (
     <group ref={groupRef}>
-      {/* Hull */}
-      <mesh>
-        <boxGeometry args={[14, 5, 30]} />
-        <meshToonMaterial color="#8B4513" />
-      </mesh>
-      {/* Keel */}
-      <mesh position={[0, -3.5, 0]}>
-        <boxGeometry args={[10, 3, 26]} />
-        <meshToonMaterial color="#5c2e0a" />
-      </mesh>
-      {/* Deck cabin */}
-      <mesh position={[0, 5, -4]}>
-        <boxGeometry args={[10, 7, 12]} />
-        <meshToonMaterial color="#d2a06a" />
-      </mesh>
-      {/* Mast */}
-      <mesh position={[0, 20, 2]}>
-        <cylinderGeometry args={[1, 1.2, 30, 8]} />
-        <meshToonMaterial color="#7a3a0a" />
-      </mesh>
-      {/* Main sail */}
-      <mesh position={[0, 23, 8]}>
-        <planeGeometry args={[16, 18]} />
-        <meshToonMaterial color="#f5f0e0" side={THREE.DoubleSide} />
-      </mesh>
-      {/* Sail accent */}
-      <mesh position={[0, 23, 8.1]}>
-        <planeGeometry args={[8, 9]} />
-        <meshBasicMaterial color="#cc2222" transparent opacity={0.65} side={THREE.DoubleSide} />
-      </mesh>
-      {/* Wake */}
-      <mesh position={[0, -5, 18]} rotation={[-Math.PI / 2, 0, 0]} scale={[0.4, 1, 1]}>
-        <circleGeometry args={[20, 14]} />
-        <meshBasicMaterial color="#e8f6ff" transparent opacity={0.45} />
+      <Suspense fallback={null}>
+        <GoingMerryModel />
+      </Suspense>
+
+      {/* Rastro de espuma (Wake) atrás do navio */}
+      <mesh position={[0, -2, 14]} rotation={[-Math.PI / 2, 0, 0]} scale={[0.4, 1, 1]}>
+        <circleGeometry args={[18, 14]} />
+        <meshBasicMaterial color="#e8f6ff" transparent opacity={0.35} />
       </mesh>
     </group>
   )
 }
+
+// Pré-carrega o modelo da Going Merry para evitar travamento na renderização
+useGLTF.preload("/models/going_merry.glb")

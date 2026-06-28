@@ -1,11 +1,12 @@
 "use client"
 
-import { useEffect, useRef } from "react"
+import { useEffect, useRef, useMemo } from "react"
 import { Canvas, useThree } from "@react-three/fiber"
 import * as THREE from "three"
 
 import { OceanPlane } from "./ocean-plane"
 import { IslandNode3D } from "./island-node-3d"
+import { BoatMarker3D } from "./boat-marker-3d"
 import type { Island } from "@/types/api"
 import { FOV_DEG, MAP_WIDTH, MAP_HEIGHT, type CameraState } from "@/hooks/use-map-camera"
 
@@ -75,6 +76,7 @@ interface GrandLineSceneProps {
   activeIslandId: number | null
   activeArcId: number
   searchQuery: string
+  sliderVal: number
   onIslandClick: (id: number) => void
 }
 
@@ -86,8 +88,21 @@ function GrandLineScene({
   activeIslandId,
   activeArcId,
   searchQuery,
+  sliderVal,
   onIslandClick,
 }: GrandLineSceneProps) {
+  const allNodesXZ = useMemo(() => {
+    return [1, 2, 3, 4, 5]
+      .map(id => {
+        const isl = islands.find(i => i.id === id)
+        if (!isl) return null
+        return {
+          x: isl.coordinate_x,
+          y: isl.coordinate_y
+        }
+      })
+      .filter((n): n is { x: number; y: number } => !!n)
+  }, [islands])
   return (
     <>
       <CameraController target={camera.target} height={camera.height} smooth={smooth} />
@@ -105,6 +120,16 @@ function GrandLineScene({
       <group position={[MAP_WIDTH / 2, 0, MAP_HEIGHT / 2]}>
         <OceanPlane />
       </group>
+
+      {/* Navio Going Merry */}
+      {allNodesXZ.length >= 2 && (
+        <BoatMarker3D
+          nodes={allNodesXZ}
+          progress={sliderVal / (allNodesXZ.length - 1)}
+          mapWidth={MAP_WIDTH}
+          mapHeight={MAP_HEIGHT}
+        />
+      )}
 
       {/* routepath3d removido para evitar artefatos de sombra */}
 
@@ -159,6 +184,7 @@ interface GrandLineMap3DProps {
   activeIslandId: number | null
   activeArcId: number
   searchQuery: string
+  sliderVal: number
   onIslandClick: (id: number) => void
   onMouseDown: (e: React.MouseEvent) => void
   onMouseMove: (e: React.MouseEvent) => void
@@ -176,6 +202,7 @@ export function GrandLineMap3D({
   activeIslandId,
   activeArcId,
   searchQuery,
+  sliderVal,
   onIslandClick,
   onMouseDown,
   onMouseMove,
@@ -208,6 +235,7 @@ export function GrandLineMap3D({
           activeIslandId={activeIslandId}
           activeArcId={activeArcId}
           searchQuery={searchQuery}
+          sliderVal={sliderVal}
           onIslandClick={onIslandClick}
         />
       </Canvas>

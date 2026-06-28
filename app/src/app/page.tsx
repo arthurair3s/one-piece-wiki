@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo, useCallback, useRef } from 'react'
+import { useState, useMemo, useCallback, useRef, useEffect } from 'react'
 import { useMapCamera, MAP_WIDTH } from '@/hooks/use-map-camera'
 import { useDashboardData } from '@/hooks/use-dashboard-data'
 
@@ -90,6 +90,16 @@ export default function HomePage() {
       .map(id => mergedIslands.find(isl => isl.id === id))
       .filter((isl): isl is NonNullable<typeof isl> => !!isl)
   }, [mergedIslands])
+
+  // Sincroniza o slider com a ilha selecionada ativa
+  useEffect(() => {
+    if (activeIslandId !== null) {
+      const idx = allRouteIslands.findIndex(isl => isl.id === activeIslandId)
+      if (idx !== -1) {
+        setSliderVal(idx)
+      }
+    }
+  }, [activeIslandId, allRouteIslands])
 
   const activeArc      = useMemo(() => arcs.find((a) => a.id === activeArcId), [arcs, activeArcId])
   const activeArcOrder = activeArc ? activeArc.order : 1
@@ -195,6 +205,7 @@ export default function HomePage() {
           activeIslandId={activeIslandId}
           activeArcId={activeArcId}
           searchQuery={searchQuery}
+          sliderVal={sliderVal}
           onIslandClick={(id) => {
             setActiveIslandId(id)
             setActiveModal(isAdmin ? 'config' : 'details')
