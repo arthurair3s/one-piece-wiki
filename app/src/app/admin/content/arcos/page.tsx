@@ -785,22 +785,31 @@ export default function AdminArcsPage() {
                           <TableHeader className="bg-muted/30">
                             <TableRow>
                               <TableHead>Ilha</TableHead>
-                              <TableHead>Região</TableHead>
+                              <TableHead>Coordenadas (X, Y, Z)</TableHead>
                               <TableHead className="text-right">Ordem Cronológica</TableHead>
                             </TableRow>
                           </TableHeader>
                           <TableBody>
                             {[...(viewingArc.islands || [])]
                               .sort((a, b) => ((a as any).ArcIsland?.order ?? 0) - ((b as any).ArcIsland?.order ?? 0))
-                              .map((island) => (
-                                <TableRow key={island.id}>
-                                  <TableCell className="font-semibold">{island.name}</TableCell>
-                                  <TableCell className="text-muted-foreground">{island.region || '-'}</TableCell>
-                                  <TableCell className="text-right font-medium text-primary">
-                                    #{ (island as any).ArcIsland?.order || 0 }
-                                  </TableCell>
-                                </TableRow>
-                              ))}
+                              .map((island) => {
+                                const coords = island.coordinates || {
+                                  x: island.coordinate_x ?? 0,
+                                  y: island.coordinate_y ?? 0,
+                                  z: island.coordinate_z ?? 0
+                                }
+                                return (
+                                  <TableRow key={island.id}>
+                                    <TableCell className="font-semibold">{island.name}</TableCell>
+                                    <TableCell className="text-muted-foreground font-mono text-xs">
+                                      {coords.x.toFixed(1)}, {coords.y.toFixed(1)}, {coords.z.toFixed(1)}
+                                    </TableCell>
+                                    <TableCell className="text-right font-medium text-primary">
+                                      #{ (island as any).ArcIsland?.order || 0 }
+                                    </TableCell>
+                                  </TableRow>
+                                )
+                              })}
                           </TableBody>
                         </Table>
                       </div>
