@@ -49,6 +49,7 @@ export interface Island {
   is_active?: boolean;
   rotation_y?: number;
   scale?: number;
+  arcs?: (Arc & { ArcIsland?: { order: number } })[];
   createdAt?: string;
   updatedAt?: string;
 }

@@ -27,6 +27,7 @@ import { GetIslandDetailsHandler } from './queries/handlers/get-island-details.h
 import { GetIslandsHandler } from './queries/handlers/get-islands.handler';
 import { GetIslandArcsHandler } from './queries/handlers/get-island-arcs.handler';
 import { GetIslandsMapHandler } from './queries/handlers/get-islands-map.handler';
+import { GetIslandByIdHandler } from './queries/handlers/get-island-by-id.handler';
 
 
 const CommandHandlers = [
@@ -41,6 +42,7 @@ const QueryHandlers = [
   GetIslandsHandler,
   GetIslandArcsHandler,
   GetIslandsMapHandler,
+  GetIslandByIdHandler,
 ];
 
 @Module({

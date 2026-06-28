@@ -29,7 +29,7 @@ const CONTENT_MODULES = [
     description: 'Gerencie as ilhas e localizações geográficas.',
     href: '/admin/content/ilhas',
     icon: MapIcon, // Placeholder, can change later
-    active: false,
+    active: true,
   },
   {
     id: 'characters',
