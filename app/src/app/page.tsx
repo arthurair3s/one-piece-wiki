@@ -11,6 +11,7 @@ import { Minimap } from '@/components/layout/minimap'
 import { IslandDetailsModal } from '@/components/modals/island-details-modal'
 import { CharacterCarouselModal } from '@/components/modals/character-carousel-modal'
 import { IslandConfigModal, type IslandPreview } from '@/components/modals/island-config-modal'
+import { UserProfileModal } from '@/components/modals/user-profile-modal'
 
 // posições padrão usadas como fallback quando a ilha não possui coordenadas no banco de dados
 const ROUTE_NODES = [
@@ -26,7 +27,7 @@ export default function HomePage() {
   const [activeArcId, setActiveArcId]   = useState<number>(1)
   const [activeSagaId, setActiveSagaId] = useState<number | null>(null)
   const [activeIslandId, setActiveIslandId] = useState<number | null>(null)
-  const [activeModal, setActiveModal]   = useState<'details' | 'characters' | 'config' | null>(null)
+  const [activeModal, setActiveModal]   = useState<'details' | 'characters' | 'config' | 'profile' | null>(null)
   const [sliderVal, setSliderVal]       = useState(0)
 
   // sobreposição para visualização em tempo real — aplicada ao mapa antes de salvar
@@ -229,6 +230,7 @@ export default function HomePage() {
           setActiveModal(null)
         }}
         onLogout={handleLogout}
+        onEditProfile={() => setActiveModal('profile')}
       />
 
       {/* Zoom controls */}
@@ -311,6 +313,11 @@ export default function HomePage() {
           />
         </>
       )}
+
+      <UserProfileModal
+        isOpen={activeModal === 'profile'}
+        onClose={() => setActiveModal(null)}
+      />
     </div>
   )
 }
