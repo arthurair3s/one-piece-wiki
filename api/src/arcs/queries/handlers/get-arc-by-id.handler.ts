@@ -5,6 +5,8 @@ import { NotFoundException } from '@nestjs/common';
 import { GetArcByIdQuery } from '../impl/get-arc-by-id.query';
 import { Arc } from '../../models/arc.model';
 import { Island } from '../../../islands/models/island.model';
+import { CharacterVersion } from '../../../character-versions/models/character-version.model';
+import { Character } from '../../../characters/models/character.model';
 
 @QueryHandler(GetArcByIdQuery)
 export class GetArcByIdHandler implements IQueryHandler<GetArcByIdQuery> {
@@ -23,6 +25,17 @@ export class GetArcByIdHandler implements IQueryHandler<GetArcByIdQuery> {
           through: { attributes: ['order'] }, // traz a ordem da ilha neste arco
           attributes: ['id', 'name', 'coordinate_x', 'coordinate_y', 'coordinate_z'],
         },
+        {
+          model: CharacterVersion,
+          through: { attributes: ['order'] }, // traz a ordem do personagem neste arco
+          attributes: ['id', 'character_id', 'alias', 'epithet', 'status', 'image_url'],
+          include: [
+            {
+              model: Character,
+              attributes: ['id', 'name'],
+            }
+          ]
+        }
       ],
     });
 

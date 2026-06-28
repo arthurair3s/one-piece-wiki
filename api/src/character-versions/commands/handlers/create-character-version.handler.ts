@@ -49,6 +49,7 @@ export class CreateCharacterVersionHandler implements ICommandHandler<CreateChar
         await this.pivotModel.bulkCreate(pivots, { transaction: t });
       }
 
+        return version;
       });
     } catch (error: any) {
       if (error.name === 'SequelizeUniqueConstraintError') {

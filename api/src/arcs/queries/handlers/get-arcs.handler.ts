@@ -4,6 +4,7 @@ import { Op } from 'sequelize';
 
 import { GetArcsQuery } from '../impl/get-arcs.query';
 import { Arc } from '../../models/arc.model';
+import { Saga } from '../../../sagas/models/saga.model';
 
 @QueryHandler(GetArcsQuery)
 export class GetArcsHandler implements IQueryHandler<GetArcsQuery> {
@@ -33,6 +34,12 @@ export class GetArcsHandler implements IQueryHandler<GetArcsQuery> {
       where,
       limit,
       offset,
+      include: [
+        {
+          model: Saga,
+          attributes: ['id', 'name'],
+        }
+      ],
       order: [
         ['saga_id', 'ASC'],
         ['order', 'ASC'],

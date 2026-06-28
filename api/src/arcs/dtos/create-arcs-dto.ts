@@ -4,8 +4,10 @@ import {
   MaxLength,
   IsInt,
   Min,
+  IsOptional,
+  IsArray,
 } from 'class-validator';
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class CreateArcDto {
   @ApiProperty({ example: 'Alabasta', description: 'Nome do arco' })
@@ -28,4 +30,34 @@ export class CreateArcDto {
   @IsInt()
   @Min(1)
   order!: number;
+
+  @ApiPropertyOptional({
+    type: 'array',
+    items: {
+      type: 'object',
+      properties: {
+        island_id: { type: 'number' },
+        order: { type: 'number' },
+      },
+    },
+    description: 'Lista de ilhas associadas com ordem',
+  })
+  @IsOptional()
+  @IsArray()
+  islands?: { island_id: number; order: number }[];
+
+  @ApiPropertyOptional({
+    type: 'array',
+    items: {
+      type: 'object',
+      properties: {
+        character_version_id: { type: 'number' },
+        order: { type: 'number' },
+      },
+    },
+    description: 'Lista de versões de personagens associadas com ordem',
+  })
+  @IsOptional()
+  @IsArray()
+  character_versions?: { character_version_id: number; order: number }[];
 }

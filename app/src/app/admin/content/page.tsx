@@ -21,7 +21,7 @@ const CONTENT_MODULES = [
     description: 'Gerencie os arcos de história pertencentes a cada saga.',
     href: '/admin/content/arcos',
     icon: MapIcon,
-    active: false,
+    active: true,
   },
   {
     id: 'ilhas',

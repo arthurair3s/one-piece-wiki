@@ -17,9 +17,13 @@ export interface Arc {
   name: string;
   description?: string;
   order: number;
-  sagaId: number;
+  saga_id: number;
+  sagaId?: number;
   sagaName?: string;
   islandsCount?: number;
+  islands?: (Island & { ArcIsland?: { order: number } })[];
+  character_versions?: (CharacterVersion & { ArcCharacterVersion?: { order: number } })[];
+  saga?: Saga;
   createdAt?: string;
   updatedAt?: string;
 }
