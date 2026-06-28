@@ -17,6 +17,7 @@ import {
 } from '@/components/ui/table'
 import { SearchIcon, PlusIcon, PencilIcon, TrashIcon, MapIcon, ChevronLeftIcon, ChevronRightIcon, InfoIcon, EyeIcon, UserIcon } from 'lucide-react'
 import { DeleteConfirmModal } from '@/components/modals/delete-confirm-modal'
+import { AdminPageHeader } from '@/components/layout/admin-page-header'
 
 import { ARCS_ADMIN_CONFIG as CONFIG } from './_configuration'
 import { getArcs, getArcById, createArc, updateArc, deleteArc, getSagas, getIslands, getCharacterVersions } from './_service'
@@ -377,22 +378,11 @@ export default function AdminArcsPage() {
     <div className="min-h-screen bg-background pt-24 pb-12">
       <div className="max-w-6xl mx-auto px-4 sm:px-6">
         {/* Header */}
-        <div className="flex items-start gap-3 mb-8">
-          <button
-            onClick={() => router.push('/admin/content')}
-            className="w-8 h-8 flex items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors mt-1.5"
-            title="Voltar"
-          >
-            <ChevronLeftIcon className="w-4 h-4" />
-          </button>
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight flex items-center gap-3">
-              <MapIcon className="w-8 h-8 text-primary" />
-              {CONFIG.ui.title}
-            </h1>
-            <p className="text-muted-foreground mt-2">{CONFIG.ui.description}</p>
-          </div>
-        </div>
+        <AdminPageHeader
+          title={CONFIG.ui.title}
+          description={CONFIG.ui.description}
+          icon={MapIcon}
+        />
 
         {successMessage && (
           <div className="mb-6 p-4 rounded-lg border border-green-500/20 bg-green-500/10 text-green-500 flex items-center gap-2">
