@@ -7,13 +7,14 @@ import {
 } from 'sequelize-typescript';
 import { Event } from './event.model';
 import { CharacterVersion } from '../../character-versions/models/character-version.model';
+import { Character } from '../../characters/models/character.model';
 
 @Table({
   tableName: 'event_participants',
   timestamps: true,
   paranoid: true,
   indexes: [
-    { unique: true, fields: ['event_id', 'character_version_id'], where: { deletedAt: null }, name: 'unique_event_participant' }
+    { unique: true, fields: ['event_id', 'character_id'], where: { deletedAt: null }, name: 'unique_event_participant' }
   ]
 })
 export class EventParticipant extends Model {
@@ -24,4 +25,8 @@ export class EventParticipant extends Model {
   @ForeignKey(() => CharacterVersion)
   @Column({ type: DataType.INTEGER, allowNull: false })
   character_version_id!: number;
+
+  @ForeignKey(() => Character)
+  @Column({ type: DataType.INTEGER, allowNull: false })
+  character_id!: number;
 }
