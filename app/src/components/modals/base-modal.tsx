@@ -42,7 +42,7 @@ export function BaseModal({
         )}
 
         {/* card principal do modal */}
-        <div className="flex-1 bg-card/75 text-card-foreground border border-border/50 rounded-2xl backdrop-blur-md shadow-2xl p-6 md:p-10 flex flex-col justify-between min-h-[580px] md:h-[80vh] relative overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+        <div className="flex-1 bg-card/75 text-card-foreground border border-border/50 rounded-2xl backdrop-blur-md shadow-2xl p-6 md:p-10 flex flex-col justify-between h-[85vh] md:min-h-[580px] md:h-[80vh] relative overflow-hidden animate-in fade-in zoom-in-95 duration-200">
           
           {/* botão de fechar */}
           <button
